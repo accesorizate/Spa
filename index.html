@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AccesorizateSpA — Tienda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===========================================================
+     GUÍA RÁPIDA
+     1. Tus productos están en el array `productos`, cerca del final
+        del archivo, dentro de la etiqueta <script>. Cada uno tiene
+        precio(s), opciones (tamaño/color/diseño) y si es "personalizable".
+     2. Los precios son EJEMPLOS. Cambialos por los tuyos.
+     3. Para poner una foto real: guardá la imagen dentro de la carpeta
+        "imagenes" (al lado de este archivo) y escribí su nombre en el
+        campo "imagen" del producto, ej: "imagenes/cuadro-foto.png".
+        Mientras un producto no tenga su propia foto, se muestra
+        "imagenes/logo.png" como marcador de posición: a medida que
+        vayas teniendo las fotos reales, solo reemplazá el campo
+        "imagen" de cada producto y esa foto va a reemplazar al logo.
+     4. El carrito y el pago ya están armados: el cliente transfiere a tu
+        cuenta y el botón le abre WhatsApp con el resumen del pedido para
+        que te mande el comprobante. No necesitás Mercado Pago ni una
+        función de servidor (Netlify) para esto — el sitio funciona
+        completo con solo alojar este archivo (ej: GitHub Pages).
+     5. Las secciones "Explora categorías" y "Destacados" se arman
+        solas a partir de tus mismos productos, no hace falta cargar
+        nada aparte.
+     6. FOTO DISTINTA POR VARIANTE:
+        - Si depende de UNA sola opción (ej: solo el color), usá
+          "imagenesPorOpcion":
+            imagenesPorOpcion:{
+              "Color del marco": {
+                "Café": "imagenes/cuadro-foto-cafe.png",
+                "Blanco": "imagenes/cuadro-foto-blanco.png"
+              }
+            }
+        - Si depende de VARIAS opciones a la vez (ej: tamaño + color, como
+          en "Cuadro + foto", o tamaño + diseño + número, como en
+          "Cuadro + personalización"), usá "combinacionImagen" +
+          "imagenesPorCombinacion": el primero dice qué opciones arman la
+          combinación y en qué orden, el segundo mapea esa combinación
+          (unida con "|") a la foto:
+            combinacionImagen:["Tamaño","Color del marco"],
+            imagenesPorCombinacion:{
+              "10x15|Café": "imagenes/cuadro10x15cafeb.png",
+              "10x15|Blanco": "imagenes/cuadro10x15blanco.png"
+            }
+        Mientras no cargues una foto para alguna combinación, no la agregues
+        al mapa (o dejá la ruta vacía): así esa variante sigue mostrando el
+        logo en vez de un ícono de imagen rota.
+     7. OPCIÓN QUE DEPENDE DE OTRA (ej: "Número de diseño" según el tema
+        "Diseño" elegido, en Cuadros → Cuadro + personalización). En vez
+        de "valores", usá "dependeDe" + "valoresPorPadre", así:
+          { nombre:"Número de diseño", dependeDe:"Diseño", valoresPorPadre:{
+              "Navidad":["1","2","3","4"],
+              "Aniversario":["1","2","3","4"]
+            }
+          }
+        La opción de la que depende ("Diseño" en este caso) tiene que estar
+        definida ANTES en el array "opciones".
+     8. PAGO: el único método es transferencia bancaria. El cliente ve tus
+        datos de cuenta en el carrito, transfiere el total y al tocar el
+        botón se le abre WhatsApp con el resumen del pedido, listo para
+        que envíe el comprobante. Tus datos de cuenta están en el HTML,
+        dentro de "datosTransferencia"; y el número de WhatsApp al que se
+        envía el mensaje está al final del <script>, en la línea que dice
+        "wa.me/56920635715".
+     9. ENVÍO: por ahora hay una sola opción, "Estándar (1 a 3 días hábiles)
+        — $3.000", válida solo dentro de Santiago, y su costo se suma
+        siempre al total (carrito y WhatsApp). Para agregar otra opción
+        más adelante (ej: "Retiro en tienda" gratis, o "Envío a regiones"
+        con otro precio), copiá esta línea del HTML y cambiale el texto,
+        el "value" y el "data-costo":
+          <label><input type="radio" name="metodoEnvio" value="retiro"
+            data-costo="0" checked> Retiro en tienda — Gratis</label>
+        No hace falta tocar el JavaScript: el costo se toma solo del
+        "data-costo" de la opción que esté marcada.
+     10. PRECIO QUE DEPENDE DE VARIAS OPCIONES (ej: Posters, que cobra
+        distinto según tamaño Y acabado; o Fotografía Polaroid, según
+        acabado Y cantidad): en vez de "grupoPrecio" + "precios", usá
+        "combinacionPrecio" + "preciosPorCombinacion", igual que con las
+        fotos por combinación (punto 6):
+          combinacionPrecio:["Tamaño","Acabado"],
+          preciosPorCombinacion:{
+            "21x29|Sin acabado": 1000,
+            "21x29|Laminado": 2000
+          }
+     11. UN DISEÑO POR UNIDAD (ej: Marcapáginas o Etiqueta navideña ya
+        cortada, cuando llevás más de 1): usá "multiplePorCantidad" en vez
+        de "valores" fijos, apuntando al nombre de la opción de cantidad.
+        Aparece un selector de diseño por cada unidad, y el cliente puede
+        elegir un diseño distinto (o repetido) en cada uno:
+          { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3"] }
+        La opción de cantidad ("Cantidad" en este caso) tiene que estar
+        definida ANTES en el array "opciones".
+     =========================================================== */
+
+  :root {
+    --bg: #FBFAF7;
+    --bg-alt: #EFE6D6;
+    --ink: #201B18;
+    --ink-soft: #57504A;
+    --accent: #8C2F39;
+    --accent-ink: #FBFAF7;
+    --line: rgba(32, 27, 24, 0.14);
+    --max: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Work Sans', sans-serif; line-height: 1.5; }
+  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; margin: 0 0 0.4em; }
+  p { margin: 0 0 1em; color: var(--ink-soft); }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .section-head { max-width: 60ch; margin-bottom: 28px; }
+  .section-head p { margin-bottom: 0; }
+
+  /* --- Header --- */
+  header { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; gap: 16px; }
+  .logo {
+    max-width: 225px;
+    height: auto;
+    white-space: nowrap;
+  }
+  nav { display: flex; gap: 20px; font-size: 0.9rem; flex-wrap: wrap; }
+  nav a { text-decoration: none; color: var(--ink); border-bottom: 1px solid transparent; }
+  nav a:hover { border-color: var(--accent); }
+
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 38px; height: 38px; border: 1px solid var(--line); background: var(--bg);
+    border-radius: 2px; display: flex; align-items: center; justify-content: center;
+    color: var(--ink); cursor: pointer; flex: none;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn svg { width: 17px; height: 17px; }
+
+  .cart-btn {
+    position: relative; border: 1px solid var(--ink); background: var(--bg);
+    padding: 9px 16px; border-radius: 2px; font-size: 0.9rem; cursor: pointer; font-family: inherit;
+  }
+  .cart-btn:hover { background: var(--ink); color: var(--bg); }
+  .cart-count {
+    position: absolute; top: -8px; right: -8px; background: var(--accent); color: var(--accent-ink);
+    font-size: 0.7rem; min-width: 18px; height: 18px; border-radius: 9px; display: flex;
+    align-items: center; justify-content: center; padding: 0 4px;
+  }
+
+  /* --- Hero --- */
+  .hero { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+  .hero h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); max-width: 18ch; }
+  .hero p { max-width: 50ch; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .btn {
+    display: inline-block; font-size: 0.88rem; font-weight: 600; padding: 12px 22px;
+    border-radius: 2px; text-decoration: none; font-family: inherit; cursor: pointer; border: 1px solid var(--ink);
+  }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-secondary { background: transparent; color: var(--ink); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-visual {
+    aspect-ratio: 4/3; border-radius: 4px; position: relative; overflow: hidden;
+    background: linear-gradient(155deg, var(--bg-alt) 0%, var(--bg) 55%, var(--accent) 145%);
+    border: 1px solid var(--line);
+  }
+  .hero-visual::before, .hero-visual::after {
+    content: ""; position: absolute; border-radius: 50%; opacity: 0.5;
+  }
+  .hero-visual::before { width: 46%; aspect-ratio: 1; background: var(--accent); top: -10%; right: -8%; opacity: 0.18; }
+  .hero-visual::after { width: 30%; aspect-ratio: 1; background: var(--ink); bottom: -8%; left: -6%; opacity: 0.08; }
+  .hero-visual span {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-style: italic; font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    color: var(--ink-soft); text-align: center; padding: 20px;
+  }
+
+  .cat-nav { display: flex; gap: 10px; flex-wrap: wrap; padding: 18px 0 0; }
+  .cat-nav a {
+    font-size: 0.82rem; text-decoration: none; color: var(--ink-soft);
+    border: 1px solid var(--line); padding: 6px 12px; border-radius: 20px;
+  }
+  .cat-nav a:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* --- Explora categorías (vista rápida) --- */
+  .cat-preview { padding: 48px 0; border-bottom: 1px solid var(--line); }
+  .cat-preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .cat-preview-card {
+    border: 1px solid var(--line); padding: 20px; border-radius: 2px; background: var(--bg-alt);
+    text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 10px;
+  }
+  .cat-preview-card:hover { border-color: var(--accent); }
+  .cat-preview-mark {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-style: italic; color: var(--accent); font-size: 1.05rem;
+  }
+  .cat-preview-card h3 { font-size: 1rem; margin: 0; }
+  .cat-preview-card .count { font-size: 0.78rem; color: var(--ink-soft); }
+
+  /* --- Destacados --- */
+  .destacados { padding: 48px 0; border-bottom: 1px solid var(--line); background: var(--bg-alt); }
+  .destacados-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; }
+  .destacado-card { background: var(--bg); border: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .destacado-media {
+    aspect-ratio: 1/1; background: linear-gradient(135deg, var(--bg-alt), var(--bg));
+    border-bottom: 1px solid var(--line); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 1.8rem; font-style: italic; color: var(--accent);
+  }
+  .destacado-media img { width: 100%; height: 100%; object-fit: cover; }
+  .destacado-body { padding: 14px; }
+  .destacado-body h3 { font-size: 0.92rem; margin: 0 0 4px; }
+  .destacado-body .desde { font-size: 0.82rem; color: var(--ink-soft); }
+
+  /* --- Catálogo por categoría (listado completo) --- */
+  section.categoria { padding: 40px 0; border-top: 1px solid var(--line); }
+  section.categoria:nth-of-type(even) { background: var(--bg-alt); }
+  .categoria h2 { font-size: 1.5rem; margin-bottom: 20px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  .card { border: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; }
+  section.categoria:nth-of-type(even) .card { background: var(--bg); }
+  .card-media {
+    aspect-ratio: 1/1; background: linear-gradient(135deg, var(--bg-alt), var(--bg));
+    border-bottom: 1px solid var(--line); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 2rem; font-style: italic; color: var(--accent);
+  }
+  .card-media img { width: 100%; height: 100%; object-fit: cover; }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .card-body h3 { font-size: 1.02rem; }
+  .card-body .desc { font-size: 0.85rem; margin-bottom: 2px; }
+
+  .opcion { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; }
+  .opcion select {
+    font-family: inherit; font-size: 0.85rem; padding: 7px 8px; border: 1px solid var(--line);
+    border-radius: 2px; background: var(--bg);
+  }
+  .opcion-multiple-selects { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opcion-multiple-selects select { flex: 1; min-width: 70px; }
+  .nota-personalizada {
+    font-size: 0.78rem; background: var(--bg-alt); border: 1px solid var(--line);
+    padding: 8px 10px; border-radius: 2px; color: var(--ink-soft);
+  }
+  section.categoria:nth-of-type(even) .nota-personalizada { background: var(--bg); }
+
+  .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 6px; }
+  .price { font-family: 'Fraunces', serif; font-style: italic; font-size: 1.05rem; }
+  .add-btn {
+    font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border: 1px solid var(--ink);
+    border-radius: 2px; background: var(--ink); color: var(--bg); cursor: pointer; font-family: inherit;
+  }
+  .add-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* --- Cómo lo hacemos --- */
+  .proceso { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  .proceso .wrap { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 40px; align-items: start; }
+  .proceso-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+  .proceso-step { border-top: 2px solid var(--accent); padding-top: 10px; }
+  .proceso-step .num { font-family: 'Fraunces', serif; font-style: italic; color: var(--accent); font-size: 1.1rem; }
+  .proceso-step h4 { margin: 4px 0 4px; font-size: 0.95rem; font-family: 'Work Sans', sans-serif; font-weight: 600; }
+  .proceso-step p { font-size: 0.85rem; margin: 0; }
+
+  /* --- Personaliza tu idea --- */
+  .personaliza { padding: 56px 0; border-bottom: 1px solid var(--line); background: var(--bg-alt); }
+  .personaliza .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .personaliza h2 { font-size: 1.7rem; max-width: 16ch; }
+  .personaliza-panel {
+    border: 1px solid var(--line); background: var(--bg); padding: 24px; border-radius: 2px;
+  }
+  .personaliza-panel ol { margin: 0 0 20px; padding-left: 20px; font-size: 0.88rem; color: var(--ink-soft); }
+  .personaliza-panel li { margin-bottom: 8px; }
+  .personaliza-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* --- Síguenos --- */
+  .siguenos { padding: 44px 0; border-bottom: 1px solid var(--line); text-align: center; }
+  .siguenos h2 { font-size: 1.3rem; }
+  .siguenos-links { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .siguenos-links a {
+    border: 1px solid var(--line); padding: 9px 18px; border-radius: 20px; text-decoration: none;
+    color: var(--ink); font-size: 0.85rem;
+  }
+  .siguenos-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* --- Newsletter --- */
+  .newsletter { background: var(--ink); color: var(--bg); padding: 30px 0; }
+  .newsletter .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .newsletter h3 { color: var(--bg); font-size: 1.05rem; margin: 0 0 4px; }
+  .newsletter p { color: rgba(251,250,247,0.65); margin: 0; font-size: 0.85rem; }
+  .newsletter form { display: flex; gap: 8px; flex-wrap: wrap; }
+  .newsletter input {
+    font-family: inherit; font-size: 0.85rem; padding: 10px 12px; border: 1px solid rgba(251,250,247,0.3);
+    background: transparent; color: var(--bg); border-radius: 2px; min-width: 220px;
+  }
+  .newsletter input::placeholder { color: rgba(251,250,247,0.5); }
+  .newsletter button {
+    font-family: inherit; font-size: 0.82rem; font-weight: 600; padding: 10px 16px; border: none;
+    background: var(--accent); color: var(--accent-ink); border-radius: 2px; cursor: pointer;
+  }
+  .newsletter-msg { font-size: 0.8rem; color: var(--bg); margin-top: 6px; display: none; }
+
+  /* --- Carrito lateral --- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(32,27,24,0.35); z-index: 30;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .cart-panel {
+    position: fixed; top: 0; right: -420px; width: 100%; max-width: 400px; height: 100%;
+    background: var(--bg); z-index: 31; border-left: 1px solid var(--line);
+    display: flex; flex-direction: column; transition: right 0.25s;
+  }
+  .cart-panel.open { right: 0; }
+  .cart-head { padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .cart-head h2 { font-size: 1.3rem; margin: 0; }
+  .cart-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--ink); }
+  .cart-items { flex: 1; overflow-y: auto; padding: 12px 20px; }
+  .cart-empty { color: var(--ink-soft); font-size: 0.9rem; padding: 20px 0; }
+  .cart-line { border-bottom: 1px solid var(--line); padding: 14px 0; }
+  .cart-line-top { display: flex; justify-content: space-between; gap: 10px; }
+  .cart-line h4 { font-size: 0.92rem; margin: 0 0 4px; }
+  .cart-line .detalle { font-size: 0.78rem; color: var(--ink-soft); margin: 0 0 6px; }
+  .cart-line-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  .qty { display: flex; align-items: center; gap: 8px; }
+  .qty button { width: 24px; height: 24px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; border-radius: 2px; }
+  .remove-line { background: none; border: none; text-decoration: underline; font-size: 0.78rem; color: var(--ink-soft); cursor: pointer; padding: 0; }
+  .cart-foot { border-top: 1px solid var(--line); padding: 18px 20px; }
+  .envio-metodo { margin-bottom: 12px; }
+  .envio-metodo > span { display: block; font-size: 0.78rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .envio-metodo label { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; cursor: pointer; }
+  .envio-nota { font-size: 0.75rem; color: var(--ink-soft); margin: 4px 0 0; }
+  .datos-transferencia {
+    font-size: 0.82rem; background: var(--bg-alt); border: 1px solid var(--line);
+    padding: 10px 12px; border-radius: 2px; margin-bottom: 12px; color: var(--ink-soft);
+  }
+  .datos-transferencia strong { color: var(--ink); }
+  .datos-transferencia p { margin: 0 0 8px; }
+  .datos-transferencia p:last-child { margin-bottom: 0; }
+  .cart-resumen-linea { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .cart-total { display: flex; justify-content: space-between; font-family: 'Fraunces', serif; font-size: 1.2rem; margin: 8px 0 12px; }
+  #notaPedido {
+    width: 100%; font-family: inherit; font-size: 0.85rem; padding: 8px; border: 1px solid var(--line);
+    border-radius: 2px; margin-bottom: 12px; resize: vertical; min-height: 50px;
+  }
+  .checkout-btn {
+    width: 100%; padding: 13px; background: var(--accent); color: var(--accent-ink); border: none;
+    border-radius: 2px; font-size: 0.95rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .checkout-btn:disabled { background: var(--line); cursor: not-allowed; color: var(--ink-soft); }
+  .checkout-note { font-size: 0.75rem; color: var(--ink-soft); margin-top: 8px; text-align: center; }
+
+  /* --- Footer --- */
+  footer { border-top: 1px solid var(--line); padding: 48px 0 30px; }
+  .footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 30px; font-size: 0.88rem; color: var(--ink-soft); }
+  .footer-grid h4 { font-family: 'Work Sans', sans-serif; font-weight: 600; color: var(--ink); font-size: 0.85rem; margin: 0 0 12px; }
+  .footer-grid .logo { max-width: 150px; margin-bottom: 10px; }
+  .footer-grid ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .footer-grid a { text-decoration: none; color: inherit; }
+  .footer-grid a:hover { color: var(--accent); }
+  .footer-bottom {
+    max-width: var(--max); margin: 36px auto 0; padding: 20px 24px 0; border-top: 1px solid var(--line);
+    font-size: 0.8rem; color: var(--ink-soft);
+  }
+
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .hero-visual { order: -1; }
+    .proceso .wrap, .personaliza .wrap { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    nav { display: none; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img src="imagenes/logo.png" alt="Logo" class="logo">
+    <nav id="catNav"></nav>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" aria-label="Buscar" title="Buscar (próximamente)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn" type="button" aria-label="Mi cuenta" title="Mi cuenta (próximamente)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+      <button class="cart-btn" id="cartToggle">Carrito <span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Cuadros, papelería y regalos personalizados.</h1>
+      <p>Elegí tu producto, tu tamaño y tu diseño. Para los personalizados, después de pagar te vamos a pedir tu foto o archivo por correo.</p>
+      <div class="hero-actions">
+        <a href="#catalogo" class="btn btn-primary">Ver productos</a>
+        <a href="#personalizar" class="btn btn-secondary">Personalizar</a>
+      </div>
+      <div class="cat-nav" id="catNavChips"></div>
+    </div>
+    <div class="hero-visual"><span>Tu idea, en papel, cuadro o regalo</span></div>
+  </div>
+</section>
+
+<section class="cat-preview">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Explora nuestras categorías</h2>
+      <p>Todo lo que hacemos, agrupado para que encuentres rápido lo que buscás.</p>
+    </div>
+    <div class="cat-preview-grid" id="catPreviewGrid"></div>
+  </div>
+</section>
+
+<section class="destacados">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Productos destacados</h2>
+      <p>Algunos de los favoritos para empezar a mirar.</p>
+    </div>
+    <div class="destacados-grid" id="destacadosGrid"></div>
+  </div>
+</section>
+
+<main id="catalogo" class="wrap"></main>
+
+<section class="proceso">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:0;">
+      <h2>Así hacemos realidad tus ideas</h2>
+      <p>Nos encargamos de todo el proceso, para que solo disfrutes el resultado.</p>
+    </div>
+    <div class="proceso-steps">
+      <div class="proceso-step"><span class="num">01</span><h4>Elegís</h4><p>Elegís tu producto, tamaño y diseño desde el catálogo.</p></div>
+      <div class="proceso-step"><span class="num">02</span><h4>Personalizás</h4><p>Si es personalizado, nos enviás tu foto o archivo por correo.</p></div>
+      <div class="proceso-step"><span class="num">03</span><h4>Fabricamos</h4><p>Imprimimos y armamos tu pedido con cuidado.</p></div>
+      <div class="proceso-step"><span class="num">04</span><h4>Entregamos</h4><p>Te avisamos y coordinamos la entrega o el envío.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="personaliza" id="personalizar">
+  <div class="wrap">
+    <div>
+      <h2>¿Tenés una idea, foto o diseño en mente?</h2>
+      <p>Lo convertimos en un cuadro, una libreta, stickers, un álbum o el regalo que estés imaginando.</p>
+    </div>
+    <div class="personaliza-panel">
+      <ol>
+        <li>Elegí el producto personalizable que más te guste del catálogo.</li>
+        <li>Completá la compra con tus opciones (tamaño, color, diseño).</li>
+        <li>Envianos tu foto o archivo por correo o WhatsApp, con tu número de pedido.</li>
+      </ol>
+      <div class="personaliza-actions">
+        <a href="https://wa.me/56920635715" target="_blank" class="btn btn-primary">Escribir por WhatsApp</a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=Venta.accesorizate@gmail.com" target="_blank" class="btn btn-secondary">Escribir por correo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="siguenos">
+  <div class="wrap">
+    <h2>Seguinos</h2>
+    <p>Nuevos diseños, promociones y detrás de escena.</p>
+    <div class="siguenos-links">
+      <a href="https://instagram.com/venta.accesorizate" target="_blank">Instagram</a>
+      <a href="https://wa.me/56920635715" target="_blank">WhatsApp</a>
+      <a href="https://tiktok.com/@accesorizate.tienda" target="_blank">TikTok</a>
+    </div>
+  </div>
+</section>
+
+<div class="newsletter">
+  <div class="wrap">
+    <div>
+      <h3>No te pierdas nada</h3>
+      <p>Nuevos productos y promociones, directo a tu correo.</p>
+    </div>
+    <div>
+      <form id="formNewsletter">
+        <input type="email" id="newsletterEmail" placeholder="Tu correo electrónico" required>
+        <button type="submit">Suscribirme</button>
+      </form>
+      <p class="newsletter-msg" id="newsletterMsg">¡Gracias! Ya quedaste suscripto.</p>
+    </div>
+  </div>
+</div>
+
+<footer id="contacto">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <img src="imagenes/logo.png" alt="Logo" class="logo">
+        <p>Cuadros, papelería y regalos personalizados, hechos con cuidado de principio a fin.</p>
+      </div>
+      <div>
+        <h4>Enlaces</h4>
+        <ul>
+          <li><a href="#">Inicio</a></li>
+          <li><a href="#catalogo">Productos</a></li>
+          <li><a href="#personalizar">Personalizados</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=Venta.accesorizate@gmail.com" target="_blank">Venta.accesorizate@gmail.com</a></li>
+          <li><a href="https://wa.me/56920635715" target="_blank">WhatsApp</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Seguinos</h4>
+        <ul>
+          <li><a href="https://instagram.com/venta.accesorizate" target="_blank">Instagram</a></li>
+          <li><a href="https://tiktok.com/@accesorizate.tienda" target="_blank">TikTok</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 AccesorizateSpA. Todos los derechos reservados.</div>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<aside class="cart-panel" id="cartPanel">
+  <div class="cart-head">
+    <h2>Tu carrito</h2>
+    <button class="cart-close" id="cartClose">×</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="envio-metodo">
+      <span>Envío</span>
+      <label><input type="radio" name="metodoEnvio" value="estandar" data-costo="3000" checked> Estándar (1 a 3 días hábiles) — $3.000</label>
+      <p class="envio-nota">Envío estándar disponible solo dentro de Santiago.</p>
+    </div>
+    <div class="datos-transferencia" id="datosTransferencia">
+      <p>
+        <strong>ACCESORIZATE SPA</strong><br>
+        RUT: 78.367.632-K<br>
+        Banco Estado — Chequera Electrónica<br>
+        Cuenta: 91270163373
+      </p>
+      <p>Transferí el total y después tocá el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
+    </div>
+    <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): dirección, referencia de diseño, etc."></textarea>
+    <div class="cart-resumen-linea"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
+    <div class="cart-resumen-linea"><span>Envío</span><span id="cartEnvio">$0</span></div>
+    <div class="cart-total"><span>Total</span><span id="cartTotal">$0</span></div>
+    <button class="checkout-btn" id="checkoutBtn" disabled>Ya transferí, enviar comprobante</button>
+    <p class="checkout-note">Se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante de la transferencia.</p>
+  </div>
+</aside>
+
+<script>
+// ===========================================================
+// 1) TUS PRODUCTOS — editá nombres, precios (CLP), imágenes y opciones acá.
+//    - "grupoPrecio" indica qué opción define el precio (normalmente el tamaño).
+//    - "precios" es un mapa valor -> precio, para ese grupo.
+//    - Si el producto tiene un solo precio fijo, usá "precioBase" y no pongas "grupoPrecio".
+//    - "personalizable: true" muestra la nota de "envianos tu foto por correo".
+// ===========================================================
+const productos = [
+
+  { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
+    descripcion:"Imprimimos tu fotografía en un cuadro de madera.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "10x15":3500, "13x18":4500, "15x20":5500 },
+    opciones:[
+      { nombre:"Tamaño", valores:["10x15","13x18","15x20"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] }
+    ],
+    // La foto depende de Tamaño + Color del marco. Todavía no hay foto para
+    // "Negro" en ningún tamaño: mientras no la agregues, ese caso muestra
+    // el logo como marcador de posición (ver imagenProducto).
+    combinacionImagen:["Tamaño","Color del marco"],
+    imagenesPorCombinacion:{
+      "10x15|Café":"imagenes/cuadro10x15cafeb.png",
+      "10x15|Blanco":"imagenes/cuadro10x15blanco.png",
+      "13x18|Café":"imagenes/cuadro13x18cafeb.png",
+      "13x18|Blanco":"imagenes/cuadro13x18blanco.png",
+      "15x20|Café":"imagenes/cuadro15x20cafeb.png",
+      "15x20|Blanco":"imagenes/cuadro15x20blanco.png"
+    },
+    personalizable:true },
+
+  { id:"cuadro-diseno", categoria:"Cuadros", nombre:"Cuadro + personalización (diseño)",
+    descripcion:"Cuadro grande con tu diseño o composición personalizada.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Diseño", valores:["Navidad","Aniversario","Boda","Cumpleaños"] },
+      // "Número de diseño" depende de "Diseño": sus opciones cambian según el tema elegido.
+      // Agregá más temas o más números por tema editando este mapa; el patrón es el mismo
+      // para todos: "Tema": ["1","2","3", ...].
+      { nombre:"Número de diseño", dependeDe:"Diseño", valoresPorPadre:{
+          "Navidad":["1","2","3","4"],
+          "Aniversario":["1","2","3","4"],
+          "Boda":["1","2","3","4"],
+          "Cumpleaños":["1","2","3","4"]
+        }
+      }
+    ],
+    // La foto depende de Tamaño + Diseño + Número de diseño (el color del
+    // marco no cambia la foto). Vos me diste los 4 números para "Navidad"
+    // en 21x29 y los números 1 y 2 para "Navidad" en 33x48; para el resto
+    // completé el mismo patrón de nombre de archivo — revisá que los
+    // nombres de tus fotos coincidan exactamente, y si alguno no calza me
+    // decís cuál para corregirlo.
+    combinacionImagen:["Tamaño","Diseño","Número de diseño"],
+    imagenesPorCombinacion:{
+      "21x29|Navidad|1":"imagenes/cuadro21x29navidad1.png",
+      "21x29|Navidad|2":"imagenes/cuadro21x29navidad2.png",
+      "21x29|Navidad|3":"imagenes/cuadro21x29navidad3.png",
+      "21x29|Navidad|4":"imagenes/cuadro21x29navidad4.png",
+      "21x29|Aniversario|1":"imagenes/cuadro21x29aniversario1.png",
+      "21x29|Aniversario|2":"imagenes/cuadro21x29aniversario2.png",
+      "21x29|Aniversario|3":"imagenes/cuadro21x29aniversario3.png",
+      "21x29|Aniversario|4":"imagenes/cuadro21x29aniversario4.png",
+      "21x29|Boda|1":"imagenes/cuadro21x29boda1.png",
+      "21x29|Boda|2":"imagenes/cuadro21x29boda2.png",
+      "21x29|Boda|3":"imagenes/cuadro21x29boda3.png",
+      "21x29|Boda|4":"imagenes/cuadro21x29boda4.png",
+      "21x29|Cumpleaños|1":"imagenes/cuadro21x29cumpleanos1.png",
+      "21x29|Cumpleaños|2":"imagenes/cuadro21x29cumpleanos2.png",
+      "21x29|Cumpleaños|3":"imagenes/cuadro21x29cumpleanos3.png",
+      "21x29|Cumpleaños|4":"imagenes/cuadro21x29cumpleanos4.png",
+      "33x48|Navidad|1":"imagenes/cuadro33x48navidad1.png",
+      "33x48|Navidad|2":"imagenes/cuadro33x48navidad2.png",
+      "33x48|Navidad|3":"imagenes/cuadro33x48navidad3.png",
+      "33x48|Navidad|4":"imagenes/cuadro33x48navidad4.png",
+      "33x48|Aniversario|1":"imagenes/cuadro33x48aniversario1.png",
+      "33x48|Aniversario|2":"imagenes/cuadro33x48aniversario2.png",
+      "33x48|Aniversario|3":"imagenes/cuadro33x48aniversario3.png",
+      "33x48|Aniversario|4":"imagenes/cuadro33x48aniversario4.png",
+      "33x48|Boda|1":"imagenes/cuadro33x48boda1.png",
+      "33x48|Boda|2":"imagenes/cuadro33x48boda2.png",
+      "33x48|Boda|3":"imagenes/cuadro33x48boda3.png",
+      "33x48|Boda|4":"imagenes/cuadro33x48boda4.png",
+      "33x48|Cumpleaños|1":"imagenes/cuadro33x48cumpleanos1.png",
+      "33x48|Cumpleaños|2":"imagenes/cuadro33x48cumpleanos2.png",
+      "33x48|Cumpleaños|3":"imagenes/cuadro33x48cumpleanos3.png",
+      "33x48|Cumpleaños|4":"imagenes/cuadro33x48cumpleanos4.png"
+    },
+    personalizable:true },
+
+  { id:"stickers", categoria:"Stickers", nombre:"Set de stickers",
+    descripcion:"Elegí el tamaño (con su cantidad aproximada) y el número de diseño.",
+    imagen:"", grupoPrecio:"Tamaño / cantidad",
+    precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
+    opciones:[
+      { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
+      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"posters", categoria:"Posters", nombre:"Poster",
+    descripcion:"Elegí tamaño y acabado.",
+    imagen:"",
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","29x42","33x48"] },
+      // El 33x48 no se puede plastificar ni laminar, por eso "Acabado"
+      // depende del Tamaño: para 33x48 solo se ofrece "Sin acabado".
+      { nombre:"Acabado", dependeDe:"Tamaño", valoresPorPadre:{
+          "21x29":["Sin acabado","Laminado","Plastificado"],
+          "29x42":["Sin acabado","Laminado","Plastificado"],
+          "33x48":["Sin acabado"]
+        }
+      }
+    ],
+    combinacionPrecio:["Tamaño","Acabado"],
+    preciosPorCombinacion:{
+      "21x29|Sin acabado":1000,
+      "21x29|Laminado":2000,
+      "21x29|Plastificado":2000,
+      "29x42|Sin acabado":1500,
+      "29x42|Laminado":3000,
+      "29x42|Plastificado":3000,
+      "33x48|Sin acabado":2000
+    },
+    personalizable:false },
+
+  { id:"fotografias", categoria:"Fotografías", nombre:"Impresión de fotografías",
+    descripcion:"Elegí tamaño y cantidad de copias.",
+    imagen:"", grupoPrecio:"Cantidad",
+    precios:{ "5 unidades":2000, "10 unidades":3500, "20 unidades":6000, "50 unidades":13000 },
+    opciones:[
+      { nombre:"Tamaño", valores:["10x15","20x25"] },
+      { nombre:"Cantidad", valores:["5 unidades","10 unidades","20 unidades","50 unidades"] }
+    ],
+    personalizable:true },
+
+  { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
+    descripcion:"Formato 5x8. Elegí el acabado y la cantidad.",
+    imagen:"",
+    opciones:[
+      { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
+      // Las cantidades disponibles cambian según el acabado elegido.
+      { nombre:"Cantidad", dependeDe:"Acabado", valoresPorPadre:{
+          "Normal":["10 unidades","35 unidades","50 unidades","100 unidades"],
+          "Laminada":["25 unidades","50 unidades","100 unidades"],
+          "Laminada imantada":["20 unidades","60 unidades","100 unidades"]
+        }
+      }
+    ],
+    combinacionPrecio:["Acabado","Cantidad"],
+    preciosPorCombinacion:{
+      "Normal|10 unidades":1990,
+      "Normal|35 unidades":5990,
+      "Normal|50 unidades":7990,
+      "Normal|100 unidades":11990,
+      "Laminada|25 unidades":5990,
+      "Laminada|50 unidades":9990,
+      "Laminada|100 unidades":16950,
+      "Laminada imantada|20 unidades":6990,
+      "Laminada imantada|60 unidades":19800,
+      "Laminada imantada|100 unidades":26990
+    },
+    personalizable:true },
+
+  { id:"encendedores", categoria:"Encendedores", nombre:"Encendedor personalizado",
+    descripcion:"Elegí el número de diseño.",
+    imagen:"", precioBase:500,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"calendario", categoria:"Calendarios", nombre:"Calendario 2027 personalizado",
+    descripcion:"Elegí el tipo de calendario.",
+    imagen:"", grupoPrecio:"Tipo",
+    precios:{ "Normal":2000, "Imantado":2500 },
+    opciones:[
+      { nombre:"Tipo", valores:["Normal","Imantado"] }
+    ],
+    personalizable:true },
+
+  { id:"marcapaginas", categoria:"Marcapáginas", nombre:"Marcapáginas",
+    descripcion:"Elegí el tipo, la cantidad y el diseño (uno por unidad si llevás más de 1).",
+    imagen:"",
+    opciones:[
+      { nombre:"Tipo", valores:["Normal","Imantado"] },
+      // Por ahora el imantado solo viene de a 1 unidad; agregá más
+      // cantidades acá el día que quieras ofrecer, por ejemplo, 3
+      // unidades imantadas también.
+      { nombre:"Cantidad", dependeDe:"Tipo", valoresPorPadre:{
+          "Normal":["1 unidad","3 unidades"],
+          "Imantado":["1 unidad"]
+        }
+      },
+      // Un select de diseño por cada unidad de "Cantidad": si llevás
+      // 3 unidades, el cliente elige 3 diseños (pueden repetirse).
+      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5"] }
+    ],
+    combinacionPrecio:["Tipo","Cantidad"],
+    preciosPorCombinacion:{
+      "Normal|1 unidad":400,
+      "Normal|3 unidades":1000,
+      "Imantado|1 unidad":500
+    },
+    personalizable:false },
+
+  { id:"libretas", categoria:"Libretas", nombre:"Libreta",
+    descripcion:"Elegí el número de diseño de tapa.",
+    imagen:"", precioBase:500,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"papel-regalo", categoria:"Papel de regalo", nombre:"Papel de regalo",
+    descripcion:"Elegí el número de diseño.",
+    imagen:"", precioBase:2500,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"etiqueta-cortada", categoria:"Etiquetas navideñas", nombre:"Etiqueta navideña (ya cortada)",
+    descripcion:"Etiqueta individual, ya cortada y lista para pegar en el regalo. Elegí el diseño (uno por unidad si llevás más de 1).",
+    imagen:"", grupoPrecio:"Cantidad",
+    precios:{ "1 unidad":300, "2 unidades":500 },
+    opciones:[
+      { nombre:"Cantidad", valores:["1 unidad","2 unidades"] },
+      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"etiquetas", categoria:"Etiquetas navideñas", nombre:"Set de etiquetas navideñas (tira sin cortar)",
+    descripcion:"Tira sin cortar con diseños surtidos (no se elige diseño individual).",
+    imagen:"", precioBase:1000,
+    opciones:[],
+    personalizable:false },
+
+  { id:"pizarra", categoria:"Pizarra infantil", nombre:"Pizarra infantil + plumones",
+    descripcion:"Elegí el número de diseño.",
+    imagen:"", precioBase:3000,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:false },
+
+  { id:"llavero", categoria:"Llaveros", nombre:"Llavero personalizado",
+    descripcion:"Enviá tu foto y te lo hacemos a medida.",
+    imagen:"", precioBase:1290,
+    opciones:[],
+    personalizable:true },
+
+  { id:"photocards", categoria:"Photo cards", nombre:"Photo cards",
+    descripcion:"Elegí el número de diseño y el acabado.",
+    imagen:"", precioBase:500,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4","5"] },
+      { nombre:"Acabado", valores:["Laminada","Plastificada"] }
+    ],
+    personalizable:false },
+
+  { id:"album", categoria:"Álbum fotográfico", nombre:"Álbum fotográfico personalizado",
+    descripcion:"Enviá tus fotos y armamos tu álbum.",
+    imagen:"", precioBase:19950,
+    opciones:[
+      { nombre:"Diseño de tapa", valores:["1","2","3","4","5"] }
+    ],
+    personalizable:true },
+
+];
+
+// ===========================================================
+// 2) A partir de acá es el motor de la tienda. No hace falta tocarlo.
+// ===========================================================
+const formatoCLP = n => n.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
+
+// Saca el número al principio de un valor de cantidad, ej: "3 unidades" -> 3.
+function cantidadNumerica(valor) {
+  const match = /^(\d+)/.exec(valor || "");
+  return match ? parseInt(match[1], 10) : 1;
+}
+
+// Lee todos los <select> de opción dentro de una tarjeta y arma el objeto
+// de selección. Si hay más de un select con el mismo "data-opcion" (caso de
+// "elegí un diseño por unidad"), junta sus valores en un arreglo en vez de
+// pisar el valor anterior.
+function leerSeleccionDeCard(card) {
+  const seleccion = {};
+  card.querySelectorAll("select[data-opcion]").forEach(s => {
+    const nombre = s.dataset.opcion;
+    if (!(nombre in seleccion)) {
+      seleccion[nombre] = s.value;
+    } else if (Array.isArray(seleccion[nombre])) {
+      seleccion[nombre].push(s.value);
+    } else {
+      seleccion[nombre] = [seleccion[nombre], s.value];
+    }
+  });
+  return seleccion;
+}
+
+// Para mostrar una opción elegida como texto, sea un valor único o un
+// arreglo (varios diseños, uno por unidad).
+function formatoValorSeleccion(v) {
+  return Array.isArray(v) ? v.join(", ") : v;
+}
+
+// El precio se resuelve en este orden:
+// 1) "preciosPorCombinacion" — cuando el precio depende de VARIAS opciones
+//    a la vez (ej: tamaño + acabado en Posters, o acabado + cantidad en
+//    Fotografía Polaroid). "combinacionPrecio" dice qué opciones arman esa
+//    combinación y en qué orden.
+// 2) "grupoPrecio" + "precios" — cuando el precio depende de UNA sola opción.
+// 3) "precioBase" — precio fijo, sin variantes de precio.
+function precioProducto(prod, seleccion) {
+  if (prod.combinacionPrecio && prod.preciosPorCombinacion) {
+    const clave = prod.combinacionPrecio.map(opcionNombre => seleccion[opcionNombre]).join("|");
+    const precio = prod.preciosPorCombinacion[clave];
+    if (precio !== undefined) return precio;
+  }
+  if (prod.grupoPrecio) return prod.precios[seleccion[prod.grupoPrecio]] ?? 0;
+  return prod.precioBase ?? 0;
+}
+
+function precioDesde(prod) {
+  if (prod.preciosPorCombinacion) return Math.min(...Object.values(prod.preciosPorCombinacion));
+  if (prod.grupoPrecio) return Math.min(...Object.values(prod.precios));
+  return prod.precioBase ?? 0;
+}
+
+// Elige qué foto mostrar según la variante seleccionada. Revisa en este orden:
+// 1) "imagenesPorCombinacion" — cuando la foto depende de VARIAS opciones a
+//    la vez (ej: tamaño + color, o tamaño + diseño + número). El producto
+//    dice qué opciones forman la combinación en "combinacionImagen".
+// 2) "imagenesPorOpcion" — cuando la foto depende de UNA sola opción.
+// 3) "imagen" — la foto general del producto.
+// 4) si nada de eso hay, muestra el logo como marcador de posición.
+function imagenProducto(prod, seleccion) {
+  if (prod.combinacionImagen && prod.imagenesPorCombinacion) {
+    const clave = prod.combinacionImagen.map(opcionNombre => seleccion[opcionNombre]).join("|");
+    const ruta = prod.imagenesPorCombinacion[clave];
+    if (ruta) return ruta;
+  }
+  if (prod.imagenesPorOpcion) {
+    for (const opcionNombre in prod.imagenesPorOpcion) {
+      const valorElegido = seleccion[opcionNombre];
+      const ruta = prod.imagenesPorOpcion[opcionNombre]?.[valorElegido];
+      if (ruta) return ruta;
+    }
+  }
+  return prod.imagen || "imagenes/logo.png";
+}
+
+// -- Render del catálogo, agrupado por categoría --
+const categorias = [...new Set(productos.map(p => p.categoria))];
+const catalogoEl = document.getElementById("catalogo");
+const navEl = document.getElementById("catNav");
+const chipsEl = document.getElementById("catNavChips");
+
+categorias.forEach(cat => {
+  const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  navEl.innerHTML += `<a href="#${slug}">${cat}</a>`;
+  chipsEl.innerHTML += `<a href="#${slug}">${cat}</a>`;
+
+  const seccion = document.createElement("section");
+  seccion.className = "categoria";
+  seccion.id = slug;
+  seccion.innerHTML = `<div class="wrap"><h2>${cat}</h2><div class="grid">${
+    productos.filter(p => p.categoria === cat).map(renderCard).join("")
+  }</div></div>`;
+  catalogoEl.appendChild(seccion);
+});
+
+function renderCard(prod) {
+  const seleccionInicial = valoresPorDefecto(prod);
+
+  const opcionesHtml = prod.opciones.map(op => {
+    // Opción "un diseño por unidad" (ej: Marcapáginas o Etiqueta navideña
+    // cuando llevás más de 1 unidad): dibuja un select de diseño por cada
+    // unidad de la cantidad elegida, y se reconstruye si la cantidad cambia
+    // (ver el listener de "change").
+    if (op.multiplePorCantidad) {
+      const cantidadInicial = seleccionInicial[op.multiplePorCantidad];
+      const n = cantidadNumerica(cantidadInicial);
+      const selectsHtml = Array.from({ length: n }, () => `
+        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
+          ${op.valores.map(v => `<option value="${v}">${v}</option>`).join("")}
+        </select>
+      `).join("");
+      return `
+        <div class="opcion opcion-multiple" data-opcion-multiple="${op.nombre}">
+          <label>${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})</label>
+          <div class="opcion-multiple-selects">${selectsHtml}</div>
+        </div>
+      `;
+    }
+    // Opción dependiente (ej: "Número de diseño" depende de "Diseño"):
+    // sus valores iniciales salen del tema por defecto, y se repueblan
+    // cuando cambia el select del que dependen (ver el listener de "change").
+    if (op.dependeDe) {
+      const valorPadreInicial = seleccionInicial[op.dependeDe];
+      const valoresIniciales = op.valoresPorPadre?.[valorPadreInicial] || [];
+      return `
+        <div class="opcion">
+          <label>${op.nombre}</label>
+          <select data-prod="${prod.id}" data-opcion="${op.nombre}" data-depende-de="${op.dependeDe}">
+            ${valoresIniciales.map(v => `<option value="${v}">${v}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    }
+    return `
+      <div class="opcion">
+        <label>${op.nombre}</label>
+        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
+          ${op.valores.map(v => `<option value="${v}">${v}</option>`).join("")}
+        </select>
+      </div>
+    `;
+  }).join("");
+
+  const notaHtml = prod.personalizable
+    ? `<p class="nota-personalizada">Después de comprar, envianos tu foto o diseño a <strong>tu-correo@ejemplo.com</strong> indicando tu número de pedido.</p>`
+    : "";
+
+  const media = `<img data-imagen-de="${prod.id}" src="${imagenProducto(prod, seleccionInicial)}" alt="${prod.nombre}">`;
+
+  return `
+    <article class="card">
+      <div class="card-media">${media}</div>
+      <div class="card-body">
+        <h3>${prod.nombre}</h3>
+        <p class="desc">${prod.descripcion}</p>
+        ${opcionesHtml}
+        ${notaHtml}
+        <div class="card-foot">
+          <span class="price" data-precio-de="${prod.id}">${formatoCLP(precioProducto(prod, seleccionInicial))}</span>
+          <button class="add-btn" onclick="agregarAlCarrito('${prod.id}')">Agregar</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function valoresPorDefecto(prod) {
+  const sel = {};
+  // El orden importa: una opción dependiente (dependeDe o multiplePorCantidad)
+  // siempre está definida después de la opción de la que depende, así que
+  // cuando le toca resolverse, ese valor ya está en "sel".
+  prod.opciones.forEach(op => {
+    if (op.multiplePorCantidad) {
+      const n = cantidadNumerica(sel[op.multiplePorCantidad]);
+      sel[op.nombre] = Array.from({ length: n }, () => op.valores[0]);
+    } else if (op.dependeDe) {
+      const lista = op.valoresPorPadre?.[sel[op.dependeDe]] || [];
+      sel[op.nombre] = lista[0] || "";
+    } else {
+      sel[op.nombre] = op.valores[0];
+    }
+  });
+  return sel;
+}
+
+// -- Explora categorías (tarjetas resumen, arriba del catálogo) --
+const catPreviewGrid = document.getElementById("catPreviewGrid");
+if (catPreviewGrid) {
+  catPreviewGrid.innerHTML = categorias.map(cat => {
+    const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const cantidad = productos.filter(p => p.categoria === cat).length;
+    return `
+      <a class="cat-preview-card" href="#${slug}">
+        <span class="cat-preview-mark">${cat.charAt(0)}</span>
+        <h3>${cat}</h3>
+        <span class="count">${cantidad} ${cantidad === 1 ? "producto" : "productos"}</span>
+      </a>
+    `;
+  }).join("");
+}
+
+// -- Destacados (una selección de productos ya existentes, con su precio real) --
+const destacadosGrid = document.getElementById("destacadosGrid");
+if (destacadosGrid) {
+  const idsDestacados = ["stickers", "libretas", "llavero", "cuadro-foto", "photocards"];
+  const listaDestacados = idsDestacados
+    .map(id => productos.find(p => p.id === id))
+    .filter(Boolean);
+
+  destacadosGrid.innerHTML = listaDestacados.map(prod => {
+    const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const media = `<img src="${imagenProducto(prod, valoresPorDefecto(prod))}" alt="${prod.nombre}">`;
+    return `
+      <a class="destacado-card" href="#${slug}">
+        <div class="destacado-media">${media}</div>
+        <div class="destacado-body">
+          <h3>${prod.nombre}</h3>
+          <span class="desde">Desde ${formatoCLP(precioDesde(prod))}</span>
+        </div>
+      </a>
+    `;
+  }).join("");
+}
+
+// Cuando el cliente cambia una opción: si otras opciones dependen de ella
+// (ej: "Número de diseño" depende de "Diseño"), repuebla esas primero; si
+// alguna opción muestra "un diseño por unidad" ligada a la que cambió,
+// reconstruye ese grupo de selects; y al final recalcula precio y foto.
+document.addEventListener("change", e => {
+  if (!e.target.matches("select[data-prod]")) return;
+  const id = e.target.dataset.prod;
+  const prod = productos.find(p => p.id === id);
+  const card = e.target.closest(".card");
+  const opcionCambiada = e.target.dataset.opcion;
+
+  const dependientes = prod.opciones.filter(op => op.dependeDe === opcionCambiada);
+  dependientes.forEach(op => {
+    const selDependiente = card.querySelector(`select[data-opcion="${op.nombre}"]`);
+    if (!selDependiente) return;
+    const valorPrevio = selDependiente.value;
+    const nuevaLista = op.valoresPorPadre?.[e.target.value] || [];
+    selDependiente.innerHTML = nuevaLista.map(v => `<option value="${v}">${v}</option>`).join("");
+    if (nuevaLista.includes(valorPrevio)) selDependiente.value = valorPrevio;
+  });
+
+  const opcionesMultiples = prod.opciones.filter(op => op.multiplePorCantidad === opcionCambiada);
+  opcionesMultiples.forEach(op => {
+    const contenedor = card.querySelector(`[data-opcion-multiple="${op.nombre}"]`);
+    if (!contenedor) return;
+    const previos = [...contenedor.querySelectorAll("select")].map(s => s.value);
+    const n = cantidadNumerica(e.target.value);
+    contenedor.querySelector(".opcion-multiple-selects").innerHTML = Array.from({ length: n }, (_, i) => {
+      const valorPrevio = previos[i] || op.valores[0];
+      return `
+        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
+          ${op.valores.map(v => `<option value="${v}" ${v === valorPrevio ? "selected" : ""}>${v}</option>`).join("")}
+        </select>
+      `;
+    }).join("");
+    const label = contenedor.querySelector("label");
+    if (label) label.textContent = `${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})`;
+  });
+
+  const seleccion = leerSeleccionDeCard(card);
+  card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(precioProducto(prod, seleccion));
+
+  const imgEl = card.querySelector(`[data-imagen-de="${id}"]`);
+  if (imgEl) imgEl.src = imagenProducto(prod, seleccion);
+});
+
+// -- Carrito --
+let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+
+function agregarAlCarrito(id) {
+  const prod = productos.find(p => p.id === id);
+  const card = [...document.querySelectorAll(".card")].find(c => c.querySelector(`[data-precio-de="${id}"]`));
+  const seleccion = leerSeleccionDeCard(card);
+  const precio = precioProducto(prod, seleccion);
+
+  carrito.push({
+    lineaId: Date.now() + Math.random(),
+    id, nombre: prod.nombre, seleccion, precio, cantidad: 1
+  });
+  guardarYRenderizarCarrito();
+  abrirCarrito();
+}
+
+function cambiarCantidad(lineaId, delta) {
+  const linea = carrito.find(l => l.lineaId === lineaId);
+  if (!linea) return;
+  linea.cantidad += delta;
+  if (linea.cantidad <= 0) carrito = carrito.filter(l => l.lineaId !== lineaId);
+  guardarYRenderizarCarrito();
+}
+
+function eliminarLinea(lineaId) {
+  carrito = carrito.filter(l => l.lineaId !== lineaId);
+  guardarYRenderizarCarrito();
+}
+
+function guardarYRenderizarCarrito() {
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  renderizarCarrito();
+}
+
+// Costo del método de envío actualmente elegido (hoy solo existe "Estándar",
+// pero el radio ya está listo para que agregues más opciones más adelante:
+// copiá el <label><input type="radio" name="metodoEnvio" ...></label> del
+// HTML con otro "value" y otro "data-costo").
+function costoEnvioActual() {
+  const radio = document.querySelector('input[name="metodoEnvio"]:checked');
+  return radio ? Number(radio.dataset.costo) : 0;
+}
+
+function renderizarCarrito() {
+  const cont = document.getElementById("cartItems");
+  const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
+  document.getElementById("cartCount").textContent = totalCantidad;
+
+  if (!carrito.length) {
+    cont.innerHTML = `<p class="cart-empty">Tu carrito está vacío.</p>`;
+  } else {
+    cont.innerHTML = carrito.map(l => `
+      <div class="cart-line">
+        <div class="cart-line-top">
+          <h4>${l.nombre}</h4>
+          <button class="remove-line" onclick="eliminarLinea(${l.lineaId})">quitar</button>
+        </div>
+        <p class="detalle">${Object.entries(l.seleccion).map(([k,v]) => `${k}: ${formatoValorSeleccion(v)}`).join(" · ") || "&nbsp;"}</p>
+        <div class="cart-line-bottom">
+          <div class="qty">
+            <button onclick="cambiarCantidad(${l.lineaId}, -1)">−</button>
+            <span>${l.cantidad}</span>
+            <button onclick="cambiarCantidad(${l.lineaId}, 1)">+</button>
+          </div>
+          <span>${formatoCLP(l.precio * l.cantidad)}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const subtotal = carrito.reduce((s, l) => s + l.precio * l.cantidad, 0);
+  const envio = carrito.length ? costoEnvioActual() : 0;
+  document.getElementById("cartSubtotal").textContent = formatoCLP(subtotal);
+  document.getElementById("cartEnvio").textContent = formatoCLP(envio);
+  document.getElementById("cartTotal").textContent = formatoCLP(subtotal + envio);
+  document.getElementById("checkoutBtn").disabled = carrito.length === 0;
+}
+
+document.querySelectorAll('input[name="metodoEnvio"]').forEach(radio => {
+  radio.addEventListener("change", renderizarCarrito);
+});
+
+function abrirCarrito() {
+  document.getElementById("cartPanel").classList.add("open");
+  document.getElementById("overlay").classList.add("open");
+}
+function cerrarCarrito() {
+  document.getElementById("cartPanel").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+
+document.getElementById("cartToggle").addEventListener("click", abrirCarrito);
+document.getElementById("cartClose").addEventListener("click", cerrarCarrito);
+document.getElementById("overlay").addEventListener("click", cerrarCarrito);
+
+// -- Newsletter (solo interfaz: no hay backend conectado todavía) --
+const formNewsletter = document.getElementById("formNewsletter");
+if (formNewsletter) {
+  formNewsletter.addEventListener("submit", e => {
+    e.preventDefault();
+    document.getElementById("newsletterMsg").style.display = "block";
+    formNewsletter.reset();
+  });
+}
+
+// Arma el mensaje de WhatsApp con el resumen del pedido, para que el
+// cliente lo envíe junto con el comprobante de la transferencia.
+function mensajePedidoParaWhatsapp() {
+  const lineas = carrito.map(l =>
+    `• ${l.cantidad} x ${l.nombre} (${Object.values(l.seleccion).map(formatoValorSeleccion).join(", ")}) — ${formatoCLP(l.precio * l.cantidad)}`
+  ).join("\n");
+  const subtotal = carrito.reduce((s, l) => s + l.precio * l.cantidad, 0);
+  const envio = costoEnvioActual();
+  const nota = document.getElementById("notaPedido").value.trim();
+
+  let mensaje = `Hola! Quiero confirmar mi pedido y enviar el comprobante de la transferencia:\n\n${lineas}\n\nEnvío estándar (Santiago): ${formatoCLP(envio)}\nTotal: ${formatoCLP(subtotal + envio)}`;
+  if (nota) mensaje += `\n\nNota: ${nota}`;
+  return encodeURIComponent(mensaje);
+}
+
+// -- Pago por transferencia bancaria, derivado a WhatsApp --
+document.getElementById("checkoutBtn").addEventListener("click", () => {
+  const urlWhatsapp = `https://wa.me/56920635715?text=${mensajePedidoParaWhatsapp()}`;
+  window.open(urlWhatsapp, "_blank");
+});
+
+renderizarCarrito();
+</script>
+</body>
+</html>
