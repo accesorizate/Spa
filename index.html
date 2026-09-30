@@ -52,6 +52,12 @@
         Mientras no cargues una foto para alguna combinación, no la agregues
         al mapa (o dejá la ruta vacía): así esa variante sigue mostrando el
         logo en vez de un ícono de imagen rota.
+        - VARIAS FOTOS PARA LA MISMA VARIANTE (distintos ángulos): en vez de
+          una ruta de texto, poné un arreglo de rutas. Funciona igual en
+          "imagenesPorOpcion", "imagenesPorCombinacion" o "imagen":
+            "10x15|Café": ["imagenes/cuadro10x15cafebaa.png", "imagenes/cuadro10x15cafebbb.png"]
+          En la tarjeta del producto aparecen unos puntitos abajo de la foto
+          para pasar de una a otra; si es una sola foto, no aparecen.
      7. OPCIÓN QUE DEPENDE DE OTRA (ej: "Número de diseño" según el tema
         "Diseño" elegido, en Cuadros → Cuadro + personalización). En vez
         de "valores", usá "dependeDe" + "valoresPorPadre", así:
@@ -210,22 +216,6 @@
   }
   .cat-nav a:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* --- Explora categorías (vista rápida) --- */
-  .cat-preview { padding: 48px 0; border-bottom: 1px solid var(--line); }
-  .cat-preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-  .cat-preview-card {
-    border: 1px solid var(--line); padding: 20px; border-radius: 2px; background: var(--bg-alt);
-    text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 10px;
-  }
-  .cat-preview-card:hover { border-color: var(--accent); }
-  .cat-preview-mark {
-    width: 34px; height: 34px; border-radius: 50%; background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-style: italic; color: var(--accent); font-size: 1.05rem;
-  }
-  .cat-preview-card h3 { font-size: 1rem; margin: 0; }
-  .cat-preview-card .count { font-size: 0.78rem; color: var(--ink-soft); }
-
   /* --- Destacados --- */
   .destacados { padding: 48px 0; border-bottom: 1px solid var(--line); background: var(--bg-alt); }
   .destacados-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; }
@@ -251,11 +241,20 @@
   section.categoria:nth-of-type(even) .card { background: var(--bg); }
   .card-media {
     aspect-ratio: 1/1; background: linear-gradient(135deg, var(--bg-alt), var(--bg));
-    border-bottom: 1px solid var(--line); overflow: hidden;
+    border-bottom: 1px solid var(--line); overflow: hidden; position: relative;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Fraunces', serif; font-size: 2rem; font-style: italic; color: var(--accent);
   }
   .card-media img { width: 100%; height: 100%; object-fit: cover; }
+  .card-media-dots {
+    position: absolute; left: 0; right: 0; bottom: 8px; display: flex;
+    justify-content: center; gap: 6px;
+  }
+  .media-dot {
+    width: 8px; height: 8px; padding: 0; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(251,250,247,0.9); background: rgba(32,27,24,0.35);
+  }
+  .media-dot.active { background: var(--accent); border-color: var(--accent); }
   .card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-body h3 { font-size: 1.02rem; }
   .card-body .desc { font-size: 0.85rem; margin-bottom: 2px; }
@@ -458,16 +457,6 @@
   </div>
 </section>
 
-<section class="cat-preview">
-  <div class="wrap">
-    <div class="section-head">
-      <h2>Explora nuestras categorías</h2>
-      <p>Todo lo que hacemos, agrupado para que encuentres rápido lo que buscas.</p>
-    </div>
-    <div class="cat-preview-grid" id="catPreviewGrid"></div>
-  </div>
-</section>
-
 <section class="destacados">
   <div class="wrap">
     <div class="section-head">
@@ -651,7 +640,7 @@ const productos = [
     // el logo como marcador de posición (ver imagenProducto).
     combinacionImagen:["Tamaño","Color del marco"],
     imagenesPorCombinacion:{
-      "10x15|Café":"imagenes/cuadro10x15cafeb.png",
+      "10x15|Café":["imagenes/cuadro10x15cafebaa.png","imagenes/cuadro10x15cafebbb.png","imagenes/cuadro10x15cafebcc.png","imagenes/cuadro10x15cafebdd.png"],
       "10x15|Blanco":"imagenes/cuadro10x15blanco.png",
       "13x18|Café":"imagenes/cuadro13x18cafeb.png",
       "13x18|Blanco":"imagenes/cuadro13x18blanco.png",
@@ -985,6 +974,18 @@ function imagenProducto(prod, seleccion) {
   return prod.imagen || "imagenes/logo.png";
 }
 
+// Igual que imagenProducto, pero siempre devuelve una LISTA de fotos.
+// Para mostrar varios ángulos de una misma variante, en vez de una ruta de
+// texto poné un arreglo de rutas donde corresponda (imagenesPorCombinacion,
+// imagenesPorOpcion o "imagen"), ej:
+//   "10x15|Café": ["imagenes/cuadro10x15cafebaa.png", "imagenes/cuadro10x15cafebbb.png"]
+// Esta función se encarga de que el resto del sitio funcione igual tenga
+// una foto sola o varias.
+function listaImagenesProducto(prod, seleccion) {
+  const resultado = imagenProducto(prod, seleccion);
+  return Array.isArray(resultado) ? resultado : [resultado];
+}
+
 // -- Render del catálogo, agrupado por categoría --
 const categorias = [...new Set(productos.map(p => p.categoria))];
 const catalogoEl = document.getElementById("catalogo");
@@ -1057,11 +1058,22 @@ function renderCard(prod) {
     ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
     : "";
 
-  const media = `<img data-imagen-de="${prod.id}" src="${imagenProducto(prod, seleccionInicial)}" alt="${prod.nombre}">`;
+  const imagenesIniciales = listaImagenesProducto(prod, seleccionInicial);
+  const dotsHtml = imagenesIniciales.length > 1
+    ? `<div class="card-media-dots">${imagenesIniciales.map((_, i) =>
+        `<button type="button" class="media-dot${i === 0 ? " active" : ""}" data-indice="${i}" aria-label="Ver foto ${i + 1}"></button>`
+      ).join("")}</div>`
+    : "";
+  const media = `
+    <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
+      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" alt="${prod.nombre}">
+      ${dotsHtml}
+    </div>
+  `;
 
   return `
     <article class="card">
-      <div class="card-media">${media}</div>
+      ${media}
       <div class="card-body">
         <h3>${prod.nombre}</h3>
         <p class="desc">${prod.descripcion}</p>
@@ -1095,22 +1107,6 @@ function valoresPorDefecto(prod) {
   return sel;
 }
 
-// -- Explora categorías (tarjetas resumen, arriba del catálogo) --
-const catPreviewGrid = document.getElementById("catPreviewGrid");
-if (catPreviewGrid) {
-  catPreviewGrid.innerHTML = categorias.map(cat => {
-    const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const cantidad = productos.filter(p => p.categoria === cat).length;
-    return `
-      <a class="cat-preview-card" href="#${slug}">
-        <span class="cat-preview-mark">${cat.charAt(0)}</span>
-        <h3>${cat}</h3>
-        <span class="count">${cantidad} ${cantidad === 1 ? "producto" : "productos"}</span>
-      </a>
-    `;
-  }).join("");
-}
-
 // -- Destacados (una selección de productos ya existentes, con su precio real) --
 const destacadosGrid = document.getElementById("destacadosGrid");
 if (destacadosGrid) {
@@ -1121,7 +1117,7 @@ if (destacadosGrid) {
 
   destacadosGrid.innerHTML = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const media = `<img src="${imagenProducto(prod, valoresPorDefecto(prod))}" alt="${prod.nombre}">`;
+    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod))[0]}" alt="${prod.nombre}">`;
     return `
       <a class="destacado-card" href="#${slug}">
         <div class="destacado-media">${media}</div>
@@ -1176,8 +1172,36 @@ document.addEventListener("change", e => {
   const seleccion = leerSeleccionDeCard(card);
   card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(precioProducto(prod, seleccion));
 
-  const imgEl = card.querySelector(`[data-imagen-de="${id}"]`);
-  if (imgEl) imgEl.src = imagenProducto(prod, seleccion);
+  const mediaEl = card.querySelector(`[data-media-de="${id}"]`);
+  if (mediaEl) {
+    const imagenes = listaImagenesProducto(prod, seleccion);
+    mediaEl.dataset.imagenes = JSON.stringify(imagenes);
+    const imgEl = mediaEl.querySelector("img");
+    if (imgEl) imgEl.src = imagenes[0];
+    const dotsPrevios = mediaEl.querySelector(".card-media-dots");
+    if (dotsPrevios) dotsPrevios.remove();
+    if (imagenes.length > 1) {
+      mediaEl.insertAdjacentHTML("beforeend", `
+        <div class="card-media-dots">${imagenes.map((_, i) =>
+          `<button type="button" class="media-dot${i === 0 ? " active" : ""}" data-indice="${i}" aria-label="Ver foto ${i + 1}"></button>`
+        ).join("")}</div>
+      `);
+    }
+  }
+});
+
+// Cuando el cliente hace clic en un puntito del carrusel de fotos, cambia
+// la imagen principal de esa tarjeta a la foto correspondiente.
+document.addEventListener("click", e => {
+  const punto = e.target.closest(".media-dot");
+  if (!punto) return;
+  const contenedor = punto.closest("[data-media-de]");
+  if (!contenedor) return;
+  const imagenes = JSON.parse(contenedor.dataset.imagenes || "[]");
+  const indice = Number(punto.dataset.indice);
+  const imgEl = contenedor.querySelector("img");
+  if (imgEl && imagenes[indice]) imgEl.src = imagenes[indice];
+  contenedor.querySelectorAll(".media-dot").forEach((d, i) => d.classList.toggle("active", i === indice));
 });
 
 // -- Carrito --
