@@ -69,16 +69,21 @@
         dentro de "datosTransferencia"; y el número de WhatsApp al que se
         envía el mensaje está al final del <script>, en la línea que dice
         "wa.me/56920635715".
-     9. ENVÍO: por ahora hay una sola opción, "Estándar (1 a 3 días hábiles)
-        — $3.000", válida solo dentro de Santiago, y su costo se suma
-        siempre al total (carrito y WhatsApp). Para agregar otra opción
-        más adelante (ej: "Retiro en tienda" gratis, o "Envío a regiones"
-        con otro precio), copiá esta línea del HTML y cambiale el texto,
-        el "value" y el "data-costo":
+     9. ENVÍO: hay dos opciones. "Estándar" ($3.000, solo Santiago) y
+        "Periferia / regiones" (se muestra en $0 porque el flete se paga
+        directo a la empresa transportista — Starken o Bluexpress — al
+        recibir; esa elección de empresa está en el <select> con id
+        "selectTransportista"). El costo elegido se suma siempre al total
+        (carrito y WhatsApp). Para agregar otra opción de envío más
+        adelante (ej: "Retiro en tienda" gratis), copiá esta línea del
+        HTML y cambiale el texto, el "value" y el "data-costo":
           <label><input type="radio" name="metodoEnvio" value="retiro"
-            data-costo="0" checked> Retiro en tienda — Gratis</label>
+            data-costo="0"> Retiro en tienda — Gratis</label>
         No hace falta tocar el JavaScript: el costo se toma solo del
-        "data-costo" de la opción que esté marcada.
+        "data-costo" de la opción que esté marcada. Además, antes de
+        llevar al cliente a WhatsApp, el sitio pide que complete sus
+        datos de envío (nombre, RUT, ciudad, comuna y dirección; el
+        código postal es opcional) y los incluye en el mensaje.
      10. PRECIO QUE DEPENDE DE VARIAS OPCIONES (ej: Posters, que cobra
         distinto según tamaño Y acabado; o Fotografía Polaroid, según
         acabado Y cantidad): en vez de "grupoPrecio" + "precios", usá
@@ -97,6 +102,10 @@
           { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3"] }
         La opción de cantidad ("Cantidad" en este caso) tiene que estar
         definida ANTES en el array "opciones".
+     12. BUSCADOR: el ícono de la lupa en el header abre una barra de
+        búsqueda que filtra el catálogo completo por nombre y descripción
+        a medida que el cliente escribe (sin recargar la página). Si no
+        hay resultados, muestra un aviso. No hace falta configurar nada.
      =========================================================== */
 
   :root {
@@ -140,6 +149,17 @@
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
   .icon-btn svg { width: 17px; height: 17px; }
+  .icon-btn[aria-expanded="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .search-bar { display: none; border-top: 1px solid var(--line); background: var(--bg-alt); }
+  .search-bar.open { display: block; }
+  .search-bar .wrap { padding: 12px 24px; }
+  .search-bar input {
+    width: 100%; font-family: inherit; font-size: 0.95rem; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 2px; background: var(--bg); color: var(--ink);
+  }
+  .search-empty { display: none; font-size: 0.82rem; margin: 8px 0 0; }
+  .search-empty.visible { display: block; }
 
   .cart-btn {
     position: relative; border: 1px solid var(--ink); background: var(--bg);
@@ -336,8 +356,23 @@
   .cart-foot { border-top: 1px solid var(--line); padding: 18px 20px; }
   .envio-metodo { margin-bottom: 12px; }
   .envio-metodo > span { display: block; font-size: 0.78rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
-  .envio-metodo label { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; cursor: pointer; }
+  .envio-metodo label { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; cursor: pointer; margin-bottom: 4px; }
+  .envio-transportista { display: none; margin: 6px 0 6px 22px; }
+  .envio-transportista.visible { display: flex; align-items: center; gap: 8px; }
+  .envio-transportista label { font-size: 0.8rem; color: var(--ink-soft); margin: 0; }
+  .envio-transportista select {
+    font-family: inherit; font-size: 0.85rem; padding: 6px 8px; border: 1px solid var(--line);
+    border-radius: 2px; background: var(--bg);
+  }
   .envio-nota { font-size: 0.75rem; color: var(--ink-soft); margin: 4px 0 0; }
+  .datos-envio { margin-bottom: 12px; }
+  .datos-envio-titulo { display: block; font-size: 0.78rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .datos-envio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .datos-envio-grid input {
+    font-family: inherit; font-size: 0.85rem; padding: 8px; border: 1px solid var(--line);
+    border-radius: 2px; background: var(--bg); width: 100%;
+  }
+  .datos-envio-grid input.full { grid-column: 1 / -1; }
   .datos-transferencia {
     font-size: 0.82rem; background: var(--bg-alt); border: 1px solid var(--line);
     padding: 10px 12px; border-radius: 2px; margin-bottom: 12px; color: var(--ink-soft);
@@ -391,7 +426,7 @@
     <img src="imagenes/logo.png" alt="Logo" class="logo">
     <nav id="catNav"></nav>
     <div class="header-actions">
-      <button class="icon-btn" type="button" aria-label="Buscar" title="Buscar (próximamente)">
+      <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
       <button class="icon-btn" type="button" aria-label="Mi cuenta" title="Mi cuenta (próximamente)">
@@ -400,13 +435,19 @@
       <button class="cart-btn" id="cartToggle">Carrito <span class="cart-count" id="cartCount">0</span></button>
     </div>
   </div>
+  <div class="search-bar" id="searchBar">
+    <div class="wrap">
+      <input type="search" id="inputBuscar" placeholder="Buscar productos por nombre...">
+      <p class="search-empty" id="searchEmptyMsg">No encontramos productos que coincidan con tu búsqueda.</p>
+    </div>
+  </div>
 </header>
 
 <section class="hero">
   <div class="wrap">
     <div>
       <h1>Cuadros, papelería y regalos personalizados.</h1>
-      <p>Elegí tu producto, tu tamaño y tu diseño. Para los personalizados, después de pagar te vamos a pedir tu foto o archivo por correo.</p>
+      <p>Elige tu producto, tu tamaño y tu diseño. Para los personalizados, después de pagar te vamos a pedir tu foto o archivo por correo.</p>
       <div class="hero-actions">
         <a href="#catalogo" class="btn btn-primary">Ver productos</a>
         <a href="#personalizar" class="btn btn-secondary">Personalizar</a>
@@ -421,7 +462,7 @@
   <div class="wrap">
     <div class="section-head">
       <h2>Explora nuestras categorías</h2>
-      <p>Todo lo que hacemos, agrupado para que encuentres rápido lo que buscás.</p>
+      <p>Todo lo que hacemos, agrupado para que encuentres rápido lo que buscas.</p>
     </div>
     <div class="cat-preview-grid" id="catPreviewGrid"></div>
   </div>
@@ -446,8 +487,8 @@
       <p>Nos encargamos de todo el proceso, para que solo disfrutes el resultado.</p>
     </div>
     <div class="proceso-steps">
-      <div class="proceso-step"><span class="num">01</span><h4>Elegís</h4><p>Elegís tu producto, tamaño y diseño desde el catálogo.</p></div>
-      <div class="proceso-step"><span class="num">02</span><h4>Personalizás</h4><p>Si es personalizado, nos enviás tu foto o archivo por correo.</p></div>
+      <div class="proceso-step"><span class="num">01</span><h4>Eliges</h4><p>Eliges tu producto, tamaño y diseño desde el catálogo.</p></div>
+      <div class="proceso-step"><span class="num">02</span><h4>Personalizas</h4><p>Si es personalizado, nos envías tu foto o archivo por correo.</p></div>
       <div class="proceso-step"><span class="num">03</span><h4>Fabricamos</h4><p>Imprimimos y armamos tu pedido con cuidado.</p></div>
       <div class="proceso-step"><span class="num">04</span><h4>Entregamos</h4><p>Te avisamos y coordinamos la entrega o el envío.</p></div>
     </div>
@@ -457,14 +498,14 @@
 <section class="personaliza" id="personalizar">
   <div class="wrap">
     <div>
-      <h2>¿Tenés una idea, foto o diseño en mente?</h2>
+      <h2>¿Tienes una idea, foto o diseño en mente?</h2>
       <p>Lo convertimos en un cuadro, una libreta, stickers, un álbum o el regalo que estés imaginando.</p>
     </div>
     <div class="personaliza-panel">
       <ol>
-        <li>Elegí el producto personalizable que más te guste del catálogo.</li>
-        <li>Completá la compra con tus opciones (tamaño, color, diseño).</li>
-        <li>Envianos tu foto o archivo por correo o WhatsApp, con tu número de pedido.</li>
+        <li>Elige el producto personalizable que más te guste del catálogo.</li>
+        <li>Completa la compra con tus opciones (tamaño, color, diseño).</li>
+        <li>Envíanos tu foto o archivo por correo o WhatsApp, con tu número de pedido.</li>
       </ol>
       <div class="personaliza-actions">
         <a href="https://wa.me/56920635715" target="_blank" class="btn btn-primary">Escribir por WhatsApp</a>
@@ -476,7 +517,7 @@
 
 <section class="siguenos">
   <div class="wrap">
-    <h2>Seguinos</h2>
+    <h2>Síguenos</h2>
     <p>Nuevos diseños, promociones y detrás de escena.</p>
     <div class="siguenos-links">
       <a href="https://instagram.com/venta.accesorizate" target="_blank">Instagram</a>
@@ -526,7 +567,7 @@
         </ul>
       </div>
       <div>
-        <h4>Seguinos</h4>
+        <h4>Síguenos</h4>
         <ul>
           <li><a href="https://instagram.com/venta.accesorizate" target="_blank">Instagram</a></li>
           <li><a href="https://tiktok.com/@accesorizate.tienda" target="_blank">TikTok</a></li>
@@ -548,7 +589,26 @@
     <div class="envio-metodo">
       <span>Envío</span>
       <label><input type="radio" name="metodoEnvio" value="estandar" data-costo="3000" checked> Estándar (1 a 3 días hábiles) — $3.000</label>
-      <p class="envio-nota">Envío estándar disponible solo dentro de Santiago.</p>
+      <label><input type="radio" name="metodoEnvio" value="regiones" data-costo="0"> Periferia / regiones — envío por pagar</label>
+      <div class="envio-transportista" id="envioTransportista">
+        <label for="selectTransportista">Empresa de envío</label>
+        <select id="selectTransportista">
+          <option value="Starken">Starken</option>
+          <option value="Bluexpress">Bluexpress</option>
+        </select>
+      </div>
+      <p class="envio-nota">El envío estándar es solo dentro de Santiago. Para periferia o regiones, el costo del transporte se paga directo a Starken o Bluexpress al recibir.</p>
+    </div>
+    <div class="datos-envio">
+      <span class="datos-envio-titulo">Datos de envío</span>
+      <div class="datos-envio-grid">
+        <input type="text" id="envioNombre" placeholder="Nombre completo">
+        <input type="text" id="envioRut" placeholder="RUT">
+        <input type="text" id="envioCiudad" placeholder="Ciudad">
+        <input type="text" id="envioComuna" placeholder="Comuna">
+        <input type="text" id="envioDireccion" class="full" placeholder="Dirección">
+        <input type="text" id="envioCodigoPostal" class="full" placeholder="Código postal (opcional)">
+      </div>
     </div>
     <div class="datos-transferencia" id="datosTransferencia">
       <p>
@@ -557,9 +617,9 @@
         Banco Estado — Chequera Electrónica<br>
         Cuenta: 91270163373
       </p>
-      <p>Transferí el total y después tocá el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
+      <p>Transfiere el total y luego haz clic en el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
     </div>
-    <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): dirección, referencia de diseño, etc."></textarea>
+    <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): referencia de diseño, etc."></textarea>
     <div class="cart-resumen-linea"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
     <div class="cart-resumen-linea"><span>Envío</span><span id="cartEnvio">$0</span></div>
     <div class="cart-total"><span>Total</span><span id="cartTotal">$0</span></div>
@@ -574,7 +634,7 @@
 //    - "grupoPrecio" indica qué opción define el precio (normalmente el tamaño).
 //    - "precios" es un mapa valor -> precio, para ese grupo.
 //    - Si el producto tiene un solo precio fijo, usá "precioBase" y no pongas "grupoPrecio".
-//    - "personalizable: true" muestra la nota de "envianos tu foto por correo".
+//    - "personalizable: true" muestra la nota de "envíanos tu foto por correo".
 // ===========================================================
 const productos = [
 
@@ -663,7 +723,7 @@ const productos = [
     personalizable:true },
 
   { id:"stickers", categoria:"Stickers", nombre:"Set de stickers",
-    descripcion:"Elegí el tamaño (con su cantidad aproximada) y el número de diseño.",
+    descripcion:"Elige el tamaño (con su cantidad aproximada) y el número de diseño.",
     imagen:"", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
@@ -673,7 +733,7 @@ const productos = [
     personalizable:false },
 
   { id:"posters", categoria:"Posters", nombre:"Poster",
-    descripcion:"Elegí tamaño y acabado.",
+    descripcion:"Elige tamaño y acabado.",
     imagen:"",
     opciones:[
       { nombre:"Tamaño", valores:["21x29","29x42","33x48"] },
@@ -699,7 +759,7 @@ const productos = [
     personalizable:false },
 
   { id:"fotografias", categoria:"Fotografías", nombre:"Impresión de fotografías",
-    descripcion:"Elegí tamaño y cantidad de copias.",
+    descripcion:"Elige tamaño y cantidad de copias.",
     imagen:"", grupoPrecio:"Cantidad",
     precios:{ "5 unidades":2000, "10 unidades":3500, "20 unidades":6000, "50 unidades":13000 },
     opciones:[
@@ -709,7 +769,7 @@ const productos = [
     personalizable:true },
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
-    descripcion:"Formato 5x8. Elegí el acabado y la cantidad.",
+    descripcion:"Formato 5x8. Elige el acabado y la cantidad.",
     imagen:"",
     opciones:[
       { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
@@ -737,7 +797,7 @@ const productos = [
     personalizable:true },
 
   { id:"encendedores", categoria:"Encendedores", nombre:"Encendedor personalizado",
-    descripcion:"Elegí el número de diseño.",
+    descripcion:"Elige el número de diseño.",
     imagen:"", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] }
@@ -745,7 +805,7 @@ const productos = [
     personalizable:false },
 
   { id:"calendario", categoria:"Calendarios", nombre:"Calendario 2027 personalizado",
-    descripcion:"Elegí el tipo de calendario.",
+    descripcion:"Elige el tipo de calendario.",
     imagen:"", grupoPrecio:"Tipo",
     precios:{ "Normal":2000, "Imantado":2500 },
     opciones:[
@@ -754,7 +814,7 @@ const productos = [
     personalizable:true },
 
   { id:"marcapaginas", categoria:"Marcapáginas", nombre:"Marcapáginas",
-    descripcion:"Elegí el tipo, la cantidad y el diseño (uno por unidad si llevás más de 1).",
+    descripcion:"Elige el tipo, la cantidad y el diseño (uno por unidad si llevas más de 1).",
     imagen:"",
     opciones:[
       { nombre:"Tipo", valores:["Normal","Imantado"] },
@@ -779,7 +839,7 @@ const productos = [
     personalizable:false },
 
   { id:"libretas", categoria:"Libretas", nombre:"Libreta",
-    descripcion:"Elegí el número de diseño de tapa.",
+    descripcion:"Elige el número de diseño de tapa.",
     imagen:"", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] }
@@ -787,7 +847,7 @@ const productos = [
     personalizable:false },
 
   { id:"papel-regalo", categoria:"Papel de regalo", nombre:"Papel de regalo",
-    descripcion:"Elegí el número de diseño.",
+    descripcion:"Elige el número de diseño.",
     imagen:"", precioBase:2500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] }
@@ -795,7 +855,7 @@ const productos = [
     personalizable:false },
 
   { id:"etiqueta-cortada", categoria:"Etiquetas navideñas", nombre:"Etiqueta navideña (ya cortada)",
-    descripcion:"Etiqueta individual, ya cortada y lista para pegar en el regalo. Elegí el diseño (uno por unidad si llevás más de 1).",
+    descripcion:"Etiqueta individual, ya cortada y lista para pegar en el regalo. Elige el diseño (uno por unidad si llevas más de 1).",
     imagen:"", grupoPrecio:"Cantidad",
     precios:{ "1 unidad":300, "2 unidades":500 },
     opciones:[
@@ -811,7 +871,7 @@ const productos = [
     personalizable:false },
 
   { id:"pizarra", categoria:"Pizarra infantil", nombre:"Pizarra infantil + plumones",
-    descripcion:"Elegí el número de diseño.",
+    descripcion:"Elige el número de diseño.",
     imagen:"", precioBase:3000,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] }
@@ -819,13 +879,13 @@ const productos = [
     personalizable:false },
 
   { id:"llavero", categoria:"Llaveros", nombre:"Llavero personalizado",
-    descripcion:"Enviá tu foto y te lo hacemos a medida.",
+    descripcion:"Envía tu foto y te lo hacemos a medida.",
     imagen:"", precioBase:1290,
     opciones:[],
     personalizable:true },
 
   { id:"photocards", categoria:"Photo cards", nombre:"Photo cards",
-    descripcion:"Elegí el número de diseño y el acabado.",
+    descripcion:"Elige el número de diseño y el acabado.",
     imagen:"", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] },
@@ -834,7 +894,7 @@ const productos = [
     personalizable:false },
 
   { id:"album", categoria:"Álbum fotográfico", nombre:"Álbum fotográfico personalizado",
-    descripcion:"Enviá tus fotos y armamos tu álbum.",
+    descripcion:"Envía tus fotos y armamos tu álbum.",
     imagen:"", precioBase:19950,
     opciones:[
       { nombre:"Diseño de tapa", valores:["1","2","3","4","5"] }
@@ -994,7 +1054,7 @@ function renderCard(prod) {
   }).join("");
 
   const notaHtml = prod.personalizable
-    ? `<p class="nota-personalizada">Después de comprar, envianos tu foto o diseño a <strong>tu-correo@ejemplo.com</strong> indicando tu número de pedido.</p>`
+    ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
     : "";
 
   const media = `<img data-imagen-de="${prod.id}" src="${imagenProducto(prod, seleccionInicial)}" alt="${prod.nombre}">`;
@@ -1155,14 +1215,33 @@ function guardarYRenderizarCarrito() {
   renderizarCarrito();
 }
 
-// Costo del método de envío actualmente elegido (hoy solo existe "Estándar",
-// pero el radio ya está listo para que agregues más opciones más adelante:
-// copiá el <label><input type="radio" name="metodoEnvio" ...></label> del
-// HTML con otro "value" y otro "data-costo").
+// Costo del método de envío actualmente elegido. "Periferia / regiones"
+// se refleja como $0 en el sitio porque el flete se paga directo a la
+// empresa transportista (Starken o Bluexpress) al recibir el pedido.
 function costoEnvioActual() {
   const radio = document.querySelector('input[name="metodoEnvio"]:checked');
   return radio ? Number(radio.dataset.costo) : 0;
 }
+
+// Describe el método de envío elegido en texto, incluyendo la empresa
+// transportista si corresponde, para mostrarlo en el mensaje de WhatsApp.
+function envioDescripcionActual() {
+  const radio = document.querySelector('input[name="metodoEnvio"]:checked');
+  if (!radio) return "";
+  if (radio.value === "regiones") {
+    const transportista = document.getElementById("selectTransportista").value;
+    return `Periferia / regiones — ${transportista} (envío por pagar al recibir)`;
+  }
+  return "Estándar (Santiago)";
+}
+
+// Muestra el selector de empresa transportista solo cuando el método de
+// envío elegido es "Periferia / regiones".
+document.querySelectorAll('input[name="metodoEnvio"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    document.getElementById("envioTransportista").classList.toggle("visible", radio.value === "regiones" && radio.checked);
+  });
+});
 
 function renderizarCarrito() {
   const cont = document.getElementById("cartItems");
@@ -1226,8 +1305,9 @@ if (formNewsletter) {
   });
 }
 
-// Arma el mensaje de WhatsApp con el resumen del pedido, para que el
-// cliente lo envíe junto con el comprobante de la transferencia.
+// Arma el mensaje de WhatsApp con el resumen del pedido, el envío elegido
+// y los datos de envío del cliente, para que lo mande junto con el
+// comprobante de la transferencia.
 function mensajePedidoParaWhatsapp() {
   const lineas = carrito.map(l =>
     `• ${l.cantidad} x ${l.nombre} (${Object.values(l.seleccion).map(formatoValorSeleccion).join(", ")}) — ${formatoCLP(l.precio * l.cantidad)}`
@@ -1236,16 +1316,83 @@ function mensajePedidoParaWhatsapp() {
   const envio = costoEnvioActual();
   const nota = document.getElementById("notaPedido").value.trim();
 
-  let mensaje = `Hola! Quiero confirmar mi pedido y enviar el comprobante de la transferencia:\n\n${lineas}\n\nEnvío estándar (Santiago): ${formatoCLP(envio)}\nTotal: ${formatoCLP(subtotal + envio)}`;
+  const datosEnvio = [
+    `Nombre: ${document.getElementById("envioNombre").value.trim()}`,
+    `RUT: ${document.getElementById("envioRut").value.trim()}`,
+    `Ciudad: ${document.getElementById("envioCiudad").value.trim()}`,
+    `Comuna: ${document.getElementById("envioComuna").value.trim()}`,
+    `Dirección: ${document.getElementById("envioDireccion").value.trim()}`
+  ];
+  const codigoPostal = document.getElementById("envioCodigoPostal").value.trim();
+  if (codigoPostal) datosEnvio.push(`Código postal: ${codigoPostal}`);
+
+  let mensaje = `Hola! Quiero confirmar mi pedido y enviar el comprobante de la transferencia:\n\n${lineas}\n\nEnvío: ${envioDescripcionActual()} — ${formatoCLP(envio)}\nTotal: ${formatoCLP(subtotal + envio)}\n\nDatos de envío:\n${datosEnvio.join("\n")}`;
   if (nota) mensaje += `\n\nNota: ${nota}`;
   return encodeURIComponent(mensaje);
 }
 
 // -- Pago por transferencia bancaria, derivado a WhatsApp --
 document.getElementById("checkoutBtn").addEventListener("click", () => {
+  const camposObligatorios = [
+    ["envioNombre", "el nombre"],
+    ["envioRut", "el RUT"],
+    ["envioCiudad", "la ciudad"],
+    ["envioComuna", "la comuna"],
+    ["envioDireccion", "la dirección"]
+  ];
+  for (const [idCampo, etiqueta] of camposObligatorios) {
+    const campo = document.getElementById(idCampo);
+    if (!campo.value.trim()) {
+      alert(`Completa ${etiqueta} antes de continuar.`);
+      campo.focus();
+      return;
+    }
+  }
+
   const urlWhatsapp = `https://wa.me/56920635715?text=${mensajePedidoParaWhatsapp()}`;
   window.open(urlWhatsapp, "_blank");
 });
+
+// -- Buscador: filtra las tarjetas del catálogo por nombre o descripción --
+const btnBuscar = document.getElementById("btnBuscar");
+const searchBar = document.getElementById("searchBar");
+const inputBuscar = document.getElementById("inputBuscar");
+const searchEmptyMsg = document.getElementById("searchEmptyMsg");
+
+btnBuscar.addEventListener("click", () => {
+  const abierto = searchBar.classList.toggle("open");
+  btnBuscar.setAttribute("aria-expanded", abierto ? "true" : "false");
+  if (abierto) {
+    inputBuscar.focus();
+  } else {
+    inputBuscar.value = "";
+    filtrarCatalogoPorBusqueda("");
+  }
+});
+
+inputBuscar.addEventListener("input", () => {
+  filtrarCatalogoPorBusqueda(inputBuscar.value);
+});
+
+function filtrarCatalogoPorBusqueda(termino) {
+  const busqueda = termino.trim().toLowerCase();
+  let hayResultados = !busqueda;
+
+  document.querySelectorAll("section.categoria").forEach(seccion => {
+    let seccionTieneCoincidencia = false;
+    seccion.querySelectorAll(".card").forEach(card => {
+      const nombre = card.querySelector(".card-body h3")?.textContent.toLowerCase() || "";
+      const desc = card.querySelector(".card-body .desc")?.textContent.toLowerCase() || "";
+      const coincide = !busqueda || nombre.includes(busqueda) || desc.includes(busqueda);
+      card.style.display = coincide ? "" : "none";
+      if (coincide) seccionTieneCoincidencia = true;
+    });
+    seccion.style.display = seccionTieneCoincidencia ? "" : "none";
+    if (seccionTieneCoincidencia) hayResultados = true;
+  });
+
+  searchEmptyMsg.classList.toggle("visible", busqueda !== "" && !hayResultados);
+}
 
 renderizarCarrito();
 </script>
