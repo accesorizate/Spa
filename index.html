@@ -628,24 +628,38 @@
 const productos = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
-    descripcion:"Imprimimos tu fotografía en un cuadro de madera.",
-    imagen:"", grupoPrecio:"Tamaño",
-    precios:{ "10x15":3500, "13x18":4500, "15x20":5500 },
+    descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elegí el tamaño y el marco.",
+    imagen:"",
+    // AGREGUÉ EL TAMAÑO "18x24" CON UN PRECIO DE EJEMPLO ($6.500, siguiendo
+    // el mismo salto de $1.000 entre tamaños que ya tenías) — cambialo por
+    // el precio real.
+    grupoPrecio:"Tamaño",
+    precios:{ "10x15":3500, "13x18":4500, "15x20":5500, "18x24":6500 },
     opciones:[
-      { nombre:"Tamaño", valores:["10x15","13x18","15x20"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] }
+      { nombre:"Tamaño", valores:["10x15","13x18","15x20","18x24"] },
+      // El marco disponible cambia según el tamaño, tal como me lo diste.
+      { nombre:"Color del marco", dependeDe:"Tamaño", valoresPorPadre:{
+          "10x15":["Café con blanco (diseño 1)","Café con blanco (diseño 2)"],
+          "13x18":["Café con blanco","Café"],
+          "15x20":["Café con blanco"],
+          "18x24":["Café"]
+        }
+      }
     ],
-    // La foto depende de Tamaño + Color del marco. Todavía no hay foto para
-    // "Negro" en ningún tamaño: mientras no la agregues, ese caso muestra
-    // el logo como marcador de posición (ver imagenProducto).
+    // La foto depende de Tamaño + Color del marco.
+    // OJO: las 4 fotos que me diste antes (cuadro10x15cafebaa/bbb/ccc/ddd)
+    // las dejé asignadas a "10x15 Café con blanco (diseño 1)" como mejor
+    // suposición, ya que antes eran las fotos de "10x15 Café" a secas.
+    // Confirmame si van ahí o si en realidad son del "diseño 2", y pasame
+    // las fotos que falten (diseño 2 en 10x15, y las de 13x18, 15x20 y
+    // 18x24) para completarlo — mientras tanto esas combinaciones
+    // muestran el logo como marcador de posición.
     combinacionImagen:["Tamaño","Color del marco"],
     imagenesPorCombinacion:{
-      "10x15|Café":["imagenes/cuadro10x15cafebaa.png","imagenes/cuadro10x15cafebbb.png","imagenes/cuadro10x15cafebcc.png","imagenes/cuadro10x15cafebdd.png"],
-      "10x15|Blanco":"imagenes/cuadro10x15blanco.png",
+      "10x15|Café con blanco (diseño 1)":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png"],
+      "13x18|Café con blanco (diseño 1)":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png"],
+      "15x20|Café con blanco (diseño 1)":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblanco1.png"],
       "13x18|Café":"imagenes/cuadro13x18cafeb.png",
-      "13x18|Blanco":"imagenes/cuadro13x18blanco.png",
-      "15x20|Café":"imagenes/cuadro15x20cafeb.png",
-      "15x20|Blanco":"imagenes/cuadro15x20blanco.png"
     },
     personalizable:true },
 
