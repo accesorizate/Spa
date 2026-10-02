@@ -39,11 +39,10 @@
               }
             }
         - Si depende de VARIAS opciones a la vez (ej: tamaño + color, como
-          en "Cuadro + foto", o tamaño + diseño + número, como en
-          "Cuadro + personalización"), usá "combinacionImagen" +
-          "imagenesPorCombinacion": el primero dice qué opciones arman la
-          combinación y en qué orden, el segundo mapea esa combinación
-          (unida con "|") a la foto:
+          en "Cuadro + foto", o tamaño + número, como en los cuadros
+          personalizados), usá "combinacionImagen" + "imagenesPorCombinacion":
+          el primero dice qué opciones arman la combinación y en qué orden,
+          el segundo mapea esa combinación (unida con "|") a la foto:
             combinacionImagen:["Tamaño","Color del marco"],
             imagenesPorCombinacion:{
               "10x15|Café": "imagenes/cuadro10x15cafeb.png",
@@ -58,15 +57,15 @@
             "10x15|Café": ["imagenes/cuadro10x15cafebaa.png", "imagenes/cuadro10x15cafebbb.png"]
           En la tarjeta del producto aparecen unos puntitos abajo de la foto
           para pasar de una a otra; si es una sola foto, no aparecen.
-     7. OPCIÓN QUE DEPENDE DE OTRA (ej: "Número de diseño" según el tema
-        "Diseño" elegido, en Cuadros → Cuadro + personalización). En vez
-        de "valores", usá "dependeDe" + "valoresPorPadre", así:
-          { nombre:"Número de diseño", dependeDe:"Diseño", valoresPorPadre:{
-              "Navidad":["1","2","3","4"],
-              "Aniversario":["1","2","3","4"]
+     7. OPCIÓN QUE DEPENDE DE OTRA (ej: "Acabado" según el "Tamaño"
+        elegido, en Posters). En vez de "valores", usá "dependeDe" +
+        "valoresPorPadre", así:
+          { nombre:"Acabado", dependeDe:"Tamaño", valoresPorPadre:{
+              "21x29":["Sin acabado","Laminado"],
+              "33x48":["Sin acabado"]
             }
           }
-        La opción de la que depende ("Diseño" en este caso) tiene que estar
+        La opción de la que depende ("Tamaño" en este caso) tiene que estar
         definida ANTES en el array "opciones".
      8. PAGO: el único método es transferencia bancaria. El cliente ve tus
         datos de cuenta en el carrito, transfiere el total y al tocar el
@@ -112,6 +111,15 @@
         búsqueda que filtra el catálogo completo por nombre y descripción
         a medida que el cliente escribe (sin recargar la página). Si no
         hay resultados, muestra un aviso. No hace falta configurar nada.
+     13. PRODUCTO QUE SOLO COTIZA POR WHATSAPP (en vez de agregarse al
+        carrito): agregá "accionPersonalizada" al producto, así:
+          accionPersonalizada:{
+            tipo:"whatsapp",
+            mensaje:"Hola! Estoy interesad@ en cotizar..."
+          }
+        El botón de esa tarjeta cambia a "Cotizar por WhatsApp" y, al
+        tocarlo, abre WhatsApp con tu mensaje más el tamaño/color/diseño
+        que el cliente haya elegido en la tarjeta (no pasa por el carrito).
      =========================================================== */
 
   :root {
@@ -277,6 +285,7 @@
   .add-btn {
     font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border: 1px solid var(--ink);
     border-radius: 2px; background: var(--ink); color: var(--bg); cursor: pointer; font-family: inherit;
+    text-decoration: none; display: inline-block;
   }
   .add-btn:hover { background: var(--accent); border-color: var(--accent); }
 
@@ -647,13 +656,6 @@ const productos = [
       }
     ],
     // La foto depende de Tamaño + Color del marco.
-    // OJO: las 4 fotos que me diste antes (cuadro10x15cafebaa/bbb/ccc/ddd)
-    // las dejé asignadas a "10x15 Café con blanco (diseño 1)" como mejor
-    // suposición, ya que antes eran las fotos de "10x15 Café" a secas.
-    // Confirmame si van ahí o si en realidad son del "diseño 2", y pasame
-    // las fotos que falten (diseño 2 en 10x15, y las de 13x18, 15x20 y
-    // 18x24) para completarlo — mientras tanto esas combinaciones
-    // muestran el logo como marcador de posición.
     combinacionImagen:["Tamaño","Color del marco"],
     imagenesPorCombinacion:{
       "10x15|Café con blanco (diseño 1)":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
@@ -661,71 +663,156 @@ const productos = [
       "13x18|Café con blanco":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
       "15x20|Café con blanco":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
       "13x18|Café":["imagenes/publicuadros.png","imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"],
-      "18x24|Café":["imagenes/publicuadros.png","imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"],
+      "18x24|Café":["imagenes/publicuadros.png","imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"]
     },
     personalizable:true },
 
-  { id:"cuadro-diseno", categoria:"Cuadros", nombre:"Cuadro + personalización (diseño)",
-    descripcion:"Cuadro grande con tu diseño o composición personalizada.",
+  { id:"cuadro-navideno", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado navideño",
+    descripcion:"Cuadro grande con tu diseño navideño personalizado.",
     imagen:"", grupoPrecio:"Tamaño",
     precios:{ "21x29":9990, "33x48":16990 },
     opciones:[
       { nombre:"Tamaño", valores:["21x29","33x48"] },
       { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Diseño", valores:["Navidad","Aniversario","Boda","Cumpleaños"] },
-      // "Número de diseño" depende de "Diseño": sus opciones cambian según el tema elegido.
-      // Agregá más temas o más números por tema editando este mapa; el patrón es el mismo
-      // para todos: "Tema": ["1","2","3", ...].
-      { nombre:"Número de diseño", dependeDe:"Diseño", valoresPorPadre:{
-          "Navidad":["1","2","3","4"],
-          "Aniversario":["1","2","3","4"],
-          "Boda":["1","2","3","4"],
-          "Cumpleaños":["1","2","3","4"]
-        }
-      }
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
     ],
-    // La foto depende de Tamaño + Diseño + Número de diseño (el color del
-    // marco no cambia la foto). Vos me diste los 4 números para "Navidad"
-    // en 21x29 y los números 1 y 2 para "Navidad" en 33x48; para el resto
-    // completé el mismo patrón de nombre de archivo — revisá que los
-    // nombres de tus fotos coincidan exactamente, y si alguno no calza me
-    // decís cuál para corregirlo.
-    combinacionImagen:["Tamaño","Diseño","Número de diseño"],
+    // Confirmado: 21x29 (1 a 4) y 33x48 (1 y 2). Las que faltan (33x48,
+    // números 3 y 4) muestran el logo hasta que me pases esas fotos.
+    combinacionImagen:["Tamaño","Número de diseño"],
     imagenesPorCombinacion:{
-      "21x29|Navidad|1":"imagenes/cuadro21x29navidad1.png",
-      "21x29|Navidad|2":"imagenes/cuadro21x29navidad2.png",
-      "21x29|Navidad|3":"imagenes/cuadro21x29navidad3.png",
-      "21x29|Navidad|4":"imagenes/cuadro21x29navidad4.png",
-      "21x29|Aniversario|1":"imagenes/cuadro21x29aniversario1.png",
-      "21x29|Aniversario|2":"imagenes/cuadro21x29aniversario2.png",
-      "21x29|Aniversario|3":"imagenes/cuadro21x29aniversario3.png",
-      "21x29|Aniversario|4":"imagenes/cuadro21x29aniversario4.png",
-      "21x29|Boda|1":"imagenes/cuadro21x29boda1.png",
-      "21x29|Boda|2":"imagenes/cuadro21x29boda2.png",
-      "21x29|Boda|3":"imagenes/cuadro21x29boda3.png",
-      "21x29|Boda|4":"imagenes/cuadro21x29boda4.png",
-      "21x29|Cumpleaños|1":"imagenes/cuadro21x29cumpleanos1.png",
-      "21x29|Cumpleaños|2":"imagenes/cuadro21x29cumpleanos2.png",
-      "21x29|Cumpleaños|3":"imagenes/cuadro21x29cumpleanos3.png",
-      "21x29|Cumpleaños|4":"imagenes/cuadro21x29cumpleanos4.png",
-      "33x48|Navidad|1":"imagenes/cuadro33x48navidad1.png",
-      "33x48|Navidad|2":"imagenes/cuadro33x48navidad2.png",
-      "33x48|Navidad|3":"imagenes/cuadro33x48navidad3.png",
-      "33x48|Navidad|4":"imagenes/cuadro33x48navidad4.png",
-      "33x48|Aniversario|1":"imagenes/cuadro33x48aniversario1.png",
-      "33x48|Aniversario|2":"imagenes/cuadro33x48aniversario2.png",
-      "33x48|Aniversario|3":"imagenes/cuadro33x48aniversario3.png",
-      "33x48|Aniversario|4":"imagenes/cuadro33x48aniversario4.png",
-      "33x48|Boda|1":"imagenes/cuadro33x48boda1.png",
-      "33x48|Boda|2":"imagenes/cuadro33x48boda2.png",
-      "33x48|Boda|3":"imagenes/cuadro33x48boda3.png",
-      "33x48|Boda|4":"imagenes/cuadro33x48boda4.png",
-      "33x48|Cumpleaños|1":"imagenes/cuadro33x48cumpleanos1.png",
-      "33x48|Cumpleaños|2":"imagenes/cuadro33x48cumpleanos2.png",
-      "33x48|Cumpleaños|3":"imagenes/cuadro33x48cumpleanos3.png",
-      "33x48|Cumpleaños|4":"imagenes/cuadro33x48cumpleanos4.png"
+      "21x29|1":"imagenes/cuadro21x29navidad1.png",
+      "21x29|2":"imagenes/cuadro21x29navidad2.png",
+      "21x29|3":"imagenes/cuadro21x29navidad3.png",
+      "21x29|4":"imagenes/cuadro21x29navidad4.png",
+      "33x48|1":"imagenes/cuadro33x48navidad1.png",
+      "33x48|2":"imagenes/cuadro33x48navidad2.png"
     },
     personalizable:true },
+
+  { id:"cuadro-enamorados", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado enamorados",
+    descripcion:"Cuadro grande con tu diseño personalizado para tu pareja.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    // Todavía no tengo fotos de este — pasame los nombres cuando los tengas
+    // (mismo patrón: "Tamaño|Número" -> ruta) y los agrego acá.
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-sanvalentin", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado San Valentín",
+    descripcion:"Cuadro grande con tu diseño personalizado para San Valentín.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-diamadre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día de la Madre",
+    descripcion:"Cuadro grande con tu diseño personalizado para el Día de la Madre.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-diapadre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día del Padre",
+    descripcion:"Cuadro grande con tu diseño personalizado para el Día del Padre.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-spotify", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Spotify",
+    descripcion:"Cuadro grande con tu canción favorita en formato placa Spotify.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-nacimiento", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado nacimiento",
+    descripcion:"Cuadro grande para anunciar o recordar el nacimiento de tu bebé.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-dianino", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día del Niño",
+    descripcion:"Cuadro grande con tu diseño personalizado para el Día del Niño.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  { id:"cuadro-funebre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado fúnebre",
+    descripcion:"Cuadro grande como homenaje o recuerdo para un ser querido.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    personalizable:true },
+
+  // Este producto NO se agrega al carrito: el botón lleva directo a
+  // WhatsApp a cotizar (ver "accionPersonalizada" y la guía, punto 13).
+  { id:"cuadro-graduacion", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado graduación",
+    descripcion:"Cuadro grande para celebrar una graduación. Escríbenos para cotizar tu diseño.",
+    imagen:"", grupoPrecio:"Tamaño",
+    precios:{ "21x29":9990, "33x48":16990 },
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:["1","2","3","4"] }
+    ],
+    combinacionImagen:["Tamaño","Número de diseño"],
+    imagenesPorCombinacion:{},
+    accionPersonalizada:{
+      tipo:"whatsapp",
+      mensaje:"Hola! Estoy interesad@ en cotizar un cuadro para la graduación de mi hij@."
+    },
+    personalizable:false },
 
   { id:"stickers", categoria:"Stickers", nombre:"Set de stickers",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el número de diseño.",
@@ -969,8 +1056,8 @@ function precioDesde(prod) {
 
 // Elige qué foto mostrar según la variante seleccionada. Revisa en este orden:
 // 1) "imagenesPorCombinacion" — cuando la foto depende de VARIAS opciones a
-//    la vez (ej: tamaño + color, o tamaño + diseño + número). El producto
-//    dice qué opciones forman la combinación en "combinacionImagen".
+//    la vez (ej: tamaño + color, o tamaño + número). El producto dice qué
+//    opciones forman la combinación en "combinacionImagen".
 // 2) "imagenesPorOpcion" — cuando la foto depende de UNA sola opción.
 // 3) "imagen" — la foto general del producto.
 // 4) si nada de eso hay, muestra el logo como marcador de posición.
@@ -1045,9 +1132,9 @@ function renderCard(prod) {
         </div>
       `;
     }
-    // Opción dependiente (ej: "Número de diseño" depende de "Diseño"):
-    // sus valores iniciales salen del tema por defecto, y se repueblan
-    // cuando cambia el select del que dependen (ver el listener de "change").
+    // Opción dependiente (ej: "Acabado" depende de "Tamaño"): sus valores
+    // iniciales salen del padre por defecto, y se repueblan cuando cambia
+    // el select del que dependen (ver el listener de "change").
     if (op.dependeDe) {
       const valorPadreInicial = seleccionInicial[op.dependeDe];
       const valoresIniciales = op.valoresPorPadre?.[valorPadreInicial] || [];
@@ -1087,6 +1174,13 @@ function renderCard(prod) {
     </div>
   `;
 
+  // Botón de la tarjeta: normalmente "Agregar" (al carrito). Si el producto
+  // tiene "accionPersonalizada" tipo "whatsapp" (ej: Cuadro graduación),
+  // en vez de eso abre WhatsApp con tu mensaje + la variante elegida.
+  const botonHtml = prod.accionPersonalizada?.tipo === "whatsapp"
+    ? `<button type="button" class="add-btn" onclick="cotizarPorWhatsapp('${prod.id}')">Cotizar por WhatsApp</button>`
+    : `<button type="button" class="add-btn" onclick="agregarAlCarrito('${prod.id}')">Agregar</button>`;
+
   return `
     <article class="card">
       ${media}
@@ -1097,7 +1191,7 @@ function renderCard(prod) {
         ${notaHtml}
         <div class="card-foot">
           <span class="price" data-precio-de="${prod.id}">${formatoCLP(precioProducto(prod, seleccionInicial))}</span>
-          <button class="add-btn" onclick="agregarAlCarrito('${prod.id}')">Agregar</button>
+          ${botonHtml}
         </div>
       </div>
     </article>
@@ -1147,9 +1241,9 @@ if (destacadosGrid) {
 }
 
 // Cuando el cliente cambia una opción: si otras opciones dependen de ella
-// (ej: "Número de diseño" depende de "Diseño"), repuebla esas primero; si
-// alguna opción muestra "un diseño por unidad" ligada a la que cambió,
-// reconstruye ese grupo de selects; y al final recalcula precio y foto.
+// (ej: "Acabado" depende de "Tamaño"), repuebla esas primero; si alguna
+// opción muestra "un diseño por unidad" ligada a la que cambió, reconstruye
+// ese grupo de selects; y al final recalcula precio y foto.
 document.addEventListener("change", e => {
   if (!e.target.matches("select[data-prod]")) return;
   const id = e.target.dataset.prod;
@@ -1219,6 +1313,21 @@ document.addEventListener("click", e => {
   if (imgEl && imagenes[indice]) imgEl.src = imagenes[indice];
   contenedor.querySelectorAll(".media-dot").forEach((d, i) => d.classList.toggle("active", i === indice));
 });
+
+// Para productos con "accionPersonalizada" tipo "whatsapp" (ej: Cuadro
+// graduación): arma el mensaje con tu texto + la variante que el cliente
+// eligió en la tarjeta, y abre WhatsApp. No toca el carrito para nada.
+function cotizarPorWhatsapp(id) {
+  const prod = productos.find(p => p.id === id);
+  const card = [...document.querySelectorAll(".card")].find(c => c.querySelector(`[data-precio-de="${id}"]`));
+  const seleccion = leerSeleccionDeCard(card);
+  const detalle = Object.entries(seleccion).map(([k, v]) => `${k}: ${formatoValorSeleccion(v)}`).join(" · ");
+
+  let mensaje = prod.accionPersonalizada.mensaje;
+  if (detalle) mensaje += `\n\nDetalle: ${detalle}`;
+
+  window.open(`https://wa.me/56920635715?text=${encodeURIComponent(mensaje)}`, "_blank");
+}
 
 // -- Carrito --
 let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
