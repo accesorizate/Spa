@@ -136,6 +136,20 @@
         a cada uno un nombre de archivo siguiendo tu mismo patrón
         ("imagenes/publiencendedorpokemon.png", etc.) — avisame si alguno
         no coincide con el nombre real que vas a usar.
+     16. CATEGORÍA ACTIVA AL SCROLLEAR: a medida que el cliente baja por
+        el catálogo, la categoría que tiene justo debajo del header se
+        resalta sola (color del acento) tanto en el menú de arriba como
+        en los chips del hero — así siempre sabe dónde está y puede
+        saltar a otra categoría tocándola, incluso desde el celular
+        (ahí el menú de categorías ahora se desliza horizontal en vez de
+        desaparecer). No hace falta configurar nada.
+     17. FOTO PRINCIPAL ANTES, FOTOS POR VARIANTE DESPUÉS: si un producto
+        tiene "imagen" (su foto principal) Y ADEMÁS "imagenesPorCombinacion"
+        o "imagenesPorOpcion" (fotos por variante), al entrar a la página
+        se ve primero la foto principal. Recién cuando el cliente elige
+        una opción (tamaño, color, diseño), la tarjeta cambia a la foto de
+        esa variante puntual. Si un producto no tiene "imagen" propia, se
+        sigue viendo la foto por variante desde el principio, como antes.
      =========================================================== */
 
   :root {
@@ -168,8 +182,9 @@
     white-space: nowrap;
   }
   nav { display: flex; gap: 20px; font-size: 0.9rem; flex-wrap: wrap; }
-  nav a { text-decoration: none; color: var(--ink); border-bottom: 1px solid transparent; }
+  nav a { text-decoration: none; color: var(--ink); border-bottom: 1px solid transparent; white-space: nowrap; }
   nav a:hover { border-color: var(--accent); }
+  nav a.activa { color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
   .header-actions { display: flex; align-items: center; gap: 10px; }
   .icon-btn {
@@ -239,6 +254,7 @@
     border: 1px solid var(--line); padding: 6px 12px; border-radius: 20px;
   }
   .cat-nav a:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-nav a.activa { border-color: var(--accent); color: var(--accent-ink); background: var(--accent); }
 
   /* --- Destacados --- */
   .destacados { padding: 48px 0; border-bottom: 1px solid var(--line); background: var(--bg-alt); }
@@ -439,7 +455,11 @@
   }
 
   @media (max-width: 640px) {
-    nav { display: none; }
+    nav {
+      flex-wrap: nowrap; overflow-x: auto; max-width: 42vw; gap: 14px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
     .footer-grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -655,7 +675,7 @@ const productos = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
     descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elegí el tamaño y el marco.",
-    imagen:"imagenes/publicuadros.png",
+    imagen:"",
     // AGREGUÉ EL TAMAÑO "18x24" CON UN PRECIO DE EJEMPLO ($6.500, siguiendo
     // el mismo salto de $1.000 entre tamaños que ya tenías) — cambialo por
     // el precio real.
@@ -675,12 +695,12 @@ const productos = [
     // La foto depende de Tamaño + Color del marco.
     combinacionImagen:["Tamaño","Color del marco"],
     imagenesPorCombinacion:{
-      "10x15|Café con blanco (diseño 1)":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "10x15|Café con blanco (diseño 2)":["imagenes/cuadro10x15cafeconblanco2.png","imagenes/cuadro10x15cafeconblanco2tras.png"],
-      "13x18|Café con blanco":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "15x20|Café con blanco":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "13x18|Café":["imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"],
-      "18x24|Café":["imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"]
+      "10x15|Café con blanco (diseño 1)":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
+      "10x15|Café con blanco (diseño 2)":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco2.png","imagenes/cuadro10x15cafeconblanco2tras.png"],
+      "13x18|Café con blanco":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
+      "15x20|Café con blanco":["imagenes/publicuadros.png","imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
+      "13x18|Café":["imagenes/publicuadros.png","imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"],
+      "18x24|Café":["imagenes/publicuadros.png","imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"]
     },
     personalizable:true },
 
@@ -1362,14 +1382,22 @@ function precioDesde(prod) {
   return prod.precioBase ?? 0;
 }
 
-// Elige qué foto mostrar según la variante seleccionada. Revisa en este orden:
+// Elige qué foto mostrar según la variante seleccionada.
+// Si "priorizarPortada" es true y el producto tiene "imagen" (su foto
+// principal), esa foto gana siempre, aunque haya fotos por combinación —
+// así, antes de que el cliente toque ninguna opción, se ve 1 sola foto
+// principal. Úsalo solo para el render inicial de la tarjeta; una vez que
+// el cliente elige una variante (ver el listener de "change"), se llama
+// sin "priorizarPortada" y ahí sí se revisa en este orden:
 // 1) "imagenesPorCombinacion" — cuando la foto depende de VARIAS opciones a
 //    la vez (ej: tamaño + color, o tamaño + número). El producto dice qué
 //    opciones forman la combinación en "combinacionImagen".
 // 2) "imagenesPorOpcion" — cuando la foto depende de UNA sola opción.
 // 3) "imagen" — la foto general del producto.
 // 4) si nada de eso hay, muestra el logo como marcador de posición.
-function imagenProducto(prod, seleccion) {
+function imagenProducto(prod, seleccion, { priorizarPortada = false } = {}) {
+  if (priorizarPortada && prod.imagen) return prod.imagen;
+
   if (prod.combinacionImagen && prod.imagenesPorCombinacion) {
     const clave = prod.combinacionImagen.map(opcionNombre => seleccion[opcionNombre]).join("|");
     const ruta = prod.imagenesPorCombinacion[clave];
@@ -1392,8 +1420,8 @@ function imagenProducto(prod, seleccion) {
 //   "10x15|Café": ["imagenes/cuadro10x15cafebaa.png", "imagenes/cuadro10x15cafebbb.png"]
 // Esta función se encarga de que el resto del sitio funcione igual tenga
 // una foto sola o varias.
-function listaImagenesProducto(prod, seleccion) {
-  const resultado = imagenProducto(prod, seleccion);
+function listaImagenesProducto(prod, seleccion, opciones) {
+  const resultado = imagenProducto(prod, seleccion, opciones);
   return Array.isArray(resultado) ? resultado : [resultado];
 }
 
@@ -1416,6 +1444,38 @@ categorias.forEach(cat => {
   }</div></div>`;
   catalogoEl.appendChild(seccion);
 });
+
+// -- Categoría activa mientras se scrollea --
+// Resalta, en el menú de arriba y en los chips del hero, la categoría
+// que el cliente está mirando en ese momento (la que está justo debajo
+// del header). Así puede ubicarse y saltar a otra categoría sin tener
+// que scrollear todo el catálogo.
+const seccionesCategoria = document.querySelectorAll("section.categoria");
+const headerEl = document.querySelector("header");
+
+function actualizarCategoriaActiva() {
+  const limite = headerEl.offsetHeight + 12;
+  let activa = null;
+  seccionesCategoria.forEach(seccion => {
+    if (seccion.getBoundingClientRect().top <= limite) {
+      activa = seccion.id;
+    }
+  });
+  document.querySelectorAll("#catNav a, #catNavChips a").forEach(enlace => {
+    enlace.classList.toggle("activa", activa !== null && enlace.getAttribute("href") === `#${activa}`);
+  });
+}
+
+let categoriaActivaEnEspera = false;
+window.addEventListener("scroll", () => {
+  if (categoriaActivaEnEspera) return;
+  categoriaActivaEnEspera = true;
+  requestAnimationFrame(() => {
+    actualizarCategoriaActiva();
+    categoriaActivaEnEspera = false;
+  });
+});
+actualizarCategoriaActiva();
 
 function renderCard(prod) {
   const seleccionInicial = valoresPorDefecto(prod);
@@ -1469,7 +1529,7 @@ function renderCard(prod) {
     ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
     : "";
 
-  const imagenesIniciales = listaImagenesProducto(prod, seleccionInicial, true);
+  const imagenesIniciales = listaImagenesProducto(prod, seleccionInicial, { priorizarPortada: true });
   const dotsHtml = imagenesIniciales.length > 1
     ? `<div class="card-media-dots">${imagenesIniciales.map((_, i) =>
         `<button type="button" class="media-dot${i === 0 ? " active" : ""}" data-indice="${i}" aria-label="Ver foto ${i + 1}"></button>`
@@ -1541,7 +1601,7 @@ if (destacadosGrid) {
 
   destacadosGrid.innerHTML = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod))[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
+    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
     return `
       <a class="destacado-card" href="#${slug}">
         <div class="destacado-media">${media}</div>
@@ -1598,6 +1658,8 @@ document.addEventListener("change", e => {
     card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(precioProducto(prod, seleccion));
   }
 
+  // Acá SIN "priorizarPortada": el cliente ya eligió una opción, así que
+  // ahora sí corresponde mostrar la foto específica de esa variante.
   const mediaEl = card.querySelector(`[data-media-de="${id}"]`);
   if (mediaEl) {
     const imagenes = listaImagenesProducto(prod, seleccion);
