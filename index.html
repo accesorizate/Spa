@@ -123,6 +123,19 @@
         por el carrito. Si además el producto no debe mostrar precio ni
         opciones (como graduación), agregá "sinPrecio:true" y dejá
         "opciones:[]" — ver el producto "cuadro-graduacion" como ejemplo.
+     14. CARGA MÁS FLUIDA (lazy loading): todas las fotos de producto
+        tienen "loading='lazy'", así que el navegador solo las descarga
+        cuando están por entrar en pantalla, en vez de cargar las 58 de
+        una. No hace falta tocar nada para que esto funcione.
+     15. FOTO DE PORTADA (antes de elegir diseño): en productos con
+        muchas variantes numeradas pero sin foto por número (stickers,
+        encendedores temáticos), el campo "imagen" hace de portada: se
+        muestra siempre, sea cual sea el número elegido en "Diseño", así
+        el cliente mira esa foto (con todos los diseños juntos, por
+        ejemplo) y recién después elige el número que le gustó. Le puse
+        a cada uno un nombre de archivo siguiendo tu mismo patrón
+        ("imagenes/publiencendedorpokemon.png", etc.) — avisame si alguno
+        no coincide con el nombre real que vas a usar.
      =========================================================== */
 
   :root {
@@ -549,7 +562,7 @@
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <img src="imagenes/logo.png" alt="Logo" class="logo">
+        <img src="imagenes/logo.png" alt="Logo" class="logo" loading="lazy" decoding="async">
         <p>Cuadros, papelería y regalos personalizados, hechos con cuidado de principio a fin.</p>
       </div>
       <div>
@@ -813,7 +826,7 @@ const productos = [
 
   { id:"cuadro-dianino", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día del Niño",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Niño.",
-    imagen:"", grupoPrecio:"Tamaño",
+    imagen:"imagenes/publicuadrodianino.png", grupoPrecio:"Tamaño",
     precios:{ "21x29":9990, "33x48":16990 },
     opciones:[
       { nombre:"Tamaño", valores:["21x29","33x48"] },
@@ -826,7 +839,7 @@ const productos = [
 
   { id:"cuadro-funebre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado fúnebre",
     descripcion:"Cuadro grande como homenaje o recuerdo para un ser querido.",
-    imagen:"", grupoPrecio:"Tamaño",
+    imagen:"imagenes/publicuadrofunebre.png", grupoPrecio:"Tamaño",
     precios:{ "21x29":9990, "33x48":16990 },
     opciones:[
       { nombre:"Tamaño", valores:["21x29","33x48"] },
@@ -853,7 +866,7 @@ const productos = [
 
   { id:"stickers-anime", categoria:"Stickers", nombre:"Set de stickers anime",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"", grupoPrecio:"Tamaño / cantidad",
+    imagen:"imagenes/publistickeranime.png", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -863,7 +876,7 @@ const productos = [
 
   { id:"stickers-caricaturas", categoria:"Stickers", nombre:"Set de stickers caricaturas",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"", grupoPrecio:"Tamaño / cantidad",
+    imagen:"imagenes/publistickercaricaturas.png", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -873,7 +886,7 @@ const productos = [
 
   { id:"stickers-animales", categoria:"Stickers", nombre:"Set de stickers animales",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"", grupoPrecio:"Tamaño / cantidad",
+    imagen:"imagenes/publistickeranimales.png", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -947,13 +960,13 @@ const productos = [
 
   { id:"encendedores", categoria:"Encendedores", nombre:"Encendedor personalizado",
     descripcion:"Mándanos tu diseño (imagen cuadrada de 6x6 cm) y lo imprimimos tal cual.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorpersonalizado.png", precioBase:500,
     opciones:[],
     personalizable:true },
 
   { id:"encendedor-pokemon", categoria:"Encendedores", nombre:"Encendedor Pokémon",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorpokemon.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
     ],
@@ -961,7 +974,7 @@ const productos = [
 
   { id:"encendedor-demonslayer", categoria:"Encendedores", nombre:"Encendedor Demon Slayer",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedordemonslayer.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
     ],
@@ -969,7 +982,7 @@ const productos = [
 
   { id:"encendedor-mbappe", categoria:"Encendedores", nombre:"Encendedor Mbappé",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedormbappe.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -977,7 +990,7 @@ const productos = [
 
   { id:"encendedor-messi", categoria:"Encendedores", nombre:"Encendedor Messi",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedormessi.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -985,7 +998,7 @@ const productos = [
 
   { id:"encendedor-ironman", categoria:"Encendedores", nombre:"Encendedor Iron Man",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorironman.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -993,7 +1006,7 @@ const productos = [
 
   { id:"encendedor-simpsons", categoria:"Encendedores", nombre:"Encendedor Los Simpson",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorsimpsons.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1001,7 +1014,7 @@ const productos = [
 
   { id:"encendedor-cr7", categoria:"Encendedores", nombre:"Encendedor Cr7",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorcr7.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1009,7 +1022,7 @@ const productos = [
 
   { id:"encendedor-billieeilish", categoria:"Encendedores", nombre:"Encendedor Billie Eilish",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorbillieeilish.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1017,7 +1030,7 @@ const productos = [
 
   { id:"encendedor-naruto", categoria:"Encendedores", nombre:"Encendedor Naruto",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedornaruto.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
     ],
@@ -1025,7 +1038,7 @@ const productos = [
 
   { id:"encendedor-dragonball", categoria:"Encendedores", nombre:"Encendedor Dragon Ball",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedordragonball.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1033,7 +1046,7 @@ const productos = [
 
   { id:"encendedor-spiderman", categoria:"Encendedores", nombre:"Encendedor Spider-Man",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorspiderman.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1041,7 +1054,7 @@ const productos = [
 
   { id:"encendedor-onepiece", categoria:"Encendedores", nombre:"Encendedor One Piece",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedoronepiece.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1049,7 +1062,7 @@ const productos = [
 
   { id:"encendedor-inuyasha", categoria:"Encendedores", nombre:"Encendedor Inuyasha",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorinuyasha.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1057,7 +1070,7 @@ const productos = [
 
   { id:"encendedor-bleach", categoria:"Encendedores", nombre:"Encendedor Bleach",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorbleach.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1065,7 +1078,7 @@ const productos = [
 
   { id:"encendedor-deathnote", categoria:"Encendedores", nombre:"Encendedor Death Note",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedordeathnote.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1073,7 +1086,7 @@ const productos = [
 
   { id:"encendedor-hxh", categoria:"Encendedores", nombre:"Encendedor HxH",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorhxh.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1081,7 +1094,7 @@ const productos = [
 
   { id:"encendedor-bobesponja", categoria:"Encendedores", nombre:"Encendedor Bob Esponja",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorbobesponja.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1089,7 +1102,7 @@ const productos = [
 
   { id:"encendedor-rickymorty", categoria:"Encendedores", nombre:"Encendedor Rick y Morty",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorrickymorty.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1097,7 +1110,7 @@ const productos = [
 
   { id:"encendedor-horadeaventura", categoria:"Encendedores", nombre:"Encendedor Hora de Aventura",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorhoradeaventura.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1105,7 +1118,7 @@ const productos = [
 
   { id:"encendedor-southpark", categoria:"Encendedores", nombre:"Encendedor South Park",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorsouthpark.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1113,7 +1126,7 @@ const productos = [
 
   { id:"encendedor-futurama", categoria:"Encendedores", nombre:"Encendedor Futurama",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorfuturama.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1121,7 +1134,7 @@ const productos = [
 
   { id:"encendedor-scoobydoo", categoria:"Encendedores", nombre:"Encendedor Scooby Doo",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorscoobydoo.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1129,7 +1142,7 @@ const productos = [
 
   { id:"encendedor-harrypotter", categoria:"Encendedores", nombre:"Encendedor Harry Potter",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorharrypotter.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1137,7 +1150,7 @@ const productos = [
 
   { id:"encendedor-lanadelrey", categoria:"Encendedores", nombre:"Encendedor Lana del Rey",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorlanadelrey.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1145,7 +1158,7 @@ const productos = [
 
   { id:"encendedor-ataquetitanes", categoria:"Encendedores", nombre:"Encendedor Ataque de los Titanes",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorataquetitanes.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1153,7 +1166,7 @@ const productos = [
 
   { id:"encendedor-sailormoon", categoria:"Encendedores", nombre:"Encendedor Sailor Moon",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorsailormoon.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1161,7 +1174,7 @@ const productos = [
 
   { id:"encendedor-tokyoghoul", categoria:"Encendedores", nombre:"Encendedor Tokyo Ghoul",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedortokyoghoul.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1169,7 +1182,7 @@ const productos = [
 
   { id:"encendedor-starwars", categoria:"Encendedores", nombre:"Encendedor Star Wars",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorstarwars.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1177,7 +1190,7 @@ const productos = [
 
   { id:"encendedor-tomyjerry", categoria:"Encendedores", nombre:"Encendedor Tom y Jerry",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedortomyjerry.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1185,7 +1198,7 @@ const productos = [
 
   { id:"encendedor-thor", categoria:"Encendedores", nombre:"Encendedor Thor",
     descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/publiencendedorthor.png", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
     ],
@@ -1464,7 +1477,7 @@ function renderCard(prod) {
     : "";
   const media = `
     <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
-      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" alt="${prod.nombre}">
+      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">
       ${dotsHtml}
     </div>
   `;
@@ -1528,7 +1541,7 @@ if (destacadosGrid) {
 
   destacadosGrid.innerHTML = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod))[0]}" alt="${prod.nombre}">`;
+    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod))[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
     return `
       <a class="destacado-card" href="#${slug}">
         <div class="destacado-media">${media}</div>
