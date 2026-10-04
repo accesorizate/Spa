@@ -1469,7 +1469,7 @@ function renderCard(prod) {
     ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
     : "";
 
-  const imagenesIniciales = listaImagenesProducto(prod, seleccionInicial);
+  const imagenesIniciales = listaImagenesProducto(prod, seleccionInicial, true);
   const dotsHtml = imagenesIniciales.length > 1
     ? `<div class="card-media-dots">${imagenesIniciales.map((_, i) =>
         `<button type="button" class="media-dot${i === 0 ? " active" : ""}" data-indice="${i}" aria-label="Ver foto ${i + 1}"></button>`
