@@ -53,8 +53,11 @@
         logo en vez de un ícono de imagen rota.
         - VARIAS FOTOS PARA LA MISMA VARIANTE (distintos ángulos): en vez de
           una ruta de texto, poné un arreglo de rutas. Funciona igual en
-          "imagenesPorOpcion", "imagenesPorCombinacion" o "imagen":
+          "imagenesPorOpcion", "imagenesPorCombinacion" O EN "imagen" (tu
+          foto de portada — ver punto 15), ej:
             "10x15|Café": ["imagenes/cuadro10x15cafebaa.png", "imagenes/cuadro10x15cafebbb.png"]
+          o, para la portada de un producto entero:
+            imagen: ["imagenes/publiencendedorpokemon1.png", "imagenes/publiencendedorpokemon2.png"]
           En la tarjeta del producto aparecen unos puntitos abajo de la foto
           para pasar de una a otra; si es una sola foto, no aparecen.
      7. OPCIÓN QUE DEPENDE DE OTRA (ej: "Acabado" según el "Tamaño"
@@ -132,10 +135,8 @@
         encendedores temáticos), el campo "imagen" hace de portada: se
         muestra siempre, sea cual sea el número elegido en "Diseño", así
         el cliente mira esa foto (con todos los diseños juntos, por
-        ejemplo) y recién después elige el número que le gustó. Le puse
-        a cada uno un nombre de archivo siguiendo tu mismo patrón
-        ("imagenes/publiencendedorpokemon.png", etc.) — avisame si alguno
-        no coincide con el nombre real que vas a usar.
+        ejemplo) y recién después elige el número que le gustó. Esa
+        portada también puede ser VARIAS fotos — ver el punto 6.
      16. CATEGORÍA ACTIVA AL SCROLLEAR: a medida que el cliente baja por
         el catálogo, la categoría que tiene justo debajo del header se
         resalta sola (color del acento) tanto en el menú de arriba como
@@ -150,6 +151,13 @@
         una opción (tamaño, color, diseño), la tarjeta cambia a la foto de
         esa variante puntual. Si un producto no tiene "imagen" propia, se
         sigue viendo la foto por variante desde el principio, como antes.
+     18. DESTACADOS SE DESLIZAN SOLOS: la cinta de "Productos destacados"
+        se mueve sola hacia la izquierda todo el tiempo (sin botones ni
+        flechas), y al llegar al final vuelve a empezar sin corte. Si el
+        cliente pasa el mouse por encima (o la toca en celular), se
+        detiene un momento para que pueda tocar una tarjeta tranquilo.
+        Para cambiar qué productos aparecen ahí, es la misma lista
+        "idsDestacados" de siempre, un poco más abajo en el <script>.
      =========================================================== */
 
   :root {
@@ -256,10 +264,23 @@
   .cat-nav a:hover { border-color: var(--accent); color: var(--accent); }
   .cat-nav a.activa { border-color: var(--accent); color: var(--accent-ink); background: var(--accent); }
 
-  /* --- Destacados --- */
+  /* --- Destacados (cinta que se desliza sola) --- */
   .destacados { padding: 48px 0; border-bottom: 1px solid var(--line); background: var(--bg-alt); }
-  .destacados-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; }
-  .destacado-card { background: var(--bg); border: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .destacados-viewport { overflow: hidden; }
+  .destacados-grid { display: flex; gap: 18px; width: max-content; }
+  .destacados-set { display: flex; gap: 18px; flex: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .destacados-grid { animation: destacados-desliza 28s linear infinite; }
+    .destacados-grid:hover, .destacados-grid:focus-within { animation-play-state: paused; }
+  }
+  @keyframes destacados-desliza {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .destacado-card {
+    background: var(--bg); border: 1px solid var(--line); text-decoration: none; color: var(--ink);
+    flex: 0 0 200px; width: 200px;
+  }
   .destacado-media {
     aspect-ratio: 1/1; background: linear-gradient(135deg, var(--bg-alt), var(--bg));
     border-bottom: 1px solid var(--line); overflow: hidden;
@@ -509,7 +530,9 @@
       <h2>Productos destacados</h2>
       <p>Algunos de los favoritos para empezar a mirar.</p>
     </div>
-    <div class="destacados-grid" id="destacadosGrid"></div>
+    <div class="destacados-viewport">
+      <div class="destacados-grid" id="destacadosGrid"></div>
+    </div>
   </div>
 </section>
 
@@ -1627,7 +1650,7 @@ if (destacadosGrid) {
     .map(id => productos.find(p => p.id === id))
     .filter(Boolean);
 
-  destacadosGrid.innerHTML = listaDestacados.map(prod => {
+  const destacadosCardsHtml = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
     return `
@@ -1640,6 +1663,17 @@ if (destacadosGrid) {
       </a>
     `;
   }).join("");
+
+  // Se arma el mismo juego de tarjetas DOS veces, una al lado de la otra.
+  // La animación CSS desliza la cinta exactamente la mitad de su ancho
+  // (ver "destacados-desliza"), así que cuando termina el primer juego
+  // empieza a verse el segundo, idéntico — el bucle queda sin cortes.
+  // El segundo juego lleva aria-hidden porque es solo visual, para que
+  // un lector de pantalla no lo lea dos veces.
+  destacadosGrid.innerHTML = `
+    <div class="destacados-set">${destacadosCardsHtml}</div>
+    <div class="destacados-set" aria-hidden="true">${destacadosCardsHtml}</div>
+  `;
 }
 
 // Cuando el cliente cambia una opción: si otras opciones dependen de ella
