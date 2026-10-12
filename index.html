@@ -158,6 +158,29 @@
         detiene un momento para que pueda tocar una tarjeta tranquilo.
         Para cambiar qué productos aparecen ahí, es la misma lista
         "idsDestacados" de siempre, un poco más abajo en el <script>.
+     19. ATAJOS PARA NO ESCRIBIR LO MISMO MIL VECES (arriba del todo en
+        el <script>, sección 0):
+        - rango(1, 12) arma la lista ["1","2",...,"12"] sola. Úsalo en
+          "valores" de cualquier opción numérica.
+        - CUADROS PERSONALIZADOS: se agregan con crearCuadroPersonalizado
+          ({ id, nombre, descripcion, imagen, disenos }). Ya traen los
+          precios, tamaños y colores de marco; solo escribes lo propio.
+          "disenos" es cuántos números tiene (por defecto 4).
+        - ENCENDEDORES TEMÁTICOS: una línea por tema en la lista
+          ENCENDEDORES_TEMATICOS: ["slug", "Nombre", cantidad de diseños].
+          Si no pones cantidad, son 12. La portada sale sola de
+          "imagenes/publiencendedor" + slug + ".png".
+     20. FOTO POR DISEÑO SIN ESCRIBIR CADA COMBINACIÓN: en vez de una línea
+        por cada tamaño y número en "imagenesPorCombinacion", pon una sola
+        "imagenPlantilla" con {huecos} que se llenan con lo que el cliente
+        elige. Ejemplo (Cuadro Día del Padre):
+          imagenPlantilla:"imagenes/papa{Número de diseño}.png"
+        -> diseño 1 = "imagenes/papa1.png", diseño 17 = "imagenes/papa17.png".
+        Puedes usar varios huecos, ej: "imagenes/cuadro{Tamaño}-{Número de diseño}.png".
+        "imagenesPorCombinacion" sigue sirviendo para las excepciones, y
+        gana sobre la plantilla. Si el archivo de una variante no existe
+        todavía, la tarjeta muestra la portada del producto (o el logo) en
+        vez de una imagen rota.
      =========================================================== */
 
   :root {
@@ -688,6 +711,86 @@
 
 <script>
 // ===========================================================
+// 0) ATAJOS PARA NO REPETIR CÓDIGO (ver la guía, puntos 19 y 20)
+// ===========================================================
+
+// rango(1, 12) -> ["1","2","3", ... ,"12"]. Sirve para listas de números
+// de diseño sin tener que escribirlos uno por uno.
+const rango = (desde, hasta) =>
+  Array.from({ length: hasta - desde + 1 }, (_, i) => String(desde + i));
+
+// Todos los cuadros personalizados comparten precios, tamaños, colores de
+// marco y categoría. Acá se escribe UNA vez; cada cuadro solo dice lo suyo.
+//   - "disenos": cuántos números de diseño tiene (por defecto 4).
+//   - "imagen": su foto de portada (una ruta, o un arreglo de rutas).
+//   - Cualquier otra propiedad (imagenPlantilla, imagenesPorCombinacion...)
+//     se pasa tal cual al producto.
+const PRECIOS_CUADRO_PERSONALIZADO = { "21x29":9990, "33x48":16990 };
+function crearCuadroPersonalizado({ id, nombre, descripcion, imagen = "", disenos = 4, ...extra }) {
+  return {
+    id, categoria:"Cuadros personalizados", nombre, descripcion, imagen,
+    grupoPrecio:"Tamaño", precios:PRECIOS_CUADRO_PERSONALIZADO,
+    opciones:[
+      { nombre:"Tamaño", valores:["21x29","33x48"] },
+      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
+      { nombre:"Número de diseño", valores:rango(1, disenos) }
+    ],
+    personalizable:true,
+    ...extra
+  };
+}
+
+// Encendedores temáticos: mismo precio, misma descripción, y la portada
+// sale sola del nombre: "imagenes/publiencendedor" + slug + ".png".
+function crearEncendedor(slug, nombre, disenos = 12, extra = {}) {
+  return {
+    id:`encendedor-${slug}`, categoria:"Encendedores", nombre:`Encendedor ${nombre}`,
+    descripcion:"Elige el número de diseño.",
+    imagen:`imagenes/publiencendedor${slug}.png`, precioBase:500,
+    opciones:[ { nombre:"Diseño", valores:rango(1, disenos) } ],
+    personalizable:false,
+    ...extra
+  };
+}
+
+// Lista de encendedores temáticos: [slug, nombre que se ve, cantidad de
+// diseños (12 si no la pones), extras opcionales]. Para agregar uno nuevo,
+// súmalo acá en una sola línea. Para darle una foto por diseño, agrega
+// como 4to dato, por ejemplo: { imagenPlantilla:"imagenes/pokemon{Diseño}.png" }
+const ENCENDEDORES_TEMATICOS = [
+  ["pokemon", "Pokémon", 24],
+  ["demonslayer", "Demon Slayer", 24],
+  ["mbappe", "Mbappé"],
+  ["messi", "Messi"],
+  ["ironman", "Iron Man"],
+  ["simpsons", "Los Simpson"],
+  ["cr7", "Cr7"],
+  ["billieeilish", "Billie Eilish"],
+  ["naruto", "Naruto", 24],
+  ["dragonball", "Dragon Ball"],
+  ["spiderman", "Spider-Man"],
+  ["onepiece", "One Piece"],
+  ["inuyasha", "Inuyasha"],
+  ["bleach", "Bleach"],
+  ["deathnote", "Death Note"],
+  ["hxh", "HxH"],
+  ["bobesponja", "Bob Esponja"],
+  ["rickymorty", "Rick y Morty"],
+  ["horadeaventura", "Hora de Aventura"],
+  ["southpark", "South Park"],
+  ["futurama", "Futurama"],
+  ["scoobydoo", "Scooby Doo"],
+  ["harrypotter", "Harry Potter"],
+  ["lanadelrey", "Lana del Rey"],
+  ["ataquetitanes", "Ataque de los Titanes"],
+  ["sailormoon", "Sailor Moon"],
+  ["tokyoghoul", "Tokyo Ghoul"],
+  ["starwars", "Star Wars"],
+  ["tomyjerry", "Tom y Jerry"],
+  ["thor", "Thor"],
+];
+
+// ===========================================================
 // 1) TUS PRODUCTOS — editá nombres, precios (CLP), imágenes y opciones acá.
 //    - "grupoPrecio" indica qué opción define el precio (normalmente el tamaño).
 //    - "precios" es un mapa valor -> precio, para ese grupo.
@@ -727,55 +830,18 @@ const productos = [
     },
     personalizable:true },
 
-  { id:"cuadro-navideno", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado navideño",
+  // --- Cuadros personalizados (ver "crearCuadroPersonalizado" arriba) ---
+  crearCuadroPersonalizado({ id:"cuadro-navideno", nombre:"Cuadro personalizado navideño",
     descripcion:"Cuadro grande con tu diseño navideño personalizado.",
-    imagen:"imagenes/publicuadronavidad1.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/publicuadronavidad1.png",
-      "21x29|2":"imagenes/publicuadronavidad1.png",
-      "21x29|3":"imagenes/publicuadronavidad1.png",
-      "21x29|4":"imagenes/publicuadronavidad1.png",
-      "33x48|1":"imagenes/publicuadronavidad1.png",
-      "33x48|2":"imagenes/publicuadronavidad1.png"
-    },
-    personalizable:true },
+    imagen:"imagenes/publicuadronavidad1.png" }),
 
-  { id:"cuadro-enamorados", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado enamorados",
+  crearCuadroPersonalizado({ id:"cuadro-enamorados", nombre:"Cuadro personalizado enamorados",
     descripcion:"Cuadro grande con tu diseño personalizado para tu pareja.",
-    imagen:"imagenes/publicuadroenamorados1.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/publicuadroenamorados1.png",
-      "21x29|2":"imagenes/publicuadroenamorados1.png",
-      "21x29|3":"imagenes/publicuadroenamorados1.png",
-      "21x29|4":"imagenes/publicuadroenamorados1.png",
-      "33x48|1":"imagenes/publicuadroenamorados1.png",
-      "33x48|2":"imagenes/publicuadroenamorados1.png"
-    },
-    personalizable:true },
+    imagen:"imagenes/publicuadroenamorados1.png" }),
 
-  { id:"cuadro-sanvalentin", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado San Valentín",
+  crearCuadroPersonalizado({ id:"cuadro-sanvalentin", nombre:"Cuadro personalizado San Valentín",
     descripcion:"Cuadro grande con tu diseño personalizado para San Valentín.",
-    imagen:"", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
+    // Este todavía no tiene portada; la foto sale de la combinación.
     combinacionImagen:["Tamaño","Número de diseño"],
     imagenesPorCombinacion:{
       "21x29|1":"imagenes/AQUIVASANVALENTINMODIFICARAFUTURO.png",
@@ -784,142 +850,35 @@ const productos = [
       "21x29|4":"imagenes/publicuadroenamorados.png",
       "33x48|1":"imagenes/publicuadroenamorados.png",
       "33x48|2":"imagenes/publicuadroenamorados.png"
-    },
-    personalizable:true },
+    } }),
 
-  { id:"cuadro-diamadre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día de la Madre",
+  crearCuadroPersonalizado({ id:"cuadro-diamadre", nombre:"Cuadro personalizado Día de la Madre",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día de la Madre.",
-    imagen:"imagenes/publicuadromama1.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/publicuadromama1.png",
-      "21x29|2":"imagenes/publicuadromama1.png",
-      "21x29|3":"imagenes/publicuadromama1.png",
-      "21x29|4":"imagenes/publicuadromama1.png",
-      "33x48|1":"imagenes/publicuadromama1.png",
-      "33x48|2":"imagenes/publicuadromama1.png"
-    },
-    personalizable:true },
+    imagen:"imagenes/publicuadromama1.png" }),
 
-  { id:"cuadro-diapadre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día del Padre",
+  // 17 diseños. La foto de cada número sale sola de la plantilla:
+  // diseño 5 -> "imagenes/papa5.png" (igual para los dos tamaños).
+  crearCuadroPersonalizado({ id:"cuadro-diapadre", nombre:"Cuadro personalizado Día del Padre",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Padre.",
-    imagen:["imagenes/publicuadropapa1.jpg","imagenes/papa1a12.png","imagenes/papa13a17.png"], grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/papa1.png",
-"21x29|2":"imagenes/papa2.png",
-"21x29|3":"imagenes/papa3.png",
-"21x29|4":"imagenes/papa4.png",
-"21x29|5":"imagenes/papa5.png",
-"21x29|6":"imagenes/papa6.png",
-"21x29|7":"imagenes/papa7.png",
-"21x29|8":"imagenes/papa8.png",
-"21x29|9":"imagenes/papa9.png",
-"21x29|10":"imagenes/papa10.png",
-"21x29|11":"imagenes/papa11.png",
-"21x29|12":"imagenes/papa12.png",
-"21x29|13":"imagenes/papa13.png",
-"21x29|14":"imagenes/papa14.png",
-"21x29|15":"imagenes/papa15.png",
-"21x29|16":"imagenes/papa16.png",
-"21x29|17":"imagenes/papa17.png",
-"33x48|1":"imagenes/papa1.png",
-"33x48|2":"imagenes/papa2.png",
-"33x48|3":"imagenes/papa3.png",
-"33x48|4":"imagenes/papa4.png",
-"33x48|5":"imagenes/papa5.png",
-"33x48|6":"imagenes/papa6.png",
-"33x48|7":"imagenes/papa7.png",
-"33x48|8":"imagenes/papa8.png",
-"33x48|9":"imagenes/papa9.png",
-"33x48|10":"imagenes/papa10.png",
-"33x48|11":"imagenes/papa11.png",
-"33x48|12":"imagenes/papa12.png",
-"33x48|13":"imagenes/papa13.png",
-"33x48|14":"imagenes/papa14.png",
-"33x48|15":"imagenes/papa15.png",
-"33x48|16":"imagenes/papa16.png",
-"33x48|17":"imagenes/papa17.png"
-    },
-    personalizable:true },
+    imagen:["imagenes/publicuadropapa1.jpg","imagenes/papa1a12.png","imagenes/papa13a17.png"],
+    disenos:17,
+    imagenPlantilla:"imagenes/papa{17}.png" }),
 
-  { id:"cuadro-spotify", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Spotify",
+  crearCuadroPersonalizado({ id:"cuadro-spotify", nombre:"Cuadro personalizado Spotify",
     descripcion:"Cuadro grande con tu canción favorita en formato placa Spotify.",
-    imagen:"imagenes/publicuadrospotify1.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/publicuadrospotify1.png",
-      "21x29|2":"imagenes/publicuadrospotify1.png",
-      "21x29|3":"imagenes/publicuadrospotify1.png",
-      "21x29|4":"imagenes/publicuadrospotify1.png",
-      "33x48|1":"imagenes/publicuadrospotify1.png",
-      "33x48|2":"imagenes/publicuadrospotify1.png"
-    },
-    personalizable:true },
+    imagen:"imagenes/publicuadrospotify1.png" }),
 
-  { id:"cuadro-nacimiento", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado nacimiento",
+  crearCuadroPersonalizado({ id:"cuadro-nacimiento", nombre:"Cuadro personalizado nacimiento",
     descripcion:"Cuadro grande para anunciar o recordar el nacimiento de tu bebé.",
-    imagen:"imagenes/publicuadronacimiento1.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/publicuadronacimiento1.png",
-      "21x29|2":"imagenes/publicuadronacimiento1.png",
-      "21x29|3":"imagenes/publicuadronacimiento1.png",
-      "21x29|4":"imagenes/publicuadronacimiento1.png",
-      "33x48|1":"imagenes/publicuadronacimiento1.png",
-      "33x48|2":"imagenes/publicuadronacimiento1.png"
-    },
-    personalizable:true },
+    imagen:"imagenes/publicuadronacimiento1.png" }),
 
-  { id:"cuadro-dianino", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado Día del Niño",
+  crearCuadroPersonalizado({ id:"cuadro-dianino", nombre:"Cuadro personalizado Día del Niño",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Niño.",
-    imagen:"imagenes/publicuadrodianino.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{},
-    personalizable:true },
+    imagen:"imagenes/publicuadrodianino.png" }),
 
-  { id:"cuadro-funebre", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado fúnebre",
+  crearCuadroPersonalizado({ id:"cuadro-funebre", nombre:"Cuadro personalizado fúnebre",
     descripcion:"Cuadro grande como homenaje o recuerdo para un ser querido.",
-    imagen:"imagenes/publicuadrofunebre.png", grupoPrecio:"Tamaño",
-    precios:{ "21x29":9990, "33x48":16990 },
-    opciones:[
-      { nombre:"Tamaño", valores:["21x29","33x48"] },
-      { nombre:"Color del marco", valores:["Café","Blanco","Negro"] },
-      { nombre:"Número de diseño", valores:["1","2","3","4"] }
-    ],
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{},
-    personalizable:true },
+    imagen:"imagenes/publicuadrofunebre.png" }),
 
   // Este producto NO se agrega al carrito: el botón lleva directo a
   // WhatsApp a cotizar (ver "accionPersonalizada" y la guía, punto 13).
@@ -1035,245 +994,8 @@ const productos = [
     opciones:[],
     personalizable:true },
 
-  { id:"encendedor-pokemon", categoria:"Encendedores", nombre:"Encendedor Pokémon",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorpokemon.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-demonslayer", categoria:"Encendedores", nombre:"Encendedor Demon Slayer",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedordemonslayer.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-mbappe", categoria:"Encendedores", nombre:"Encendedor Mbappé",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedormbappe.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-messi", categoria:"Encendedores", nombre:"Encendedor Messi",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedormessi.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-ironman", categoria:"Encendedores", nombre:"Encendedor Iron Man",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorironman.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-simpsons", categoria:"Encendedores", nombre:"Encendedor Los Simpson",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorsimpsons.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-cr7", categoria:"Encendedores", nombre:"Encendedor Cr7",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorcr7.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-billieeilish", categoria:"Encendedores", nombre:"Encendedor Billie Eilish",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorbillieeilish.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-naruto", categoria:"Encendedores", nombre:"Encendedor Naruto",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedornaruto.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-dragonball", categoria:"Encendedores", nombre:"Encendedor Dragon Ball",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedordragonball.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-spiderman", categoria:"Encendedores", nombre:"Encendedor Spider-Man",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorspiderman.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-onepiece", categoria:"Encendedores", nombre:"Encendedor One Piece",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedoronepiece.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-inuyasha", categoria:"Encendedores", nombre:"Encendedor Inuyasha",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorinuyasha.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-bleach", categoria:"Encendedores", nombre:"Encendedor Bleach",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorbleach.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-deathnote", categoria:"Encendedores", nombre:"Encendedor Death Note",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedordeathnote.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-hxh", categoria:"Encendedores", nombre:"Encendedor HxH",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorhxh.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-bobesponja", categoria:"Encendedores", nombre:"Encendedor Bob Esponja",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorbobesponja.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-rickymorty", categoria:"Encendedores", nombre:"Encendedor Rick y Morty",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorrickymorty.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-horadeaventura", categoria:"Encendedores", nombre:"Encendedor Hora de Aventura",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorhoradeaventura.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-southpark", categoria:"Encendedores", nombre:"Encendedor South Park",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorsouthpark.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-futurama", categoria:"Encendedores", nombre:"Encendedor Futurama",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorfuturama.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-scoobydoo", categoria:"Encendedores", nombre:"Encendedor Scooby Doo",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorscoobydoo.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-harrypotter", categoria:"Encendedores", nombre:"Encendedor Harry Potter",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorharrypotter.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-lanadelrey", categoria:"Encendedores", nombre:"Encendedor Lana del Rey",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorlanadelrey.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-ataquetitanes", categoria:"Encendedores", nombre:"Encendedor Ataque de los Titanes",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorataquetitanes.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-sailormoon", categoria:"Encendedores", nombre:"Encendedor Sailor Moon",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorsailormoon.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-tokyoghoul", categoria:"Encendedores", nombre:"Encendedor Tokyo Ghoul",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedortokyoghoul.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-starwars", categoria:"Encendedores", nombre:"Encendedor Star Wars",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorstarwars.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-tomyjerry", categoria:"Encendedores", nombre:"Encendedor Tom y Jerry",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedortomyjerry.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
-
-  { id:"encendedor-thor", categoria:"Encendedores", nombre:"Encendedor Thor",
-    descripcion:"Elige el número de diseño.",
-    imagen:"imagenes/publiencendedorthor.png", precioBase:500,
-    opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5","6","7","8","9","10","11","12"] }
-    ],
-    personalizable:false },
+  // --- Encendedores temáticos (ver ENCENDEDORES_TEMATICOS arriba) ---
+  ...ENCENDEDORES_TEMATICOS.map(([slug, nombre, disenos, extra]) => crearEncendedor(slug, nombre, disenos, extra)),
 
   { id:"calendario", categoria:"Calendarios", nombre:"Calendario 2027 personalizado",
     descripcion:"Elige el tipo de calendario.",
@@ -1433,6 +1155,27 @@ function precioDesde(prod) {
   return prod.precioBase ?? 0;
 }
 
+// Llena una plantilla de ruta con las opciones elegidas. Ejemplo:
+//   plantilla "imagenes/papa{Número de diseño}.png" + diseño "5"
+//   -> "imagenes/papa5.png". Si falta alguna opción, devuelve null.
+function rutaDesdePlantilla(plantilla, seleccion) {
+  let completa = true;
+  const ruta = plantilla.replace(/\{([^}]+)\}/g, (_, nombre) => {
+    const valor = seleccion[nombre];
+    if (valor === undefined || Array.isArray(valor)) { completa = false; return ""; }
+    return valor;
+  });
+  return completa ? ruta : null;
+}
+
+// Foto que se muestra si el archivo de la variante no existe (todavía no
+// la subiste, o el nombre no coincide): la portada del producto, y si
+// tampoco hay, el logo. Así el cliente nunca ve un ícono de imagen rota.
+function imagenRespaldo(prod) {
+  const portada = Array.isArray(prod.imagen) ? prod.imagen[0] : prod.imagen;
+  return portada || "imagenes/logo.png";
+}
+
 // Elige qué foto mostrar según la variante seleccionada.
 // Si "priorizarPortada" es true y el producto tiene "imagen" (su foto
 // principal), esa foto gana siempre, aunque haya fotos por combinación —
@@ -1443,15 +1186,22 @@ function precioDesde(prod) {
 // 1) "imagenesPorCombinacion" — cuando la foto depende de VARIAS opciones a
 //    la vez (ej: tamaño + color, o tamaño + número). El producto dice qué
 //    opciones forman la combinación en "combinacionImagen".
-// 2) "imagenesPorOpcion" — cuando la foto depende de UNA sola opción.
-// 3) "imagen" — la foto general del producto.
-// 4) si nada de eso hay, muestra el logo como marcador de posición.
+// 2) "imagenPlantilla" — una ruta con {huecos} que se llenan con lo que
+//    el cliente eligió, ej: "imagenes/papa{Número de diseño}.png". Sirve
+//    para no escribir una línea por cada combinación.
+// 3) "imagenesPorOpcion" — cuando la foto depende de UNA sola opción.
+// 4) "imagen" — la foto general del producto.
+// 5) si nada de eso hay, muestra el logo como marcador de posición.
 function imagenProducto(prod, seleccion, { priorizarPortada = false } = {}) {
   if (priorizarPortada && prod.imagen) return prod.imagen;
 
   if (prod.combinacionImagen && prod.imagenesPorCombinacion) {
     const clave = prod.combinacionImagen.map(opcionNombre => seleccion[opcionNombre]).join("|");
     const ruta = prod.imagenesPorCombinacion[clave];
+    if (ruta) return ruta;
+  }
+  if (prod.imagenPlantilla) {
+    const ruta = rutaDesdePlantilla(prod.imagenPlantilla, seleccion);
     if (ruta) return ruta;
   }
   if (prod.imagenesPorOpcion) {
@@ -1475,6 +1225,17 @@ function listaImagenesProducto(prod, seleccion, opciones) {
   const resultado = imagenProducto(prod, seleccion, opciones);
   return Array.isArray(resultado) ? resultado : [resultado];
 }
+
+// Si una foto no carga (archivo inexistente), se reemplaza por su respaldo.
+// "error" no sube por el DOM, por eso se escucha en la fase de captura.
+document.addEventListener("error", e => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.respaldo) return;
+  const aUrl = ruta => new URL(ruta, document.baseURI).href;
+  const logo = "imagenes/logo.png";
+  if (img.src === aUrl(logo)) return;                       // el logo también falló: no hay más que hacer
+  img.src = img.src === aUrl(img.dataset.respaldo) ? logo : img.dataset.respaldo;
+}, true);
 
 // -- Render del catálogo, agrupado por categoría --
 const categorias = [...new Set(productos.map(p => p.categoria))];
@@ -1588,7 +1349,7 @@ function renderCard(prod) {
     : "";
   const media = `
     <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
-      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">
+      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" loading="lazy" decoding="async">
       ${dotsHtml}
     </div>
   `;
@@ -1652,7 +1413,7 @@ if (destacadosGrid) {
 
   const destacadosCardsHtml = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
+    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
     return `
       <a class="destacado-card" href="#${slug}">
         <div class="destacado-media">${media}</div>
