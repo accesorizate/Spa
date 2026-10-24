@@ -839,24 +839,21 @@ const productos = [
 
   crearCuadroPersonalizado({ id:"cuadro-enamorados", nombre:"Cuadro personalizado enamorados",
     descripcion:"Cuadro grande con tu diseño personalizado para tu pareja.",
-    imagen:"imagenes/publicuadroenamorados1.png" }),
+    imagen:"imagenes/publicuadroenamorados1.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/enamorado{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-sanvalentin", nombre:"Cuadro personalizado San Valentín",
     descripcion:"Cuadro grande con tu diseño personalizado para San Valentín.",
-    // Este todavía no tiene portada; la foto sale de la combinación.
-    combinacionImagen:["Tamaño","Número de diseño"],
-    imagenesPorCombinacion:{
-      "21x29|1":"imagenes/AQUIVASANVALENTINMODIFICARAFUTURO.png",
-      "21x29|2":"imagenes/publicuadroenamorados.png",
-      "21x29|3":"imagenes/publicuadroenamorados.png",
-      "21x29|4":"imagenes/publicuadroenamorados.png",
-      "33x48|1":"imagenes/publicuadroenamorados.png",
-      "33x48|2":"imagenes/publicuadroenamorados.png"
-    } }),
+    imagen:"imagenes/publicuadrovalentin1.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/valentin{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-diamadre", nombre:"Cuadro personalizado Día de la Madre",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día de la Madre.",
-    imagen:"imagenes/publicuadromama1.png" }),
+    imagen:"imagenes/publicuadromama1.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/madre{Número de diseño}.png" }),
 
   // 17 diseños. La foto de cada número sale sola de la plantilla:
   // diseño 5 -> "imagenes/papa5.png" (igual para los dos tamaños).
@@ -868,19 +865,27 @@ const productos = [
 
   crearCuadroPersonalizado({ id:"cuadro-spotify", nombre:"Cuadro personalizado Spotify",
     descripcion:"Cuadro grande con tu canción favorita en formato placa Spotify.",
-    imagen:"imagenes/publicuadrospotify1.png" }),
+    imagen:"imagenes/publicuadrospotify1.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/spotify{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-nacimiento", nombre:"Cuadro personalizado nacimiento",
     descripcion:"Cuadro grande para anunciar o recordar el nacimiento de tu bebé.",
-    imagen:"imagenes/publicuadronacimiento1.png" }),
+    imagen:"imagenes/publicuadronacimiento1.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/nacimiento{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-dianino", nombre:"Cuadro personalizado Día del Niño",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Niño.",
-    imagen:"imagenes/publicuadrodianino.png" }),
+    imagen:"imagenes/publicuadrodianino.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/nino{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-funebre", nombre:"Cuadro personalizado fúnebre",
     descripcion:"Cuadro grande como homenaje o recuerdo para un ser querido.",
-    imagen:"imagenes/publicuadrofunebre.png" }),
+    imagen:"imagenes/publicuadrofunebre.png",
+    disenos:12,
+    imagenPlantilla:"imagenes/funebre{Número de diseño}.png" }),
 
   // Este producto NO se agrega al carrito: el botón lleva directo a
   // WhatsApp a cotizar (ver "accionPersonalizada" y la guía, punto 13).
