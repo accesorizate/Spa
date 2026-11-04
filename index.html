@@ -62,6 +62,14 @@
          desplaza) están el envío, los datos y la transferencia. El total
          y el botón de enviar comprobante quedan siempre fijos abajo.
          La foto de cada producto se guarda al agregarlo al carrito.
+     22. EDITAR UN PRODUCTO DEL CARRITO: cada producto que tiene opciones
+         muestra un botón "Editar". Abre las mismas opciones del catálogo
+         (tamaño, diseño, marco...) dentro del carrito; al guardar se
+         recalculan el precio y la foto. La cantidad se cambia con − / +.
+         Los productos sin opciones (ej. llavero) no muestran "Editar".
+         Mientras hay un producto en edición, el botón de enviar
+         comprobante pide guardar o cancelar primero, para no mandar un
+         pedido con cambios a medias.
      =========================================================== */
 
   :root {
@@ -341,12 +349,40 @@
     width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--line); background: var(--bg-alt);
   }
   .cart-line-info { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-  .cart-line-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-  .cart-line h4 { font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.25; }
+  .cart-line-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 6px 10px; }
+  .cart-line h4 { flex: 1 1 110px; min-width: 0; font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.25; }
+  .cart-line-acciones { display: flex; align-items: center; gap: 12px; flex: none; margin-left: auto; }
   .remove-line {
     flex: none; background: none; border: none; text-decoration: underline; font-size: 0.78rem;
     color: var(--accent); cursor: pointer; padding: 0; font-family: inherit;
   }
+  .edit-line {
+    display: inline-flex; align-items: center; gap: 5px; flex: none;
+    background: var(--bg); color: var(--ink); border: 1px solid var(--ink); border-radius: 2px;
+    padding: 4px 9px; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer;
+  }
+  .edit-line svg { width: 12px; height: 12px; }
+  .edit-line:hover { background: var(--ink); color: var(--bg); }
+
+  /* Línea en modo edición: mismas opciones que el catálogo, dentro del carrito */
+  .cart-line.editando { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .cart-line-info > h4 { flex: none; }
+  .cart-line-estado { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
+  .cart-line-cant { font-size: 0.8rem; color: var(--ink-soft); }
+  .cart-line-editor {
+    grid-column: 1 / -1; display: flex; flex-direction: column; gap: 10px;
+    border-top: 1px dashed var(--line); padding-top: 12px;
+  }
+  .cart-line-editor .opcion select { width: 100%; }
+  .editor-precio { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.85rem; color: var(--ink-soft); }
+  .editor-precio b { font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); }
+  .editor-acciones { display: flex; gap: 8px; }
+  .editor-acciones button {
+    font-family: inherit; font-size: 0.85rem; font-weight: 600; padding: 10px 12px;
+    border-radius: 2px; cursor: pointer;
+  }
+  .btn-guardar { flex: 2; background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); }
+  .btn-cancelar { flex: 1; background: var(--bg); color: var(--ink); border: 1px solid var(--ink); }
   .cart-line-detalle { list-style: none; margin: 0; padding: 0; font-size: 0.78rem; color: var(--ink-soft); }
   .cart-line-detalle li { line-height: 1.4; }
   .cart-line-detalle b { font-weight: 500; color: var(--ink); }
@@ -1176,46 +1212,56 @@ window.addEventListener("scroll", () => {
 });
 actualizarCategoriaActiva();
 
-function renderCard(prod) {
-  const seleccionInicial = valoresPorDefecto(prod);
+// ---- Opciones de un producto ----
+// Las usan la tarjeta del catálogo y el editor del carrito, así ambos se
+// comportan igual (opciones que dependen de otra, un diseño por unidad, etc.).
+function htmlOpciones(valores, elegido) {
+  return valores.map(v => `<option value="${v}"${v === elegido ? " selected" : ""}>${v}</option>`).join("");
+}
 
-  const opcionesHtml = prod.opciones.map(op => {
+function selectOpcionHtml(attrId, nombre, valores, elegido, dependeDe) {
+  return `
+    <select ${attrId} data-opcion="${nombre}"${dependeDe ? ` data-depende-de="${dependeDe}"` : ""}>
+      ${htmlOpciones(valores, elegido)}
+    </select>
+  `;
+}
+
+function etiquetaMultiple(op, n) {
+  return `${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})`;
+}
+
+// attrId marca de quién es cada select: en la tarjeta es data-prod="id",
+// en el editor del carrito es data-edit="lineaId".
+function opcionesHtmlDe(prod, seleccion, attrId) {
+  return prod.opciones.map(op => {
     if (op.multiplePorCantidad) {
-      const cantidadInicial = seleccionInicial[op.multiplePorCantidad];
-      const n = cantidadNumerica(cantidadInicial);
-      const selectsHtml = Array.from({ length: n }, () => `
-        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
-          ${op.valores.map(v => `<option value="${v}">${v}</option>`).join("")}
-        </select>
-      `).join("");
+      const n = cantidadNumerica(seleccion[op.multiplePorCantidad]);
+      const elegidos = [].concat(seleccion[op.nombre] ?? []);
+      const selectsHtml = Array.from({ length: n }, (_, i) =>
+        selectOpcionHtml(attrId, op.nombre, op.valores, elegidos[i] ?? op.valores[0])
+      ).join("");
       return `
         <div class="opcion opcion-multiple" data-opcion-multiple="${op.nombre}">
-          <label>${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})</label>
+          <label>${etiquetaMultiple(op, n)}</label>
           <div class="opcion-multiple-selects">${selectsHtml}</div>
         </div>
       `;
     }
-    if (op.dependeDe) {
-      const valorPadreInicial = seleccionInicial[op.dependeDe];
-      const valoresIniciales = op.valoresPorPadre?.[valorPadreInicial] || [];
-      return `
-        <div class="opcion">
-          <label>${op.nombre}</label>
-          <select data-prod="${prod.id}" data-opcion="${op.nombre}" data-depende-de="${op.dependeDe}">
-            ${valoresIniciales.map(v => `<option value="${v}">${v}</option>`).join("")}
-          </select>
-        </div>
-      `;
-    }
+    const valores = op.dependeDe ? (op.valoresPorPadre?.[seleccion[op.dependeDe]] || []) : op.valores;
     return `
       <div class="opcion">
         <label>${op.nombre}</label>
-        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
-          ${op.valores.map(v => `<option value="${v}">${v}</option>`).join("")}
-        </select>
+        ${selectOpcionHtml(attrId, op.nombre, valores, seleccion[op.nombre], op.dependeDe)}
       </div>
     `;
   }).join("");
+}
+
+function renderCard(prod) {
+  const seleccionInicial = valoresPorDefecto(prod);
+
+  const opcionesHtml = opcionesHtmlDe(prod, seleccionInicial, `data-prod="${prod.id}"`);
 
   const notaHtml = prod.personalizable
     ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
@@ -1303,40 +1349,40 @@ if (destacadosGrid) {
   `;
 }
 
+// Cuando cambia una opción, actualiza las que dependen de ella: la lista de
+// valores de una opción "dependeDe" y la cantidad de selects de un "uno por
+// unidad". Es recursivo (Tipo -> Cantidad -> Diseño). "contenedor" es la
+// tarjeta del catálogo o el editor del carrito.
+function actualizarOpcionesDependientes(prod, contenedor, opcionCambiada, valorCambiado, attrId) {
+  prod.opciones.filter(op => op.dependeDe === opcionCambiada).forEach(op => {
+    const sel = contenedor.querySelector(`select[data-opcion="${op.nombre}"]`);
+    if (!sel) return;
+    const valorPrevio = sel.value;
+    sel.innerHTML = htmlOpciones(op.valoresPorPadre?.[valorCambiado] || [], valorPrevio);
+    actualizarOpcionesDependientes(prod, contenedor, op.nombre, sel.value, attrId);
+  });
+
+  prod.opciones.filter(op => op.multiplePorCantidad === opcionCambiada).forEach(op => {
+    const cont = contenedor.querySelector(`[data-opcion-multiple="${op.nombre}"]`);
+    if (!cont) return;
+    const previos = [...cont.querySelectorAll("select")].map(s => s.value);
+    const n = cantidadNumerica(valorCambiado);
+    cont.querySelector(".opcion-multiple-selects").innerHTML = Array.from({ length: n }, (_, i) =>
+      selectOpcionHtml(attrId, op.nombre, op.valores, previos[i] || op.valores[0])
+    ).join("");
+    const label = cont.querySelector("label");
+    if (label) label.textContent = etiquetaMultiple(op, n);
+  });
+}
+
 document.addEventListener("change", e => {
+  if (e.target.matches("select[data-edit]")) { alCambiarOpcionEnEditor(e.target); return; }
   if (!e.target.matches("select[data-prod]")) return;
   const id = e.target.dataset.prod;
   const prod = productos.find(p => p.id === id);
   const card = e.target.closest(".card");
-  const opcionCambiada = e.target.dataset.opcion;
 
-  const dependientes = prod.opciones.filter(op => op.dependeDe === opcionCambiada);
-  dependientes.forEach(op => {
-    const selDependiente = card.querySelector(`select[data-opcion="${op.nombre}"]`);
-    if (!selDependiente) return;
-    const valorPrevio = selDependiente.value;
-    const nuevaLista = op.valoresPorPadre?.[e.target.value] || [];
-    selDependiente.innerHTML = nuevaLista.map(v => `<option value="${v}">${v}</option>`).join("");
-    if (nuevaLista.includes(valorPrevio)) selDependiente.value = valorPrevio;
-  });
-
-  const opcionesMultiples = prod.opciones.filter(op => op.multiplePorCantidad === opcionCambiada);
-  opcionesMultiples.forEach(op => {
-    const contenedor = card.querySelector(`[data-opcion-multiple="${op.nombre}"]`);
-    if (!contenedor) return;
-    const previos = [...contenedor.querySelectorAll("select")].map(s => s.value);
-    const n = cantidadNumerica(e.target.value);
-    contenedor.querySelector(".opcion-multiple-selects").innerHTML = Array.from({ length: n }, (_, i) => {
-      const valorPrevio = previos[i] || op.valores[0];
-      return `
-        <select data-prod="${prod.id}" data-opcion="${op.nombre}">
-          ${op.valores.map(v => `<option value="${v}" ${v === valorPrevio ? "selected" : ""}>${v}</option>`).join("")}
-        </select>
-      `;
-    }).join("");
-    const label = contenedor.querySelector("label");
-    if (label) label.textContent = `${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})`;
-  });
+  actualizarOpcionesDependientes(prod, card, e.target.dataset.opcion, e.target.value, `data-prod="${id}"`);
 
   const seleccion = leerSeleccionDeCard(card);
   if (!prod.sinPrecio) {
@@ -1387,6 +1433,8 @@ function cotizarPorWhatsapp(id) {
 
 // -- Carrito --
 let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+// Mientras el cliente edita un producto del carrito: { lineaId, seleccion } con lo que va eligiendo.
+let edicion = null;
 
 function agregarAlCarrito(id) {
   const prod = productos.find(p => p.id === id);
@@ -1412,12 +1460,84 @@ function resaltarLinea(lineaId) {
   const el = document.querySelector(`.cart-line[data-linea="${lineaId}"]`);
   if (!el) return;
   el.classList.add("nueva");
+  traerALaVista(el);
+}
+
+// Desplaza la lista del carrito lo justo para que "el" quede a la vista.
+// Si es más alto que la zona visible, deja visible su parte de arriba.
+function traerALaVista(el) {
   const cont = document.getElementById("cartScroll");
-  const arriba = el.offsetTop - cont.offsetTop;
-  const abajo = arriba + el.offsetHeight;
-  if (abajo > cont.scrollTop + cont.clientHeight) {
-    cont.scrollTop = abajo - cont.clientHeight + 12;
+  const r = el.getBoundingClientRect();
+  const c = cont.getBoundingClientRect();
+  if (r.height > c.height || r.top < c.top) cont.scrollTop += r.top - c.top - 8;
+  else if (r.bottom > c.bottom) cont.scrollTop += r.bottom - c.bottom + 12;
+}
+
+// ---- Editar un producto que ya está en el carrito ----
+function mismaSeleccion(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+// Foto de la línea: la que ya tenía mientras no cambien las opciones; si las
+// cambian, la de la nueva variante.
+function fotoDeLinea(prod, linea, seleccion) {
+  return mismaSeleccion(seleccion, linea.seleccion)
+    ? (linea.imagen || imagenRespaldo(prod))
+    : listaImagenesProducto(prod, seleccion)[0];
+}
+
+function editarLinea(lineaId) {
+  const l = carrito.find(x => x.lineaId === lineaId);
+  if (!l) return;
+  edicion = { lineaId, seleccion: JSON.parse(JSON.stringify(l.seleccion)) };
+  renderizarCarrito();
+  const el = document.querySelector(`.cart-line[data-linea="${lineaId}"]`);
+  if (el) traerALaVista(el);
+}
+
+function cancelarEdicion() {
+  if (!edicion) return;
+  const lineaId = edicion.lineaId;
+  edicion = null;
+  renderizarCarrito();
+  const el = document.querySelector(`.cart-line[data-linea="${lineaId}"]`);
+  if (el) traerALaVista(el);
+}
+
+function guardarEdicion() {
+  if (!edicion) return;
+  const lineaId = edicion.lineaId;
+  const l = carrito.find(x => x.lineaId === lineaId);
+  const prod = l && productos.find(p => p.id === l.id);
+  if (l && prod) {
+    const editor = document.querySelector(`.cart-line-editor[data-editor="${lineaId}"]`);
+    const nueva = editor ? leerSeleccionDeCard(editor) : edicion.seleccion;
+    if (!mismaSeleccion(nueva, l.seleccion)) {
+      l.imagen = fotoDeLinea(prod, l, nueva);
+      l.seleccion = nueva;
+      l.precio = precioProducto(prod, nueva);
+    }
   }
+  edicion = null;
+  guardarYRenderizarCarrito();
+  resaltarLinea(lineaId);
+}
+
+// Al cambiar una opción en el editor: actualiza opciones dependientes, precio y foto.
+function alCambiarOpcionEnEditor(select) {
+  if (!edicion) return;
+  const l = carrito.find(x => x.lineaId === edicion.lineaId);
+  const prod = l && productos.find(p => p.id === l.id);
+  const editor = select.closest(".cart-line-editor");
+  if (!prod || !editor) return;
+
+  actualizarOpcionesDependientes(prod, editor, select.dataset.opcion, select.value, `data-edit="${edicion.lineaId}"`);
+
+  const seleccion = leerSeleccionDeCard(editor);
+  edicion.seleccion = seleccion;
+  editor.querySelector("[data-editor-precio]").textContent = formatoCLP(precioProducto(prod, seleccion));
+  const foto = editor.closest(".cart-line").querySelector(".cart-line-thumb");
+  if (foto) foto.src = fotoDeLinea(prod, l, seleccion);
 }
 
 function cambiarCantidad(lineaId, delta) {
@@ -1484,28 +1604,47 @@ document.querySelectorAll('input[name="metodoEnvio"]').forEach(radio => {
   });
 });
 
-function renderizarCarrito() {
-  const cont = document.getElementById("cartItems");
-  const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
-  document.getElementById("cartCount").textContent = totalCantidad;
-  document.getElementById("cartPedidoResumen").textContent =
-    `${totalCantidad} ${totalCantidad === 1 ? "producto" : "productos"}`;
+const ICONO_LAPIZ = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
 
-  if (!carrito.length) {
-    cont.innerHTML = `<p class="cart-empty">Tu carrito está vacío.</p>`;
-  } else {
-    cont.innerHTML = carrito.map(l => {
-      const prod = productos.find(p => p.id === l.id);
-      const respaldo = prod ? imagenRespaldo(prod) : "imagenes/logo.png";
-      const detalle = Object.entries(l.seleccion)
-        .map(([k, v]) => `<li><b>${k}:</b> ${formatoValorSeleccion(v)}</li>`).join("");
-      return `
+// HTML de un producto del carrito: normal, o con el editor abierto si es el que se está editando.
+function htmlLineaCarrito(l) {
+  const prod = productos.find(p => p.id === l.id);
+  const respaldo = prod ? imagenRespaldo(prod) : "imagenes/logo.png";
+
+  if (prod && edicion && edicion.lineaId === l.lineaId) {
+    return `
+      <div class="cart-line editando" data-linea="${l.lineaId}">
+        <img class="cart-line-thumb" src="${fotoDeLinea(prod, l, edicion.seleccion)}" data-respaldo="${respaldo}" alt="${l.nombre}" decoding="async">
+        <div class="cart-line-info">
+          <h4>${l.nombre}</h4>
+          <span class="cart-line-estado">Editando</span>
+          <span class="cart-line-cant">Cantidad: ${l.cantidad}</span>
+        </div>
+        <div class="cart-line-editor" data-editor="${l.lineaId}">
+          ${opcionesHtmlDe(prod, edicion.seleccion, `data-edit="${l.lineaId}"`)}
+          <div class="editor-precio"><span>Precio por unidad</span><b data-editor-precio>${formatoCLP(precioProducto(prod, edicion.seleccion))}</b></div>
+          <div class="editor-acciones">
+            <button type="button" class="btn-guardar" onclick="guardarEdicion()">Guardar cambios</button>
+            <button type="button" class="btn-cancelar" onclick="cancelarEdicion()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const detalle = Object.entries(l.seleccion)
+    .map(([k, v]) => `<li><b>${k}:</b> ${formatoValorSeleccion(v)}</li>`).join("");
+  const puedeEditar = !!prod && prod.opciones.length > 0;
+  return `
       <div class="cart-line" data-linea="${l.lineaId}">
         <img class="cart-line-thumb" src="${l.imagen || respaldo}" data-respaldo="${respaldo}" alt="${l.nombre}" decoding="async">
         <div class="cart-line-info">
           <div class="cart-line-top">
             <h4>${l.nombre}</h4>
-            <button class="remove-line" onclick="eliminarLinea(${l.lineaId})">Quitar</button>
+            <div class="cart-line-acciones">
+              ${puedeEditar ? `<button type="button" class="edit-line" onclick="editarLinea(${l.lineaId})" aria-label="Editar opciones de ${l.nombre}">${ICONO_LAPIZ}Editar</button>` : ""}
+              <button class="remove-line" onclick="eliminarLinea(${l.lineaId})">Quitar</button>
+            </div>
           </div>
           ${detalle ? `<ul class="cart-line-detalle">${detalle}</ul>` : ""}
           <div class="cart-line-bottom">
@@ -1522,7 +1661,30 @@ function renderizarCarrito() {
         </div>
       </div>
     `;
-    }).join("");
+}
+
+function renderizarCarrito() {
+  const cont = document.getElementById("cartItems");
+
+  // Si el cliente está editando, conserva lo que ya eligió aunque el carrito se
+  // vuelva a dibujar (por ejemplo al cambiar el envío o la cantidad de otro producto).
+  if (edicion) {
+    const editorAbierto = cont.querySelector(".cart-line-editor");
+    if (editorAbierto && editorAbierto.dataset.editor === String(edicion.lineaId)) {
+      edicion.seleccion = leerSeleccionDeCard(editorAbierto);
+    }
+    if (!carrito.some(l => l.lineaId === edicion.lineaId)) edicion = null;
+  }
+
+  const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
+  document.getElementById("cartCount").textContent = totalCantidad;
+  document.getElementById("cartPedidoResumen").textContent =
+    `${totalCantidad} ${totalCantidad === 1 ? "producto" : "productos"}`;
+
+  if (!carrito.length) {
+    cont.innerHTML = `<p class="cart-empty">Tu carrito está vacío.</p>`;
+  } else {
+    cont.innerHTML = carrito.map(htmlLineaCarrito).join("");
   }
 
   const subtotal = carrito.reduce((s, l) => s + l.precio * l.cantidad, 0);
@@ -1540,6 +1702,8 @@ function abrirCarrito() {
 function cerrarCarrito() {
   document.getElementById("cartPanel").classList.remove("open");
   document.getElementById("overlay").classList.remove("open");
+  // Un cambio sin guardar no queda "a medias" al volver a abrir el carrito.
+  if (edicion) { edicion = null; renderizarCarrito(); }
 }
 
 document.getElementById("cartToggle").addEventListener("click", abrirCarrito);
@@ -1589,6 +1753,14 @@ function mensajePedidoParaWhatsapp() {
 
 // -- Pago por transferencia bancaria, derivado a WhatsApp --
 document.getElementById("checkoutBtn").addEventListener("click", () => {
+  // No se envía el pedido con un producto a medio editar: el cliente debe guardar o cancelar.
+  if (edicion) {
+    alert("Estás editando un producto del carrito. Presiona «Guardar cambios» (o «Cancelar») antes de enviar el comprobante.");
+    const enEdicion = document.querySelector(".cart-line.editando");
+    if (enEdicion) traerALaVista(enEdicion);
+    return;
+  }
+
   const camposObligatorios = [
     ["envioNombre", "el nombre"],
     ["envioRut", "el RUT"]
