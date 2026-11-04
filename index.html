@@ -57,6 +57,11 @@
          crearEncendedor(...) y la lista ENCENDEDORES_TEMATICOS.
      20. FOTO POR DISEÑO SIN ESCRIBIR CADA COMBINACIÓN: "imagenPlantilla"
          con {huecos}, ej: "imagenes/papa{Número de diseño}.png".
+     21. CARRITO: arriba se ve "Tu pedido" con la foto, el detalle, la
+         cantidad (− / +) y "Quitar" de cada producto. Más abajo (se
+         desplaza) están el envío, los datos y la transferencia. El total
+         y el botón de enviar comprobante quedan siempre fijos abajo.
+         La foto de cada producto se guarda al agregarlo al carrito.
      =========================================================== */
 
   :root {
@@ -289,32 +294,72 @@
   }
   .newsletter-msg { font-size: 0.8rem; color: var(--bg); margin-top: 6px; display: none; }
 
-  /* --- Carrito lateral --- */
+  /* --- Carrito lateral ---
+     Estructura (de arriba hacia abajo):
+       .cart-head    -> título y botón cerrar (fijo)
+       .cart-scroll  -> zona que se desplaza:
+                          .cart-pedido   = lista de productos (lo primero que se ve)
+                          .cart-opciones = envío, datos, transferencia, comentario
+       .cart-foot    -> subtotal, envío, total y botón (fijo abajo)
+  */
   .overlay {
     position: fixed; inset: 0; background: rgba(32,27,24,0.35); z-index: 30;
     opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
   .overlay.open { opacity: 1; pointer-events: auto; }
   .cart-panel {
-    position: fixed; top: 0; right: -420px; width: 100%; max-width: 400px; height: 100%;
+    position: fixed; top: 0; right: -440px; width: 100%; max-width: 420px; height: 100%; height: 100dvh;
     background: var(--bg); z-index: 31; border-left: 1px solid var(--line);
     display: flex; flex-direction: column; transition: right 0.25s;
   }
   .cart-panel.open { right: 0; }
-  .cart-head { padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .cart-head { flex: none; padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
   .cart-head h2 { font-size: 1.3rem; margin: 0; }
   .cart-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--ink); }
-  .cart-items { flex: 1; overflow-y: auto; padding: 12px 20px; }
-  .cart-empty { color: var(--ink-soft); font-size: 0.9rem; padding: 20px 0; }
-  .cart-line { border-bottom: 1px solid var(--line); padding: 14px 0; }
-  .cart-line-top { display: flex; justify-content: space-between; gap: 10px; }
-  .cart-line h4 { font-size: 0.92rem; margin: 0 0 4px; }
-  .cart-line .detalle { font-size: 0.78rem; color: var(--ink-soft); margin: 0 0 6px; }
-  .cart-line-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
-  .qty { display: flex; align-items: center; gap: 8px; }
-  .qty button { width: 24px; height: 24px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; border-radius: 2px; }
-  .remove-line { background: none; border: none; text-decoration: underline; font-size: 0.78rem; color: var(--ink-soft); cursor: pointer; padding: 0; }
-  .cart-foot { border-top: 1px solid var(--line); padding: 18px 20px; }
+
+  .cart-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Lista de productos del pedido */
+  .cart-pedido { background: var(--bg-alt); border-bottom: 1px solid var(--line); padding: 16px 20px 8px; }
+  .cart-pedido-titulo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .cart-pedido-titulo h3 { font-size: 1.05rem; margin: 0; }
+  .cart-pedido-titulo span { font-size: 0.8rem; color: var(--ink-soft); }
+  .cart-empty { color: var(--ink-soft); font-size: 0.9rem; padding: 4px 0 14px; margin: 0; }
+  .cart-line {
+    display: grid; grid-template-columns: 72px 1fr; gap: 12px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 2px;
+    padding: 12px; margin-bottom: 10px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cart-line.nueva { animation: linea-nueva 1.4s ease-out; }
+  }
+  @keyframes linea-nueva {
+    from { background: rgba(140, 47, 57, 0.16); border-color: var(--accent); }
+    to { background: var(--bg); border-color: var(--line); }
+  }
+  .cart-line-thumb {
+    width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--line); background: var(--bg-alt);
+  }
+  .cart-line-info { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .cart-line-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .cart-line h4 { font-size: 0.95rem; font-weight: 600; margin: 0; line-height: 1.25; }
+  .remove-line {
+    flex: none; background: none; border: none; text-decoration: underline; font-size: 0.78rem;
+    color: var(--accent); cursor: pointer; padding: 0; font-family: inherit;
+  }
+  .cart-line-detalle { list-style: none; margin: 0; padding: 0; font-size: 0.78rem; color: var(--ink-soft); }
+  .cart-line-detalle li { line-height: 1.4; }
+  .cart-line-detalle b { font-weight: 500; color: var(--ink); }
+  .cart-line-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+  .qty { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 2px; }
+  .qty button { width: 30px; height: 30px; border: none; background: var(--bg); color: var(--ink); font-size: 1rem; cursor: pointer; }
+  .qty button:hover { background: var(--bg-alt); }
+  .qty span { min-width: 28px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+  .cart-line-precio { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+  .cart-line-precio small { font-size: 0.72rem; font-weight: 400; color: var(--ink-soft); }
+
+  /* Envío, datos, transferencia y comentario */
+  .cart-opciones { padding: 18px 20px 20px; }
   .envio-metodo { margin-bottom: 12px; }
   .envio-metodo > span { display: block; font-size: 0.78rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
   .envio-metodo label { display: flex; align-items: flex-start; gap: 6px; font-size: 0.85rem; cursor: pointer; margin-bottom: 4px; }
@@ -347,18 +392,24 @@
   .datos-transferencia strong { color: var(--ink); }
   .datos-transferencia p { margin: 0 0 8px; }
   .datos-transferencia p:last-child { margin-bottom: 0; }
-  .cart-resumen-linea { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 4px; }
-  .cart-total { display: flex; justify-content: space-between; font-family: 'Fraunces', serif; font-size: 1.2rem; margin: 8px 0 12px; }
   #notaPedido {
-    width: 100%; font-family: inherit; font-size: 0.85rem; padding: 8px; border: 1px solid var(--line);
-    border-radius: 2px; margin-bottom: 12px; resize: vertical; min-height: 50px;
+    display: block; width: 100%; font-family: inherit; font-size: 0.85rem; padding: 8px; border: 1px solid var(--line);
+    border-radius: 2px; margin: 0; resize: vertical; min-height: 50px;
   }
+
+  /* Totales y botón (siempre visibles abajo) */
+  .cart-foot {
+    flex: none; border-top: 1px solid var(--line); background: var(--bg);
+    padding: 14px 20px 16px; box-shadow: 0 -8px 16px rgba(32,27,24,0.06);
+  }
+  .cart-resumen-linea { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .cart-total { display: flex; justify-content: space-between; font-family: 'Fraunces', serif; font-size: 1.2rem; margin: 6px 0 10px; }
   .checkout-btn {
     width: 100%; padding: 13px; background: var(--accent); color: var(--accent-ink); border: none;
     border-radius: 2px; font-size: 0.95rem; font-weight: 600; cursor: pointer; font-family: inherit;
   }
   .checkout-btn:disabled { background: var(--line); cursor: not-allowed; color: var(--ink-soft); }
-  .checkout-note { font-size: 0.75rem; color: var(--ink-soft); margin-top: 8px; text-align: center; }
+  .checkout-note { font-size: 0.72rem; color: var(--ink-soft); margin: 8px 0 0; text-align: center; }
 
   /* --- Footer --- */
   footer { border-top: 1px solid var(--line); padding: 48px 0 30px; }
@@ -545,50 +596,68 @@
 <aside class="cart-panel" id="cartPanel">
   <div class="cart-head">
     <h2>Tu carrito</h2>
-    <button class="cart-close" id="cartClose">×</button>
+    <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">×</button>
   </div>
-  <div class="cart-items" id="cartItems"></div>
+
+  <div class="cart-scroll" id="cartScroll">
+
+    <!-- 1) Lista de productos: lo primero que ve el cliente -->
+    <div class="cart-pedido">
+      <div class="cart-pedido-titulo">
+        <h3>Tu pedido</h3>
+        <span id="cartPedidoResumen">0 productos</span>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+    </div>
+
+    <!-- 2) Envío, datos, transferencia y comentario -->
+    <div class="cart-opciones">
+      <div class="envio-metodo">
+        <span>Envío</span>
+        <label><input type="radio" name="metodoEnvio" value="estandar" data-costo="3000" checked> Estándar (1 a 3 días hábiles) — $3.000</label>
+        <label><input type="radio" name="metodoEnvio" value="regiones" data-costo="0"> Periferia / regiones — envío por pagar</label>
+        <label><input type="radio" name="metodoEnvio" value="retiro" data-costo="0"> Retiro en domicilio — Gratis</label>
+        <div class="envio-transportista" id="envioTransportista">
+          <label for="selectTransportista">Empresa de envío</label>
+          <select id="selectTransportista">
+            <option value="Starken">Starken</option>
+            <option value="Bluexpress">Bluexpress</option>
+          </select>
+        </div>
+        <div class="retiro-info" id="retiroInfo">
+          <strong>Dirección de retiro:</strong><br>
+          Psje Tirteo 2769, Maipú<br>
+          <em>Esta dirección es únicamente para retiros.</em>
+        </div>
+        <p class="envio-nota">El envío estándar es solo dentro de Santiago. Para periferia o regiones, el costo del transporte se paga directo a Starken o Bluexpress al recibir.</p>
+      </div>
+      <div class="datos-envio">
+        <span class="datos-envio-titulo">Datos de envío</span>
+        <div class="datos-envio-grid">
+          <input type="text" id="envioNombre" class="full" placeholder="Nombre completo">
+          <input type="text" id="envioRut" class="full" placeholder="RUT">
+          <input type="text" id="envioCiudad" class="campo-direccion" placeholder="Ciudad">
+          <input type="text" id="envioComuna" class="campo-direccion" placeholder="Comuna">
+          <input type="text" id="envioDireccion" class="full campo-direccion" placeholder="Dirección">
+          <input type="text" id="envioCodigoPostal" class="full campo-direccion" placeholder="Código postal (opcional)">
+        </div>
+      </div>
+      <div class="datos-transferencia" id="datosTransferencia">
+        <p>
+          <strong>ACCESORIZATE SPA</strong><br>
+          RUT: 78.367.632-K<br>
+          Banco Estado — Chequera Electrónica<br>
+          Cuenta: 91270163373
+        </p>
+        <p>Transfiere el total y luego haz clic en el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
+      </div>
+      <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): referencia de diseño, etc."></textarea>
+    </div>
+
+  </div>
+
+  <!-- 3) Totales y botón: siempre visibles abajo -->
   <div class="cart-foot">
-    <div class="envio-metodo">
-      <span>Envío</span>
-      <label><input type="radio" name="metodoEnvio" value="estandar" data-costo="3000" checked> Estándar (1 a 3 días hábiles) — $3.000</label>
-      <label><input type="radio" name="metodoEnvio" value="regiones" data-costo="0"> Periferia / regiones — envío por pagar</label>
-      <label><input type="radio" name="metodoEnvio" value="retiro" data-costo="0"> Retiro en domicilio — Gratis</label>
-      <div class="envio-transportista" id="envioTransportista">
-        <label for="selectTransportista">Empresa de envío</label>
-        <select id="selectTransportista">
-          <option value="Starken">Starken</option>
-          <option value="Bluexpress">Bluexpress</option>
-        </select>
-      </div>
-      <div class="retiro-info" id="retiroInfo">
-        <strong>Dirección de retiro:</strong><br>
-        Psje Tirteo 2769, Maipú<br>
-        <em>Esta dirección es únicamente para retiros.</em>
-      </div>
-      <p class="envio-nota">El envío estándar es solo dentro de Santiago. Para periferia o regiones, el costo del transporte se paga directo a Starken o Bluexpress al recibir.</p>
-    </div>
-    <div class="datos-envio">
-      <span class="datos-envio-titulo">Datos de envío</span>
-      <div class="datos-envio-grid">
-        <input type="text" id="envioNombre" class="full" placeholder="Nombre completo">
-        <input type="text" id="envioRut" class="full" placeholder="RUT">
-        <input type="text" id="envioCiudad" class="campo-direccion" placeholder="Ciudad">
-        <input type="text" id="envioComuna" class="campo-direccion" placeholder="Comuna">
-        <input type="text" id="envioDireccion" class="full campo-direccion" placeholder="Dirección">
-        <input type="text" id="envioCodigoPostal" class="full campo-direccion" placeholder="Código postal (opcional)">
-      </div>
-    </div>
-    <div class="datos-transferencia" id="datosTransferencia">
-      <p>
-        <strong>ACCESORIZATE SPA</strong><br>
-        RUT: 78.367.632-K<br>
-        Banco Estado — Chequera Electrónica<br>
-        Cuenta: 91270163373
-      </p>
-      <p>Transfiere el total y luego haz clic en el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
-    </div>
-    <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): referencia de diseño, etc."></textarea>
     <div class="cart-resumen-linea"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
     <div class="cart-resumen-linea"><span>Envío</span><span id="cartEnvio">$0</span></div>
     <div class="cart-total"><span>Total</span><span id="cartTotal">$0</span></div>
@@ -1324,13 +1393,31 @@ function agregarAlCarrito(id) {
   const card = document.querySelector(`.card[data-card-id="${id}"]`);
   const seleccion = leerSeleccionDeCard(card);
   const precio = precioProducto(prod, seleccion);
+  // Foto que el cliente está viendo en la tarjeta (la de la variante elegida).
+  const imgCard = card.querySelector(".card-media img");
+  const imagen = (imgCard && imgCard.getAttribute("src")) || imagenRespaldo(prod);
+  const lineaId = Date.now() + Math.random();
 
   carrito.push({
-    lineaId: Date.now() + Math.random(),
-    id, nombre: prod.nombre, seleccion, precio, cantidad: 1
+    lineaId,
+    id, nombre: prod.nombre, seleccion, precio, cantidad: 1, imagen
   });
   guardarYRenderizarCarrito();
   abrirCarrito();
+  resaltarLinea(lineaId);
+}
+
+// Marca la línea recién agregada y, si queda fuera de vista, la trae a la pantalla.
+function resaltarLinea(lineaId) {
+  const el = document.querySelector(`.cart-line[data-linea="${lineaId}"]`);
+  if (!el) return;
+  el.classList.add("nueva");
+  const cont = document.getElementById("cartScroll");
+  const arriba = el.offsetTop - cont.offsetTop;
+  const abajo = arriba + el.offsetHeight;
+  if (abajo > cont.scrollTop + cont.clientHeight) {
+    cont.scrollTop = abajo - cont.clientHeight + 12;
+  }
 }
 
 function cambiarCantidad(lineaId, delta) {
@@ -1401,27 +1488,41 @@ function renderizarCarrito() {
   const cont = document.getElementById("cartItems");
   const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
   document.getElementById("cartCount").textContent = totalCantidad;
+  document.getElementById("cartPedidoResumen").textContent =
+    `${totalCantidad} ${totalCantidad === 1 ? "producto" : "productos"}`;
 
   if (!carrito.length) {
     cont.innerHTML = `<p class="cart-empty">Tu carrito está vacío.</p>`;
   } else {
-    cont.innerHTML = carrito.map(l => `
-      <div class="cart-line">
-        <div class="cart-line-top">
-          <h4>${l.nombre}</h4>
-          <button class="remove-line" onclick="eliminarLinea(${l.lineaId})">quitar</button>
-        </div>
-        <p class="detalle">${Object.entries(l.seleccion).map(([k,v]) => `${k}: ${formatoValorSeleccion(v)}`).join(" · ") || "&nbsp;"}</p>
-        <div class="cart-line-bottom">
-          <div class="qty">
-            <button onclick="cambiarCantidad(${l.lineaId}, -1)">−</button>
-            <span>${l.cantidad}</span>
-            <button onclick="cambiarCantidad(${l.lineaId}, 1)">+</button>
+    cont.innerHTML = carrito.map(l => {
+      const prod = productos.find(p => p.id === l.id);
+      const respaldo = prod ? imagenRespaldo(prod) : "imagenes/logo.png";
+      const detalle = Object.entries(l.seleccion)
+        .map(([k, v]) => `<li><b>${k}:</b> ${formatoValorSeleccion(v)}</li>`).join("");
+      return `
+      <div class="cart-line" data-linea="${l.lineaId}">
+        <img class="cart-line-thumb" src="${l.imagen || respaldo}" data-respaldo="${respaldo}" alt="${l.nombre}" decoding="async">
+        <div class="cart-line-info">
+          <div class="cart-line-top">
+            <h4>${l.nombre}</h4>
+            <button class="remove-line" onclick="eliminarLinea(${l.lineaId})">Quitar</button>
           </div>
-          <span>${formatoCLP(l.precio * l.cantidad)}</span>
+          ${detalle ? `<ul class="cart-line-detalle">${detalle}</ul>` : ""}
+          <div class="cart-line-bottom">
+            <div class="qty">
+              <button onclick="cambiarCantidad(${l.lineaId}, -1)" aria-label="Quitar una unidad">−</button>
+              <span>${l.cantidad}</span>
+              <button onclick="cambiarCantidad(${l.lineaId}, 1)" aria-label="Agregar una unidad">+</button>
+            </div>
+            <div class="cart-line-precio">
+              <span>${formatoCLP(l.precio * l.cantidad)}</span>
+              ${l.cantidad > 1 ? `<small>${formatoCLP(l.precio)} c/u</small>` : ""}
+            </div>
+          </div>
         </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
   }
 
   const subtotal = carrito.reduce((s, l) => s + l.precio * l.cantidad, 0);
