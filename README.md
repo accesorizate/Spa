@@ -15,4 +15,4 @@
 6. Probá una compra completa con las tarjetas de prueba de Mercado Pago.
 7. Cuando todo funcione, reemplazá el Access Token de prueba por el de producción.
 
-Ver la guía completa paso a paso en el chat de Claude.
+Ver la guía completa paso a paso en el chat de Claude..
