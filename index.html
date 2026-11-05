@@ -7,10 +7,49 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- ===========================================================
+     PRODUCTOS NO DISPONIBLES · ocultar sin borrar
+     Escribe más abajo, una línea por producto que NO tengas por ahora.
+     Cuando vuelva el stock, borra esa línea (o ponle # al comienzo) y
+     el producto reaparece con su precio y sus opciones intactos.
+     =========================================================== -->
+<script>
+const PRODUCTOS_OCULTOS = `
+# ----------------------------------------------------------------
+# Todo lo que empiece con # se ignora. No uses comillas ni comas.
+#
+# FORMAS DE ESCRIBIR UNA LÍNEA (escríbelas debajo de esta explicación):
+#
+#   1) Solo el producto: queda oculto hasta que borres la línea.
+#        Cuadro personalizado navideño
+#
+#   2) Producto + fecha de regreso: reaparece solo ese día.
+#        Set de stickers anime | vuelve 15-12-2026
+#
+#   3) Una categoría completa:
+#        categoria: Libretas
+#
+# El producto se escribe como se ve en la tienda (da igual si usas
+# mayúsculas o tildes) o con su código, por ejemplo: cuadro-navideno
+#
+# Después de guardar, abre tu tienda con ?ocultos al final de la
+# dirección (accesorizate.cl/?ocultos). Arriba verás qué se está
+# ocultando y si alguna línea quedó mal escrita.
+# ----------------------------------------------------------------
+
+categoria: Encendedores
+Papel de regalo
+Pizarra infantil + plumones
+Álbum fotográfico personalizado
+
+`;
+</script>
+
 <style>
   /* ===========================================================
      GUÍA RÁPIDA
-     1. Tus productos están en el array `productos`, cerca del final
+     1. Tus productos están en el array `TODOS_LOS_PRODUCTOS`, cerca del final
         del archivo, dentro de la etiqueta <script>. Cada uno tiene
         precio(s), opciones (tamaño/color/diseño) y si es "personalizable".
      2. Los precios son EJEMPLOS. Cambialos por los tuyos.
@@ -70,6 +109,15 @@
          Mientras hay un producto en edición, el botón de enviar
          comprobante pide guardar o cancelar primero, para no mandar un
          pedido con cambios a medias.
+     23. OCULTAR PRODUCTOS SIN STOCK: al comienzo de este archivo (busca
+         PRODUCTOS_OCULTOS) hay una lista. Escribe ahí, una línea por
+         producto, lo que no tengas por ahora; al borrar la línea vuelve a
+         mostrarse. Con "| vuelve 15-12-2026" reaparece solo ese día, y con
+         "categoria: Libretas" se oculta una categoría completa. Abre la
+         tienda con ?ocultos (accesorizate.cl/?ocultos) para revisar que
+         las líneas estén bien escritas. Si un cliente tenía ese producto
+         en el carrito, se le quita con un aviso. Los productos siguen
+         guardados en el arreglo TODOS_LOS_PRODUCTOS: ocultar no borra nada.
      =========================================================== */
 
   :root {
@@ -383,6 +431,20 @@
   }
   .btn-guardar { flex: 2; background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); }
   .btn-cancelar { flex: 1; background: var(--bg); color: var(--ink); border: 1px solid var(--ink); }
+
+  /* Aviso en el carrito cuando se quita un producto que dejó de estar disponible */
+  .cart-aviso {
+    background: var(--bg); border: 1px solid var(--accent); border-left-width: 4px; border-radius: 2px;
+    padding: 10px 12px; margin-bottom: 12px; font-size: 0.82rem; color: var(--ink);
+  }
+  .cart-aviso[hidden] { display: none; }
+
+  /* Revisión de productos ocultos (solo se ve al abrir la tienda con ?ocultos) */
+  .aviso-ocultos { background: var(--bg-alt); border-bottom: 2px solid var(--accent); padding: 12px 24px; font-size: 0.85rem; color: var(--ink); }
+  .aviso-ocultos span, .aviso-ocultos p { color: var(--ink-soft); }
+  .aviso-ocultos ul { margin: 8px 0; padding-left: 20px; }
+  .aviso-ocultos li { margin-bottom: 4px; }
+  .aviso-ocultos p { margin: 6px 0 0; }
   .cart-line-detalle { list-style: none; margin: 0; padding: 0; font-size: 0.78rem; color: var(--ink-soft); }
   .cart-line-detalle li { line-height: 1.4; }
   .cart-line-detalle b { font-weight: 500; color: var(--ink); }
@@ -643,6 +705,7 @@
         <h3>Tu pedido</h3>
         <span id="cartPedidoResumen">0 productos</span>
       </div>
+      <div class="cart-aviso" id="cartAviso" role="status" hidden></div>
       <div class="cart-items" id="cartItems"></div>
     </div>
 
@@ -778,7 +841,10 @@ const ENCENDEDORES_TEMATICOS = [
 // ===========================================================
 // 1) TUS PRODUCTOS — editá nombres, precios (CLP), imágenes y opciones acá.
 // ===========================================================
-const productos = [
+// Aquí están TODOS tus productos, también los que hoy no tienes. Para ocultar
+// alguno por falta de stock NO lo borres: escríbelo en PRODUCTOS_OCULTOS, al
+// comienzo del archivo.
+const TODOS_LOS_PRODUCTOS = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
     descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elegí el tamaño y el marco.",
@@ -1069,6 +1135,64 @@ const productos = [
 ];
 
 // ===========================================================
+// PRODUCTOS OCULTOS
+// La lista se escribe al comienzo del archivo (PRODUCTOS_OCULTOS). Acá solo
+// se lee y se deja fuera de la tienda lo que hoy no está disponible.
+// Si esa lista tuviera un error de escritura, la tienda muestra todo (no se rompe).
+// ===========================================================
+function normalizarTexto(s) {
+  return String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+// "15-12-2026", "15/12/2026" o "2026-12-15" -> Date a las 00:00 de ese día; null si no se entiende.
+function leerFecha(texto) {
+  const m = /^(\d{1,4})[-/.](\d{1,2})[-/.](\d{1,4})$/.exec(String(texto).trim());
+  if (!m) return null;
+  const [anio, mes, dia] = m[1].length === 4 ? [+m[1], +m[2], +m[3]] : [+m[3], +m[2], +m[1]];
+  const f = new Date(anio, mes - 1, dia);
+  return f.getFullYear() === anio && f.getMonth() === mes - 1 && f.getDate() === dia ? f : null;
+}
+
+function leerReglasOcultos(texto) {
+  return String(texto || "").split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#")).map(linea => {
+    const partes = linea.split("|");
+    let nombre = partes[0].trim();
+    const esCategoria = /^categor[ií]a\s*:/i.test(nombre);
+    if (esCategoria) nombre = nombre.replace(/^categor[ií]a\s*:/i, "").trim();
+    const resto = partes.slice(1).join("|").trim();
+    const vuelve = resto ? leerFecha(resto.replace(/^(vuelve|hasta)\s+(el\s+)?/i, "")) : null;
+    return { linea, clave: normalizarTexto(nombre), esCategoria, vuelve, fechaNoEntendida: !!resto && !vuelve };
+  });
+}
+
+const REGLAS_OCULTOS = leerReglasOcultos(typeof PRODUCTOS_OCULTOS === "string" ? PRODUCTOS_OCULTOS : "");
+
+// ¿La línea de la lista apunta a este producto? (por nombre, por código o por categoría)
+function reglaCoincide(regla, prod) {
+  if (!regla.clave) return false;
+  return regla.esCategoria
+    ? normalizarTexto(prod.categoria) === regla.clave
+    : normalizarTexto(prod.id) === regla.clave || normalizarTexto(prod.nombre) === regla.clave;
+}
+
+// Oculta hasta que llegue el día de regreso; sin fecha, hasta que se borre la línea.
+function reglaVigente(regla) {
+  if (!regla.vuelve) return true;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return hoy < regla.vuelve;
+}
+
+// Desde acá, toda la tienda trabaja solo con los productos que sí están disponibles.
+const productos = TODOS_LOS_PRODUCTOS.filter(p => !REGLAS_OCULTOS.some(r => reglaVigente(r) && reglaCoincide(r, p)));
+
+REGLAS_OCULTOS.forEach(r => {
+  if (!TODOS_LOS_PRODUCTOS.some(p => reglaCoincide(r, p))) {
+    console.warn(`[Productos ocultos] La línea "${r.linea}" no coincide con ningún producto. Revisa cómo está escrita.`);
+  }
+});
+
+// ===========================================================
 // 2) A partir de acá es el motor de la tienda. No hace falta tocarlo.
 // ===========================================================
 const formatoCLP = n => n.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
@@ -1329,6 +1453,9 @@ if (destacadosGrid) {
     .map(id => productos.find(p => p.id === id))
     .filter(Boolean);
 
+  // Si todos los destacados están ocultos, no se muestra la sección vacía.
+  if (!listaDestacados.length) destacadosGrid.closest("section").style.display = "none";
+
   const destacadosCardsHtml = listaDestacados.map(prod => {
     const slug = prod.categoria.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
@@ -1435,6 +1562,24 @@ function cotizarPorWhatsapp(id) {
 let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
 // Mientras el cliente edita un producto del carrito: { lineaId, seleccion } con lo que va eligiendo.
 let edicion = null;
+
+// Si un producto que el cliente tenía en el carrito pasó a estar oculto (sin stock),
+// se quita del carrito y se le explica la próxima vez que lo abra.
+function leerAvisosCarrito() {
+  try { return JSON.parse(localStorage.getItem("avisoCarrito") || "[]"); } catch (e) { return []; }
+}
+function guardarAvisosCarrito(lista) {
+  try { localStorage.setItem("avisoCarrito", JSON.stringify(lista)); } catch (e) { /* sin almacenamiento: no pasa nada */ }
+}
+{
+  const idsVisibles = new Set(productos.map(p => p.id));
+  const quitadas = carrito.filter(l => !idsVisibles.has(l.id));
+  if (quitadas.length) {
+    carrito = carrito.filter(l => idsVisibles.has(l.id));
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    guardarAvisosCarrito([...new Set([...leerAvisosCarrito(), ...quitadas.map(l => l.nombre)])]);
+  }
+}
 
 function agregarAlCarrito(id) {
   const prod = productos.find(p => p.id === id);
@@ -1676,6 +1821,16 @@ function renderizarCarrito() {
     if (!carrito.some(l => l.lineaId === edicion.lineaId)) edicion = null;
   }
 
+  // Aviso de productos que se quitaron del carrito por no estar disponibles.
+  const avisoEl = document.getElementById("cartAviso");
+  const avisos = leerAvisosCarrito();
+  avisoEl.hidden = avisos.length === 0;
+  avisoEl.textContent = avisos.length === 1
+    ? `«${avisos[0]}» ya no está disponible por ahora, así que lo quitamos de tu pedido.`
+    : avisos.length > 1
+      ? `Estos productos ya no están disponibles por ahora y los quitamos de tu pedido: ${avisos.map(n => `«${n}»`).join(", ")}.`
+      : "";
+
   const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
   document.getElementById("cartCount").textContent = totalCantidad;
   document.getElementById("cartPedidoResumen").textContent =
@@ -1702,8 +1857,11 @@ function abrirCarrito() {
 function cerrarCarrito() {
   document.getElementById("cartPanel").classList.remove("open");
   document.getElementById("overlay").classList.remove("open");
-  // Un cambio sin guardar no queda "a medias" al volver a abrir el carrito.
-  if (edicion) { edicion = null; renderizarCarrito(); }
+  // Un cambio sin guardar no queda "a medias" al volver a abrir el carrito, y el
+  // aviso de productos quitados se muestra una sola vez.
+  const habiaAviso = leerAvisosCarrito().length > 0;
+  if (habiaAviso) guardarAvisosCarrito([]);
+  if (edicion || habiaAviso) { edicion = null; renderizarCarrito(); }
 }
 
 document.getElementById("cartToggle").addEventListener("click", abrirCarrito);
@@ -1824,6 +1982,31 @@ function filtrarCatalogoPorBusqueda(termino) {
   });
 
   searchEmptyMsg.classList.toggle("visible", busqueda !== "" && !hayResultados);
+}
+
+// -- Revisión de productos ocultos: solo aparece si abres la tienda con ?ocultos --
+if (new URLSearchParams(location.search).has("ocultos")) {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const dosDigitos = n => String(n).padStart(2, "0");
+  const fechaTexto = f => `${dosDigitos(f.getDate())}-${dosDigitos(f.getMonth() + 1)}-${f.getFullYear()}`;
+  const filas = REGLAS_OCULTOS.map(r => {
+    const n = TODOS_LOS_PRODUCTOS.filter(p => reglaCoincide(r, p)).length;
+    let estado;
+    if (n === 0) estado = "⚠ No coincide con ningún producto: revisa cómo lo escribiste.";
+    else if (!reglaVigente(r)) estado = `Ya llegó la fecha de regreso (${fechaTexto(r.vuelve)}): se está mostrando. Puedes borrar esta línea.`;
+    else if (r.vuelve) estado = `Oculto hasta que llegue el ${fechaTexto(r.vuelve)}; ese día reaparece solo.`;
+    else estado = "Oculto hasta que borres la línea.";
+    if (r.fechaNoEntendida) estado += " ⚠ No entendí la fecha (escríbela así: | vuelve 15-12-2026); por ahora queda oculto hasta que borres la línea.";
+    return `<li><b>${esc(r.linea)}</b> — ${n} ${n === 1 ? "producto" : "productos"}. ${estado}</li>`;
+  }).join("");
+  document.body.insertAdjacentHTML("afterbegin", `
+    <div class="aviso-ocultos" role="status">
+      <strong>Revisión de productos ocultos</strong>
+      <span>(solo lo ves tú, porque abriste la tienda con ?ocultos)</span>
+      ${REGLAS_OCULTOS.length ? `<ul>${filas}</ul>` : `<p>La lista está vacía: se muestran todos los productos.</p>`}
+      <p>Se muestran ${productos.length} de ${TODOS_LOS_PRODUCTOS.length} productos.</p>
+    </div>
+  `);
 }
 
 actualizarSeccionEnvio();
