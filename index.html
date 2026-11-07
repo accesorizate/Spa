@@ -1,9 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CL">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AccesorizateSpA — Tienda</title>
+<title>Accesorizate | Cuadros y fotos personalizados en Chile</title>
+<meta name="description" content="Cuadros, fotos, posters, calendarios, llaveros y más, personalizados con tus fotos. Envíos a todo Chile o retiro en Maipú. Paga por transferencia.">
+<link rel="canonical" href="https://accesorizate.cl/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Accesorizate">
+<meta property="og:locale" content="es_CL">
+<meta property="og:title" content="Accesorizate | Cuadros y fotos personalizados en Chile">
+<meta property="og:description" content="Cuadros, fotos, posters, calendarios, llaveros y más, personalizados con tus fotos. Envíos a todo Chile o retiro en Maipú. Paga por transferencia.">
+<meta property="og:url" content="https://accesorizate.cl/">
+<meta property="og:image" content="https://accesorizate.cl/imagenes/logo.png">
+<meta property="og:image:alt" content="Logo de Accesorizate">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -543,7 +554,7 @@ Pizarra infantil + plumones
 
 <header>
   <div class="wrap">
-    <img src="imagenes/logo.png" alt="Logo" class="logo">
+    <img src="imagenes/logo.png" alt="Accesorizate" class="logo">
     <nav id="catNav"></nav>
     <div class="header-actions">
       <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
@@ -566,7 +577,7 @@ Pizarra infantil + plumones
 <section class="hero">
   <div class="wrap">
     <div>
-      <h1>Cuadros, papelería y regalos personalizados.</h1>
+      <h1>Cuadros, fotos y regalos personalizados.</h1>
       <p>Elige tu producto, tu tamaño y tu diseño. Para los personalizados, después de pagar te vamos a pedir tu foto o archivo por correo.</p>
       <div class="hero-actions">
         <a href="#catalogo" class="btn btn-primary">Ver productos</a>
@@ -650,7 +661,7 @@ Pizarra infantil + plumones
         <input type="email" id="newsletterEmail" placeholder="Tu correo electrónico" required>
         <button type="submit">Suscribirme</button>
       </form>
-      <p class="newsletter-msg" id="newsletterMsg">¡Gracias! Ya quedaste suscripto.</p>
+      <p class="newsletter-msg" id="newsletterMsg">¡Gracias! Ya quedaste suscrito.</p>
     </div>
   </div>
 </div>
@@ -659,7 +670,7 @@ Pizarra infantil + plumones
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <img src="imagenes/logo.png" alt="Logo" class="logo" loading="lazy" decoding="async">
+        <img src="imagenes/logo.png" alt="Accesorizate" class="logo" loading="lazy" decoding="async">
         <p>Cuadros, papelería y regalos personalizados, hechos con cuidado de principio a fin.</p>
       </div>
       <div>
@@ -847,7 +858,7 @@ const ENCENDEDORES_TEMATICOS = [
 const TODOS_LOS_PRODUCTOS = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
-    descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elegí el tamaño y el marco.",
+    descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elige el tamaño y el marco.",
     imagen:"imagenes/publicuadros.png",
     // Tamaño "18x24" con precio de ejemplo ($6.500): cambialo por el real.
     grupoPrecio:"Tamaño",
@@ -1352,7 +1363,7 @@ function selectOpcionHtml(attrId, nombre, valores, elegido, dependeDe) {
 }
 
 function etiquetaMultiple(op, n) {
-  return `${op.nombre} (${n === 1 ? "elegí 1 diseño" : `elegí ${n} diseños, uno por unidad`})`;
+  return `${op.nombre} (${n === 1 ? "elige 1 diseño" : `elige ${n} diseños, uno por unidad`})`;
 }
 
 // attrId marca de quién es cada select: en la tarjeta es data-prod="id",
