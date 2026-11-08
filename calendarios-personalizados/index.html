@@ -16,17 +16,32 @@
 <meta property="og:image" content="https://accesorizate.cl/imagenes/logo.png">
 <meta property="og:image:alt" content="Logo de Accesorizate">
 <meta name="twitter:card" content="summary">
+<script>
+// Pide los archivos de la tienda desde el comienzo de la carga (antes de que el navegador llegue al final de la página).
+// ocultos.js y catalogo.js llevan un número que cambia cada minuto: así los cambios de stock y de precios se ven enseguida
+// y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
+(function () {
+  var minuto = Math.floor(Date.now() / 60000);
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261108a"];
+  window.ARCHIVOS_TIENDA.forEach(function (src) {
+    var l = document.createElement("link");
+    l.rel = "preload"; l.as = "script"; l.href = src;
+    document.head.appendChild(l);
+  });
+})();
+</script>
+<noscript><style>.esperar-catalogo{visibility:visible!important}</style></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261107a">
+<link rel="stylesheet" href="tienda.css?v=20261108a">
 </head>
 <body>
 
 <header>
   <div class="wrap">
     <a href="/" class="logo-link" aria-label="Accesorizate, ir al inicio"><img src="imagenes/logo.png" alt="Accesorizate" class="logo"></a>
-    <nav id="catNav"></nav>
+    <nav id="catNav"><a href="cuadros-personalizados/">Cuadros</a><a href="/#stickers">Stickers</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/" class="activa" aria-current="page">Calendarios</a><a href="/#marcap-ginas">Marcapáginas</a><a href="/#libretas">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="/#llaveros">Llaveros</a><a href="/#photo-cards">Photo cards</a></nav>
     <div class="header-actions">
       <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -55,7 +70,7 @@
 
 <main id="catalogo" class="wrap"></main>
 
-<section class="contenido-cat">
+<section class="contenido-cat esperar-catalogo">
   <div class="wrap">
     <div class="texto">
 <h2>Un regalo con tus fotos para todo el año</h2>
@@ -92,17 +107,21 @@
   </div>
 </section>
 
-<section class="mas-categorias">
+<section class="mas-categorias esperar-catalogo">
   <div class="wrap">
     <h2>Más productos personalizados</h2>
     <div class="cat-nav">
+        <a href="/cuadros-personalizados/">Cuadros</a>
+        <a href="/impresion-de-fotos/">Impresión de fotografías</a>
+        <a href="/fotos-polaroid/">Fotos estilo Polaroid</a>
+        <a href="/posters-personalizados/">Posters</a>
         <a href="/etiquetas-navidenas/">Etiquetas navideñas</a>
         <a href="/#catalogo">Ver todo el catálogo</a>
     </div>
   </div>
 </section>
 
-<footer id="contacto">
+<footer id="contacto" class="esperar-catalogo">
   <div class="wrap">
     <div class="footer-grid">
       <div>
@@ -214,17 +233,21 @@
 
 <script>window.CONFIG_PAGINA = {"categorias":["Calendarios"],"tituloSeccion":"Elige tu calendario 2027"};</script>
 <script>
-// Carga los archivos de la tienda en orden. ocultos.js y catalogo.js llevan un número que
-// cambia cada minuto: así los cambios de stock y de precios se ven enseguida y no quedan
-// guardados en la memoria (caché) de Cloudflare ni del navegador.
+// Carga los archivos de la tienda en orden (ya se pidieron desde la cabecera, ver más arriba).
+// Si algo falla, a los 6 segundos se muestra igual el resto de la página.
 (function () {
-  var minuto = Math.floor(Date.now() / 60000);
-  ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261107a"].forEach(function (src) {
+  var archivos = window.ARCHIVOS_TIENDA;
+  if (!archivos) {
+    var minuto = Math.floor(Date.now() / 60000);
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261108a"];
+  }
+  archivos.forEach(function (src) {
     var s = document.createElement("script");
     s.src = src;
     s.async = false;
     document.body.appendChild(s);
   });
+  setTimeout(function () { document.body.classList.add("tienda-lista"); }, 6000);
 })();
 </script>
 </body>
