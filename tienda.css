@@ -69,6 +69,11 @@
          las líneas estén bien escritas. Si un cliente tenía ese producto
          en el carrito, se le quita con un aviso. Los productos siguen
          guardados en el arreglo TODOS_LOS_PRODUCTOS: ocultar no borra nada.
+     25. SIN SALTOS AL CARGAR: el menú viene escrito en el HTML de cada página y el
+         catálogo se arma con JavaScript. Para que la página no "salte" mientras se
+         arma, lo que va debajo del catálogo (clase esperar-catalogo) queda invisible
+         hasta que termina (tienda.js agrega la clase tienda-lista al <body>). Si
+         algo falla, se muestra igual a los 6 segundos.
      24. PÁGINAS DE CATEGORÍA: cada categoría con su propia página (por
          ejemplo calendarios-personalizados/index.html) usa los mismos
          archivos que el inicio: tienda.css (estilos), catalogo.js
@@ -517,3 +522,9 @@
   .mas-categorias { padding: 40px 0 48px; border-top: 1px solid var(--line); background: var(--bg-alt); }
   .mas-categorias h2 { font-size: 1.3rem; }
   .mas-categorias .cat-nav { padding-top: 6px; }
+
+  /* --- Sin saltos al cargar --- */
+  /* El catálogo se arma con JavaScript: mientras tanto, lo que va debajo no se ve (pero ya ocupa su lugar). */
+  body:not(.tienda-lista) .esperar-catalogo { visibility: hidden; }
+  /* Alto reservado para los destacados (tarjetas de 200 px; deja espacio para un nombre de 2 líneas). */
+  .destacados-viewport { min-height: 300px; }

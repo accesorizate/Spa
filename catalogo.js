@@ -224,7 +224,7 @@ const TODOS_LOS_PRODUCTOS = [
       "29x42|Plastificado":3000,
       "33x48|Sin acabado":2000
     },
-    personalizable:false },
+    personalizable:true },
 
   { id:"fotografias", categoria:"Fotografías", nombre:"Impresión de fotografías",
     descripcion:"Elige tamaño y cantidad de copias.",
@@ -376,4 +376,9 @@ const TODOS_LOS_PRODUCTOS = [
 const PAGINAS_DE_CATEGORIA = {
   "Calendarios": "calendarios-personalizados/",
   "Etiquetas navideñas": "etiquetas-navidenas/",
+  "Cuadros": "cuadros-personalizados/",
+  "Cuadros personalizados": "cuadros-personalizados/",
+  "Fotografías": "impresion-de-fotos/",
+  "Fotografías Polaroid": "fotos-polaroid/",
+  "Posters": "posters-personalizados/",
 };

@@ -156,6 +156,11 @@ document.addEventListener("error", e => {
 // Cada página de categoría define window.CONFIG_PAGINA = { categorias: [...], tituloSeccion: ... }
 // para mostrar solo sus categorías. En el inicio no existe y se muestran todas.
 const PAGINA = window.CONFIG_PAGINA || {};
+
+// En las páginas de categoría, las primeras fotos se piden de inmediato (la primera con prioridad alta),
+// porque son lo primero que ve el cliente. En el inicio y más abajo siguen cargando al acercarse.
+let fotosConPrioridad = PAGINA.categorias ? 4 : 0;
+let primeraFotoPrioritaria = !!PAGINA.categorias;
 const categorias = [...new Set(productos.map(p => p.categoria))];
 const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : categorias;
 const catalogoEl = document.getElementById("catalogo");
@@ -176,12 +181,20 @@ function tituloDeSeccion(cat) {
   return (t && typeof t === "object" ? t[cat] : t) || cat;
 }
 
+// Menú: una sola entrada por dirección (si dos categorías comparten página, se muestra la primera).
+// El menú ya viene escrito en el HTML de cada página; aquí se vuelve a armar con lo que hay disponible
+// hoy, así que si coincide no se mueve nada.
+const direccionesDelMenu = new Set();
+let menuHtml = "";
 categorias.forEach(cat => {
+  const href = enlaceDeCategoria(cat);
+  if (direccionesDelMenu.has(href)) return;
+  direccionesDelMenu.add(href);
   const esLaPagina = !!(PAGINA.categorias && PAGINA.categorias.includes(cat));
-  const enlace = `<a href="${enlaceDeCategoria(cat)}"${esLaPagina ? ' class="activa" aria-current="page"' : ""}>${cat}</a>`;
-  navEl.innerHTML += enlace;
-  if (chipsEl) chipsEl.innerHTML += enlace;
+  menuHtml += `<a href="${href}"${esLaPagina ? ' class="activa" aria-current="page"' : ""}>${cat}</a>`;
 });
+navEl.innerHTML = menuHtml;
+if (chipsEl) chipsEl.innerHTML = menuHtml;
 
 categoriasDeLaPagina.forEach(cat => {
   const slug = slugDeCategoria(cat);
@@ -276,6 +289,12 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
 
 function renderCard(prod) {
   const seleccionInicial = valoresPorDefecto(prod);
+  let cargaFoto = 'loading="lazy"';
+  if (fotosConPrioridad > 0) {
+    fotosConPrioridad--;
+    cargaFoto = primeraFotoPrioritaria ? 'loading="eager" fetchpriority="high"' : 'loading="eager"';
+    primeraFotoPrioritaria = false;
+  }
 
   const opcionesHtml = opcionesHtmlDe(prod, seleccionInicial, `data-prod="${prod.id}"`);
 
@@ -291,7 +310,7 @@ function renderCard(prod) {
     : "";
   const media = `
     <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
-      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" loading="lazy" decoding="async">
+      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" ${cargaFoto} decoding="async">
       ${dotsHtml}
     </div>
   `;
@@ -366,6 +385,9 @@ if (destacadosGrid) {
     <div class="destacados-set" aria-hidden="true">${destacadosCardsHtml}</div>
   `;
 }
+
+// Catálogo y destacados ya están armados: se muestra lo que iba debajo (ver .esperar-catalogo en tienda.css).
+document.body.classList.add("tienda-lista");
 
 // Cuando cambia una opción, actualiza las que dependen de ella: la lista de
 // valores de una opción "dependeDe" y la cantidad de selects de un "uno por
