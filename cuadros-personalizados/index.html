@@ -22,7 +22,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261108a"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261109a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -35,14 +35,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261108a">
+<link rel="stylesheet" href="tienda.css?v=20261109a">
 </head>
 <body>
 
 <header>
   <div class="wrap">
     <a href="/" class="logo-link" aria-label="Accesorizate, ir al inicio"><img src="imagenes/logo.png" alt="Accesorizate" class="logo"></a>
-    <nav id="catNav"><a href="cuadros-personalizados/" class="activa" aria-current="page">Cuadros</a><a href="/#stickers">Stickers</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="/#marcap-ginas">Marcapáginas</a><a href="/#libretas">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="/#llaveros">Llaveros</a><a href="/#photo-cards">Photo cards</a></nav>
+    <nav id="catNav"><a href="cuadros-personalizados/" class="activa" aria-current="page">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="/#libretas">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></nav>
     <div class="header-actions">
       <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -55,7 +55,7 @@
   </div>
   <div class="search-bar" id="searchBar">
     <div class="wrap">
-      <input type="search" id="inputBuscar" placeholder="Buscar productos por nombre...">
+      <input type="search" id="inputBuscar" aria-label="Buscar productos por nombre" placeholder="Buscar productos por nombre...">
       <p class="search-empty" id="searchEmptyMsg">No encontramos productos que coincidan con tu búsqueda.</p>
     </div>
   </div>
@@ -130,6 +130,11 @@
         <a href="/posters-personalizados/">Posters</a>
         <a href="/calendarios-personalizados/">Calendarios</a>
         <a href="/etiquetas-navidenas/">Etiquetas navideñas</a>
+        <a href="/stickers/">Stickers</a>
+        <a href="/stickers-personalizados/">Stickers personalizados</a>
+        <a href="/llaveros-personalizados/">Llaveros</a>
+        <a href="/marcapaginas-personalizados/">Marcapáginas</a>
+        <a href="/photocards-personalizadas/">Photocards</a>
         <a href="/#catalogo">Ver todo el catálogo</a>
     </div>
   </div>
@@ -143,7 +148,7 @@
         <p>Cuadros, papelería y regalos personalizados, hechos con cuidado de principio a fin.</p>
       </div>
       <div>
-        <h4>Enlaces</h4>
+        <h4 aria-level="3">Enlaces</h4>
         <ul>
           <li><a href="/">Inicio</a></li>
           <li><a href="/#catalogo">Productos</a></li>
@@ -152,14 +157,14 @@
         </ul>
       </div>
       <div>
-        <h4>Contacto</h4>
+        <h4 aria-level="3">Contacto</h4>
         <ul>
           <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=Venta.accesorizate@gmail.com" target="_blank">Venta.accesorizate@gmail.com</a></li>
           <li><a href="https://wa.me/56920635715" target="_blank">WhatsApp</a></li>
         </ul>
       </div>
       <div>
-        <h4>Síguenos</h4>
+        <h4 aria-level="3">Síguenos</h4>
         <ul>
           <li><a href="https://instagram.com/venta.accesorizate" target="_blank">Instagram</a></li>
           <li><a href="https://tiktok.com/@accesorizate.tienda" target="_blank">TikTok</a></li>
@@ -213,12 +218,12 @@
       <div class="datos-envio">
         <span class="datos-envio-titulo">Datos de envío</span>
         <div class="datos-envio-grid">
-          <input type="text" id="envioNombre" class="full" placeholder="Nombre completo">
-          <input type="text" id="envioRut" class="full" placeholder="RUT">
-          <input type="text" id="envioCiudad" class="campo-direccion" placeholder="Ciudad">
-          <input type="text" id="envioComuna" class="campo-direccion" placeholder="Comuna">
-          <input type="text" id="envioDireccion" class="full campo-direccion" placeholder="Dirección">
-          <input type="text" id="envioCodigoPostal" class="full campo-direccion" placeholder="Código postal (opcional)">
+          <input type="text" id="envioNombre" aria-label="Nombre completo" class="full" placeholder="Nombre completo">
+          <input type="text" id="envioRut" aria-label="RUT" class="full" placeholder="RUT">
+          <input type="text" id="envioCiudad" aria-label="Ciudad" class="campo-direccion" placeholder="Ciudad">
+          <input type="text" id="envioComuna" aria-label="Comuna" class="campo-direccion" placeholder="Comuna">
+          <input type="text" id="envioDireccion" aria-label="Dirección" class="full campo-direccion" placeholder="Dirección">
+          <input type="text" id="envioCodigoPostal" aria-label="Código postal (opcional)" class="full campo-direccion" placeholder="Código postal (opcional)">
         </div>
       </div>
       <div class="datos-transferencia" id="datosTransferencia">
@@ -230,7 +235,7 @@
         </p>
         <p>Transfiere el total y luego haz clic en el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
       </div>
-      <textarea id="notaPedido" placeholder="Comentario para tu pedido (opcional): referencia de diseño, etc."></textarea>
+      <textarea id="notaPedido" aria-label="Comentario para tu pedido" placeholder="Comentario para tu pedido (opcional): referencia de diseño, etc."></textarea>
     </div>
 
   </div>
@@ -253,7 +258,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261108a"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261109a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
