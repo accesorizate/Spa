@@ -69,6 +69,9 @@
          las líneas estén bien escritas. Si un cliente tenía ese producto
          en el carrito, se le quita con un aviso. Los productos siguen
          guardados en el arreglo TODOS_LOS_PRODUCTOS: ocultar no borra nada.
+     26. ACCESIBILIDAD: los selects del catálogo y del carrito llevan aria-label (lo leen los
+         lectores de pantalla), los puntos de las fotos miden 24x24 px y los encabezados
+         del pie y de "Así hacemos realidad tus ideas" llevan aria-level="3".
      25. SIN SALTOS AL CARGAR: el menú viene escrito en el HTML de cada página y el
          catálogo se arma con JavaScript. Para que la página no "salte" mientras se
          arma, lo que va debajo del catálogo (clase esperar-catalogo) queda invisible
@@ -113,7 +116,7 @@
     white-space: nowrap;
   }
   nav { display: flex; gap: 20px; font-size: 0.9rem; flex-wrap: wrap; }
-  nav a { text-decoration: none; color: var(--ink); border-bottom: 1px solid transparent; white-space: nowrap; }
+  nav a { text-decoration: none; color: var(--ink); border-bottom: 1px solid transparent; white-space: nowrap; display: inline-flex; align-items: center; min-height: 24px; }
   nav a:hover { border-color: var(--accent); }
   nav a.activa { color: var(--accent); border-color: var(--accent); font-weight: 600; }
 
@@ -231,14 +234,20 @@
   }
   .card-media img { width: 100%; height: 100%; object-fit: cover; }
   .card-media-dots {
-    position: absolute; left: 0; right: 0; bottom: 8px; display: flex;
-    justify-content: center; gap: 6px;
+    position: absolute; left: 0; right: 0; bottom: 0; display: flex;
+    justify-content: center; gap: 0;
   }
+  /* El botón mide 24x24 px (tamaño mínimo para tocarlo bien); el punto que se ve es el de 8 px de adentro. */
   .media-dot {
-    width: 8px; height: 8px; padding: 0; border-radius: 50%; cursor: pointer;
+    width: 24px; height: 24px; padding: 0; border: 0; background: transparent;
+    position: relative; cursor: pointer;
+  }
+  .media-dot::before {
+    content: ""; position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px;
+    box-sizing: border-box; border-radius: 50%;
     border: 1px solid rgba(251,250,247,0.9); background: rgba(32,27,24,0.35);
   }
-  .media-dot.active { background: var(--accent); border-color: var(--accent); }
+  .media-dot.active::before { background: var(--accent); border-color: var(--accent); }
   .card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .card-body h3 { font-size: 1.02rem; }
   .card-body .desc { font-size: 0.85rem; margin-bottom: 2px; }
@@ -329,9 +338,10 @@
   .cart-panel {
     position: fixed; top: 0; right: -440px; width: 100%; max-width: 420px; height: 100%; height: 100dvh;
     background: var(--bg); z-index: 31; border-left: 1px solid var(--line);
-    display: flex; flex-direction: column; transition: right 0.25s;
+    display: flex; flex-direction: column; transition: right 0.25s, visibility 0s linear 0.25s;
+    visibility: hidden; /* cerrado: no se puede alcanzar con el teclado ni lo leen los lectores de pantalla */
   }
-  .cart-panel.open { right: 0; }
+  .cart-panel.open { right: 0; visibility: visible; transition: right 0.25s, visibility 0s; }
   .cart-head { flex: none; padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
   .cart-head h2 { font-size: 1.3rem; margin: 0; }
   .cart-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--ink); }
@@ -522,6 +532,10 @@
   .mas-categorias { padding: 40px 0 48px; border-top: 1px solid var(--line); background: var(--bg-alt); }
   .mas-categorias h2 { font-size: 1.3rem; }
   .mas-categorias .cat-nav { padding-top: 6px; }
+
+  /* --- Accesibilidad: tamaño mínimo de lo que se toca (24 px) --- */
+  .footer-grid li a { display: inline-block; padding: 4px 0; }
+  .cat-nav a { display: inline-flex; align-items: center; min-height: 24px; }
 
   /* --- Sin saltos al cargar --- */
   /* El catálogo se arma con JavaScript: mientras tanto, lo que va debajo no se ve (pero ya ocupa su lugar). */

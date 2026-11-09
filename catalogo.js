@@ -202,6 +202,23 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:false },
 
+  // Stickers a medida: se cotizan por WhatsApp (sin precio ni carrito) hasta que tengas precios y cantidades.
+  // Forma y Tamaño que elige el cliente viajan en el mensaje de WhatsApp. Cuando tengas precios,
+  // quita "accionPersonalizada" y "sinPrecio" y agrega "combinacionPrecio" + "preciosPorCombinacion".
+  { id:"stickers-personalizados", categoria:"Stickers personalizados", nombre:"Stickers personalizados con tu logo o imagen",
+    descripcion:"Para packaging, bolsas y regalos. Elige forma y tamaño y cuéntanos tu idea por WhatsApp: te cotizamos.",
+    imagen:"",
+    opciones:[
+      { nombre:"Forma", valores:["Circular","Cuadrado"] },
+      { nombre:"Tamaño", valores:["3x3 cm","4x4 cm","5x5 cm","6x6 cm","7x7 cm","8x8 cm","9x9 cm","Medida personalizada"] }
+    ],
+    accionPersonalizada:{
+      tipo:"whatsapp",
+      mensaje:"Hola! Quiero cotizar stickers personalizados con mi logo o imagen."
+    },
+    sinPrecio:true,
+    personalizable:false },
+
   { id:"posters", categoria:"Posters", nombre:"Poster",
     descripcion:"Elige tamaño y acabado.",
     imagen:"imagenes/publiposters.png",
@@ -226,14 +243,26 @@ const TODOS_LOS_PRODUCTOS = [
     },
     personalizable:true },
 
+  // Precio por foto: 10x15 = $500 y 21x29 = $1.000. Descuento por cantidad: 5 → 5%, 10 → 10%, 20 → 20%, 50 → 25%.
+  // (Cambia aquí cualquier precio: cada combinación de Tamaño y Cantidad tiene el suyo.)
   { id:"fotografias", categoria:"Fotografías", nombre:"Impresión de fotografías",
-    descripcion:"Elige tamaño y cantidad de copias.",
-    imagen:"", grupoPrecio:"Cantidad",
-    precios:{ "5 unidades":2000, "10 unidades":3500, "20 unidades":6000, "50 unidades":13000 },
+    descripcion:"Elige tamaño y cantidad de copias. Mientras más fotos, más descuento.",
+    imagen:"",
     opciones:[
-      { nombre:"Tamaño", valores:["10x15","20x25"] },
+      { nombre:"Tamaño", valores:["10x15","21x29"] },
       { nombre:"Cantidad", valores:["5 unidades","10 unidades","20 unidades","50 unidades"] }
     ],
+    combinacionPrecio:["Tamaño","Cantidad"],
+    preciosPorCombinacion:{
+      "10x15|5 unidades":2375,
+      "10x15|10 unidades":4500,
+      "10x15|20 unidades":8000,
+      "10x15|50 unidades":18750,
+      "21x29|5 unidades":4750,
+      "21x29|10 unidades":9000,
+      "21x29|20 unidades":16000,
+      "21x29|50 unidades":37500
+    },
     personalizable:true },
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
@@ -299,7 +328,7 @@ const TODOS_LOS_PRODUCTOS = [
       "Normal|3 unidades":1000,
       "Imantado|1 unidad":500
     },
-    personalizable:false },
+    personalizable:true },
 
   { id:"libretas", categoria:"Libretas", nombre:"Libreta",
     descripcion:"Elige el número de diseño de tapa.",
@@ -347,14 +376,14 @@ const TODOS_LOS_PRODUCTOS = [
     opciones:[],
     personalizable:true },
 
-  { id:"photocards", categoria:"Photo cards", nombre:"Photo cards",
+  { id:"photocards", categoria:"Photocards", nombre:"Photocards",
     descripcion:"Elige el número de diseño y el acabado.",
     imagen:"", precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] },
       { nombre:"Acabado", valores:["Laminada","Plastificada"] }
     ],
-    personalizable:false },
+    personalizable:true },
 
   { id:"album", categoria:"Álbum fotográfico", nombre:"Álbum fotográfico personalizado",
     descripcion:"Envía tus fotos y armamos tu álbum.",
@@ -381,4 +410,9 @@ const PAGINAS_DE_CATEGORIA = {
   "Fotografías": "impresion-de-fotos/",
   "Fotografías Polaroid": "fotos-polaroid/",
   "Posters": "posters-personalizados/",
+  "Stickers": "stickers/",
+  "Stickers personalizados": "stickers-personalizados/",
+  "Llaveros": "llaveros-personalizados/",
+  "Marcapáginas": "marcapaginas-personalizados/",
+  "Photocards": "photocards-personalizadas/",
 };

@@ -157,10 +157,10 @@ document.addEventListener("error", e => {
 // para mostrar solo sus categorías. En el inicio no existe y se muestran todas.
 const PAGINA = window.CONFIG_PAGINA || {};
 
-// En las páginas de categoría, las primeras fotos se piden de inmediato (la primera con prioridad alta),
-// porque son lo primero que ve el cliente. En el inicio y más abajo siguen cargando al acercarse.
-let fotosConPrioridad = PAGINA.categorias ? 4 : 0;
-let primeraFotoPrioritaria = !!PAGINA.categorias;
+// En las páginas de categoría, solo la primera foto se pide de inmediato y con prioridad alta (es lo primero que
+// ve el cliente); las demás esperan y van con prioridad baja para no quitarle velocidad a la primera.
+// En el inicio todas cargan al acercarse.
+let fotosConPrioridad = PAGINA.categorias ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
 const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : categorias;
 const catalogoEl = document.getElementById("catalogo");
@@ -248,9 +248,10 @@ function htmlOpciones(valores, elegido) {
   return valores.map(v => `<option value="${v}"${v === elegido ? " selected" : ""}>${v}</option>`).join("");
 }
 
-function selectOpcionHtml(attrId, nombre, valores, elegido, dependeDe) {
+// "etiqueta" es el nombre que leen los lectores de pantalla (aria-label): la etiqueta visible no está unida al select.
+function selectOpcionHtml(attrId, nombre, valores, elegido, dependeDe, etiqueta) {
   return `
-    <select ${attrId} data-opcion="${nombre}"${dependeDe ? ` data-depende-de="${dependeDe}"` : ""}>
+    <select ${attrId} data-opcion="${nombre}" aria-label="${etiqueta || nombre}"${dependeDe ? ` data-depende-de="${dependeDe}"` : ""}>
       ${htmlOpciones(valores, elegido)}
     </select>
   `;
@@ -268,7 +269,7 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
       const n = cantidadNumerica(seleccion[op.multiplePorCantidad]);
       const elegidos = [].concat(seleccion[op.nombre] ?? []);
       const selectsHtml = Array.from({ length: n }, (_, i) =>
-        selectOpcionHtml(attrId, op.nombre, op.valores, elegidos[i] ?? op.valores[0])
+        selectOpcionHtml(attrId, op.nombre, op.valores, elegidos[i] ?? op.valores[0], undefined, `${op.nombre} de ${prod.nombre}, unidad ${i + 1}`)
       ).join("");
       return `
         <div class="opcion opcion-multiple" data-opcion-multiple="${op.nombre}">
@@ -281,7 +282,7 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
     return `
       <div class="opcion">
         <label>${op.nombre}</label>
-        ${selectOpcionHtml(attrId, op.nombre, valores, seleccion[op.nombre], op.dependeDe)}
+        ${selectOpcionHtml(attrId, op.nombre, valores, seleccion[op.nombre], op.dependeDe, `${op.nombre} de ${prod.nombre}`)}
       </div>
     `;
   }).join("");
@@ -289,11 +290,10 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
 
 function renderCard(prod) {
   const seleccionInicial = valoresPorDefecto(prod);
-  let cargaFoto = 'loading="lazy"';
+  let cargaFoto = PAGINA.categorias ? 'loading="lazy" fetchpriority="low"' : 'loading="lazy"';
   if (fotosConPrioridad > 0) {
     fotosConPrioridad--;
-    cargaFoto = primeraFotoPrioritaria ? 'loading="eager" fetchpriority="high"' : 'loading="eager"';
-    primeraFotoPrioritaria = false;
+    cargaFoto = 'loading="eager" fetchpriority="high"';
   }
 
   const opcionesHtml = opcionesHtmlDe(prod, seleccionInicial, `data-prod="${prod.id}"`);
@@ -408,7 +408,7 @@ function actualizarOpcionesDependientes(prod, contenedor, opcionCambiada, valorC
     const previos = [...cont.querySelectorAll("select")].map(s => s.value);
     const n = cantidadNumerica(valorCambiado);
     cont.querySelector(".opcion-multiple-selects").innerHTML = Array.from({ length: n }, (_, i) =>
-      selectOpcionHtml(attrId, op.nombre, op.valores, previos[i] || op.valores[0])
+      selectOpcionHtml(attrId, op.nombre, op.valores, previos[i] || op.valores[0], undefined, `${op.nombre} de ${prod.nombre}, unidad ${i + 1}`)
     ).join("");
     const label = cont.querySelector("label");
     if (label) label.textContent = etiquetaMultiple(op, n);
