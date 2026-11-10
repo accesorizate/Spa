@@ -420,5 +420,6 @@ const PAGINAS_DE_CATEGORIA = {
   "Stickers personalizados": "stickers-personalizados/",
   "Llaveros": "llaveros-personalizados/",
   "Marcapáginas": "marcapaginas-personalizados/",
+  "Libretas": "libretas/",
   "Photocards": "photocards-personalizadas/",
 };

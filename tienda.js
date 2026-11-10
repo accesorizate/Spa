@@ -400,6 +400,51 @@ if (destacadosGrid) {
   `;
 }
 
+// -- Datos estructurados (Schema.org) del producto, para buscadores --
+// Solo en páginas que muestran UN producto con precio (Google pide el marcado de producto en páginas de un solo
+// producto, no en listados). Se arman desde el mismo catálogo que dibuja la tarjeta, así que el precio es el que
+// el cliente ve al abrir la página (el de las opciones que vienen marcadas) y, si un producto está oculto, no se escribe nada.
+// Los cotizados por WhatsApp (sinPrecio) no llevan precio, por lo tanto tampoco llevan este marcado.
+function datosEstructuradosDeProducto() {
+  if (!esPaginaPropia) return;
+  const visibles = PAGINA.productos ? productosDeLaPagina : productos.filter(p => categoriasDeLaPagina.includes(p.categoria));
+  if (visibles.length !== 1 || visibles[0].sinPrecio) return;
+  const prod = visibles[0];
+  const precio = precioProducto(prod, valoresPorDefecto(prod));
+  if (!(precio > 0)) return;
+  const dominio = "https://accesorizate.cl/";
+  const canonica = (document.querySelector('link[rel="canonical"]') || {}).href || dominio;
+  const meta = document.querySelector('meta[name="description"]');
+  const portada = Array.isArray(prod.imagen) ? prod.imagen[0] : prod.imagen;
+  const dato = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": prod.nombre,
+    "description": (meta && meta.content) || prod.descripcion,
+    "sku": prod.id,
+    "brand": { "@type": "Brand", "name": "Accesorizate" },
+    "offers": {
+      "@type": "Offer",
+      "url": canonica,
+      "price": precio,
+      "priceCurrency": "CLP",
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition",
+      "seller": { "@type": "Organization", "name": "Accesorizate" }
+    }
+  };
+  if (portada) dato.image = new URL(portada, dominio).href;
+  let el = document.getElementById("ld-producto");
+  if (!el) {
+    el = document.createElement("script");
+    el.type = "application/ld+json";
+    el.id = "ld-producto";
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(dato).replace(/</g, "\\u003c");
+}
+datosEstructuradosDeProducto();
+
 // Catálogo y destacados ya están armados: se muestra lo que iba debajo (ver .esperar-catalogo en tienda.css).
 document.body.classList.add("tienda-lista");
 
