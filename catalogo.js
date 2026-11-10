@@ -76,11 +76,14 @@ const ENCENDEDORES_TEMATICOS = [
 // Aquí están TODOS tus productos, también los que hoy no tienes. Para ocultar
 // alguno por falta de stock NO lo borres: escríbelo en PRODUCTOS_OCULTOS, en
 // el archivo ocultos.js.
+// Campo opcional "alt": texto alternativo de la foto principal (lo leen los lectores de pantalla y Google Imágenes).
+// Si no lo pones, se usa el nombre del producto.
 const TODOS_LOS_PRODUCTOS = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
     descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elige el tamaño y el marco.",
-    imagen:"imagenes/publicuadros.png",
+    imagen:"imagenes/publicuadros.webp",
+    alt:"Tres cuadros de madera con fotos impresas, en distintos tamaños y marcos",
     // Tamaño "18x24" con precio de ejemplo ($6.500): cambialo por el real.
     grupoPrecio:"Tamaño",
     precios:{ "10x15":3500, "13x18":4500, "15x20":5500, "18x24":6500 },
@@ -174,7 +177,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"stickers-anime", categoria:"Stickers", nombre:"Set de stickers anime",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"imagenes/publisticker2.png", grupoPrecio:"Tamaño / cantidad",
+    imagen:"imagenes/publisticker2.webp",
+    alt:"Set de stickers anime en bolsa, con stickers sueltos alrededor", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -221,7 +225,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"posters", categoria:"Posters", nombre:"Poster",
     descripcion:"Elige tamaño y acabado.",
-    imagen:"imagenes/publiposters.png",
+    imagen:"imagenes/publiposters.webp",
+    alt:"Posters personalizados de anime, K-pop y fútbol en distintos tamaños",
     opciones:[
       { nombre:"Tamaño", valores:["21x29","29x42","33x48"] },
       { nombre:"Acabado", dependeDe:"Tamaño", valoresPorPadre:{
@@ -267,7 +272,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
     descripcion:"Formato 5x8. Elige el acabado y la cantidad.",
-    imagen:"imagenes/publipolaroid.png",
+    imagen:"imagenes/publipolaroid.webp",
+    alt:"Fotos estilo Polaroid personalizadas en acabado normal, laminado e imantado",
     opciones:[
       { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
       { nombre:"Cantidad", dependeDe:"Acabado", valoresPorPadre:{

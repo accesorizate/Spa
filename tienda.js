@@ -153,16 +153,19 @@ document.addEventListener("error", e => {
 }, true);
 
 // -- Render del catálogo, agrupado por categoría --
-// Cada página de categoría define window.CONFIG_PAGINA = { categorias: [...], tituloSeccion: ... }
-// para mostrar solo sus categorías. En el inicio no existe y se muestran todas.
+// Cada página propia define window.CONFIG_PAGINA para mostrar solo lo suyo. En el inicio no existe y se muestra todo.
+//   Página de categoría:  { categorias: [...], tituloSeccion: ... }
+//   Página de producto:   { productos: ["id-del-producto", ...], tituloSeccion: "...", categoriaActiva: "Cuadros" }
+//     (categoriaActiva = categoría que se marca en el menú, porque el producto vive dentro de esa categoría).
 const PAGINA = window.CONFIG_PAGINA || {};
+const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos);
 
 // En las páginas de categoría, solo la primera foto se pide de inmediato y con prioridad alta (es lo primero que
 // ve el cliente); las demás esperan y van con prioridad baja para no quitarle velocidad a la primera.
 // En el inicio todas cargan al acercarse.
-let fotosConPrioridad = PAGINA.categorias ? 1 : 0;
+let fotosConPrioridad = esPaginaPropia ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
-const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : categorias;
+const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos ? [] : categorias);
 const catalogoEl = document.getElementById("catalogo");
 const navEl = document.getElementById("catNav");
 const chipsEl = document.getElementById("catNavChips");
@@ -173,7 +176,7 @@ function slugDeCategoria(cat) { return cat.toLowerCase().replace(/[^a-z0-9]+/g, 
 // en catalogo.js) o a su sección dentro del inicio.
 function enlaceDeCategoria(cat) {
   if (typeof PAGINAS_DE_CATEGORIA !== "undefined" && PAGINAS_DE_CATEGORIA[cat]) return PAGINAS_DE_CATEGORIA[cat];
-  return (PAGINA.categorias ? "/" : "") + "#" + slugDeCategoria(cat);
+  return (esPaginaPropia ? "/" : "") + "#" + slugDeCategoria(cat);
 }
 
 function tituloDeSeccion(cat) {
@@ -191,10 +194,21 @@ categorias.forEach(cat => {
   if (direccionesDelMenu.has(href)) return;
   direccionesDelMenu.add(href);
   const esLaPagina = !!(PAGINA.categorias && PAGINA.categorias.includes(cat));
-  menuHtml += `<a href="${href}"${esLaPagina ? ' class="activa" aria-current="page"' : ""}>${cat}</a>`;
+  const esLaSeccion = !esLaPagina && !!PAGINA.categoriaActiva && enlaceDeCategoria(PAGINA.categoriaActiva) === href;
+  menuHtml += `<a href="${href}"${esLaPagina ? ' class="activa" aria-current="page"' : esLaSeccion ? ' class="activa"' : ""}>${cat}</a>`;
 });
 navEl.innerHTML = menuHtml;
 if (chipsEl) chipsEl.innerHTML = menuHtml;
+
+// Página de producto: una sola sección con los productos que ella nombra (los ocultos no aparecen).
+const productosDeLaPagina = PAGINA.productos ? PAGINA.productos.map(id => productos.find(p => p.id === id)).filter(Boolean) : [];
+if (productosDeLaPagina.length) {
+  const seccion = document.createElement("section");
+  seccion.className = "categoria";
+  seccion.id = "productos";
+  seccion.innerHTML = `<div class="wrap"><h2>${tituloDeSeccion("")}</h2><div class="grid">${productosDeLaPagina.map(renderCard).join("")}</div></div>`;
+  catalogoEl.appendChild(seccion);
+}
 
 categoriasDeLaPagina.forEach(cat => {
   const slug = slugDeCategoria(cat);
@@ -208,7 +222,7 @@ categoriasDeLaPagina.forEach(cat => {
 });
 
 // Página de categoría cuyos productos están todos ocultos por ahora.
-if (PAGINA.categorias && !categoriasDeLaPagina.length) {
+if ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length)) {
   catalogoEl.innerHTML = `<p class="sin-productos">Por ahora no tenemos productos disponibles en esta categoría. <a href="/">Volver al inicio</a>.</p>`;
 }
 
@@ -217,7 +231,7 @@ const seccionesCategoria = document.querySelectorAll("section.categoria");
 const headerEl = document.querySelector("header");
 
 function actualizarCategoriaActiva() {
-  if (PAGINA.categorias) return; // en una página de categoría el menú ya marca la página actual
+  if (esPaginaPropia) return; // en una página de categoría o de producto el menú ya marca dónde estás
   const limite = headerEl.offsetHeight + 12;
   let activa = null;
   seccionesCategoria.forEach(seccion => {
@@ -290,7 +304,7 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
 
 function renderCard(prod) {
   const seleccionInicial = valoresPorDefecto(prod);
-  let cargaFoto = PAGINA.categorias ? 'loading="lazy" fetchpriority="low"' : 'loading="lazy"';
+  let cargaFoto = esPaginaPropia ? 'loading="lazy" fetchpriority="low"' : 'loading="lazy"';
   if (fotosConPrioridad > 0) {
     fotosConPrioridad--;
     cargaFoto = 'loading="eager" fetchpriority="high"';
@@ -310,7 +324,7 @@ function renderCard(prod) {
     : "";
   const media = `
     <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
-      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" ${cargaFoto} decoding="async">
+      <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.alt || prod.nombre}" ${cargaFoto} decoding="async">
       ${dotsHtml}
     </div>
   `;
@@ -368,7 +382,7 @@ if (destacadosGrid) {
   if (!listaDestacados.length) destacadosGrid.closest("section").style.display = "none";
 
   const destacadosCardsHtml = listaDestacados.map(prod => {
-    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.nombre}" loading="lazy" decoding="async">`;
+    const media = `<img src="${listaImagenesProducto(prod, valoresPorDefecto(prod), { priorizarPortada: true })[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.alt || prod.nombre}" loading="lazy" decoding="async">`;
     return `
       <a class="destacado-card" href="${enlaceDeCategoria(prod.categoria)}">
         <div class="destacado-media">${media}</div>
