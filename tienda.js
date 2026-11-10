@@ -304,6 +304,11 @@ function opcionesHtmlDe(prod, seleccion, attrId) {
 
 function renderCard(prod) {
   const seleccionInicial = valoresPorDefecto(prod);
+  // Si el producto tiene su propia página (PAGINAS_DE_PRODUCTO en catalogo.js), la foto y el nombre llevan a ella.
+  // Dentro de esa misma página no se enlaza a sí misma.
+  const fichaDelProducto = typeof PAGINAS_DE_PRODUCTO !== "undefined" && PAGINAS_DE_PRODUCTO[prod.id];
+  const enlazarFicha = fichaDelProducto && !(PAGINA.productos && PAGINA.productos.includes(prod.id));
+
   let cargaFoto = esPaginaPropia ? 'loading="lazy" fetchpriority="low"' : 'loading="lazy"';
   if (fotosConPrioridad > 0) {
     fotosConPrioridad--;
@@ -325,6 +330,7 @@ function renderCard(prod) {
   const media = `
     <div class="card-media" data-media-de="${prod.id}" data-imagenes='${JSON.stringify(imagenesIniciales)}'>
       <img data-imagen-de="${prod.id}" src="${imagenesIniciales[0]}" data-respaldo="${imagenRespaldo(prod)}" alt="${prod.alt || prod.nombre}" ${cargaFoto} decoding="async">
+      ${enlazarFicha ? `<a class="card-media-link" href="${fichaDelProducto}" tabindex="-1" aria-hidden="true"></a>` : ""}
       ${dotsHtml}
     </div>
   `;
@@ -341,8 +347,9 @@ function renderCard(prod) {
     <article class="card" data-card-id="${prod.id}">
       ${media}
       <div class="card-body">
-        <h3>${prod.nombre}</h3>
+        <h3>${enlazarFicha ? `<a class="card-titulo-link" href="${fichaDelProducto}">${prod.nombre}</a>` : prod.nombre}</h3>
         <p class="desc">${prod.descripcion}</p>
+        ${enlazarFicha ? `<a class="ver-detalles" href="${fichaDelProducto}" aria-label="Ver detalles de ${prod.nombre}">Ver detalles</a>` : ""}
         ${opcionesHtml}
         ${notaHtml}
         <div class="card-foot${prod.sinPrecio ? " sin-precio" : ""}">

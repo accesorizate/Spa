@@ -423,3 +423,15 @@ const PAGINAS_DE_CATEGORIA = {
   "Libretas": "libretas/",
   "Photocards": "photocards-personalizadas/",
 };
+
+// ===========================================================
+// 2b) PÁGINAS DE PRODUCTO
+// Productos que tienen su propia página (una "ficha"). En el inicio y en la página de cuadros,
+// la foto y el nombre de esa tarjeta llevan a la ficha:   "id del producto": "carpeta/"
+// ===========================================================
+const PAGINAS_DE_PRODUCTO = {
+  "cuadro-navideno": "cuadros-personalizados/navidad/",
+  "cuadro-enamorados": "cuadros-personalizados/san-valentin/",
+  "cuadro-sanvalentin": "cuadros-personalizados/san-valentin/",
+  "cuadro-spotify": "cuadros-personalizados/spotify/",
+};
