@@ -108,6 +108,8 @@
   .section-head p { margin-bottom: 0; }
 
   /* --- Header --- */
+  .aviso-ideas { margin: 0; padding: 8px 16px; text-align: center; font-size: .9rem; line-height: 1.4; color: var(--ink); background: var(--bg-alt); border-bottom: 1px solid var(--line); }
+  .aviso-ideas a { color: var(--accent); font-weight: 600; text-decoration: underline; }
   header { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
   header .wrap { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; gap: 16px; }
   .logo {

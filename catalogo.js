@@ -219,20 +219,16 @@ const TODOS_LOS_PRODUCTOS = [
     } },
     personalizable:false },
 
-  // Stickers de temporada: hoy Halloween; cuando tengas Navidad, duplica este bloque (otro id, nombre y foto)
-  // o cambia la foto y el nombre. Mientras no confirmes precios, se consulta por WhatsApp (sin precio ni carrito).
-  // Cuando los tengas: quita "accionPersonalizada" y "sinPrecio", y agrega "grupoPrecio" + "precios" y "opciones"
-  // con el mismo formato de los otros sets de stickers.
+  // Stickers de temporada: hoy Halloween. Tiene los mismos tamaños y precios que los otros sets.
+  // Cuando tengas Navidad, duplica este bloque (otro id, nombre y foto) o cambia la foto y el nombre.
   { id:"stickers-halloween", categoria:"Stickers", nombre:"Set de stickers de Halloween",
-    descripcion:"Set de stickers de temporada con diseños de Halloween. Consúltanos por WhatsApp.",
+    descripcion:"Set de stickers de temporada con diseños de Halloween. Elige el tamaño (con su cantidad aproximada).",
     imagen:"imagenes/sticker-temporada-halloween.webp",
-    alt:"Set de stickers de Halloween en bolsa, con calabazas, gatos y fantasmas",
-    opciones:[],
-    accionPersonalizada:{
-      tipo:"whatsapp",
-      mensaje:"Hola! Quiero consultar por el set de stickers de Halloween."
-    },
-    sinPrecio:true,
+    alt:"Set de stickers de Halloween en bolsa, con calabazas, gatos y fantasmas", grupoPrecio:"Tamaño / cantidad",
+    precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
+    opciones:[
+      { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] }
+    ],
     personalizable:false },
 
   // Stickers a medida: se cotizan por WhatsApp (sin precio ni carrito) hasta que tengas precios y cantidades.
@@ -240,7 +236,8 @@ const TODOS_LOS_PRODUCTOS = [
   // quita "accionPersonalizada" y "sinPrecio" y agrega "combinacionPrecio" + "preciosPorCombinacion".
   { id:"stickers-personalizados", categoria:"Stickers personalizados", nombre:"Stickers personalizados con tu logo o imagen",
     descripcion:"Para packaging, bolsas y regalos. Elige forma y tamaño y cuéntanos tu idea por WhatsApp: te cotizamos.",
-    imagen:"",
+    imagen:["imagenes/stickers-personalizados-3-a-6-cm.webp","imagenes/stickers-personalizados-7-a-9-cm.webp"],
+    alt:"Hojas de stickers circulares con un logo de ejemplo, en tamaños de 3x3 a 9x9 cm",
     opciones:[
       { nombre:"Forma", valores:["Circular","Cuadrado"] },
       { nombre:"Tamaño", valores:["3x3 cm","4x4 cm","5x5 cm","6x6 cm","7x7 cm","8x8 cm","9x9 cm","Medida personalizada"] }
@@ -345,33 +342,48 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:true },
 
-  { id:"marcapaginas", categoria:"Marcapáginas", nombre:"Marcapáginas",
-    descripcion:"Elige el tipo, la cantidad y el diseño (uno por unidad si llevas más de 1).",
-    imagen:"",
+  // Marcapáginas: tres productos. Todos miden 4 cm de ancho por 14 cm de alto.
+  //  - "marcapaginas": personalizado (el cliente envía su foto o diseño).
+  //  - "marcapaginas-imantado": personalizado, con imán.
+  //  - "marcapaginas-princesas": diseños ya hechos, numerados del 1 al 18 (se elige uno por unidad).
+  { id:"marcapaginas", categoria:"Marcapáginas", nombre:"Marcapáginas personalizado",
+    descripcion:"Marcapáginas de 4 cm de ancho por 14 cm de alto con tu foto o tu diseño. Elige la cantidad y envíanos tu imagen después de pagar.",
+    imagen:"imagenes/marcapaginas-fotos.webp",
+    alt:"Marcapáginas con distintos diseños, ordenados en filas",
+    grupoPrecio:"Cantidad",
+    precios:{ "1 unidad":400, "3 unidades":1000 },
     opciones:[
-      { nombre:"Tipo", valores:["Normal","Imantado"] },
-      { nombre:"Cantidad", dependeDe:"Tipo", valoresPorPadre:{
-          "Normal":["1 unidad","3 unidades"],
-          "Imantado":["1 unidad"]
-        }
-      },
-      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5"] }
+      { nombre:"Cantidad", valores:["1 unidad","3 unidades"] }
     ],
-    combinacionPrecio:["Tipo","Cantidad"],
-    preciosPorCombinacion:{
-      "Normal|1 unidad":400,
-      "Normal|3 unidades":1000,
-      "Imantado|1 unidad":500
-    },
     personalizable:true },
 
-  { id:"libretas", categoria:"Libretas", nombre:"Libreta",
-    descripcion:"Elige el número de diseño de tapa.",
+  { id:"marcapaginas-imantado", categoria:"Marcapáginas", nombre:"Marcapáginas imantado personalizado",
+    descripcion:"Marcapáginas imantado de 4 cm de ancho por 14 cm de alto con tu foto o tu diseño. Envíanos tu imagen después de pagar.",
     imagen:"", precioBase:500,
+    opciones:[],
+    personalizable:true },
+
+  { id:"marcapaginas-princesas", categoria:"Marcapáginas", nombre:"Marcapáginas princesas",
+    descripcion:"Marcapáginas de 4 cm de ancho por 14 cm de alto con diseños de princesas, numerados del 1 al 18. Elige la cantidad y el diseño (uno por unidad si llevas más de 1).",
+    imagen:"imagenes/marcapaginas-princesas-disenos-1-18.webp",
+    alt:"Hoja con 18 diseños de marcapáginas de princesas, numerados del 1 al 18",
+    grupoPrecio:"Cantidad",
+    precios:{ "1 unidad":400, "3 unidades":1000 },
     opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+      { nombre:"Cantidad", valores:["1 unidad","3 unidades"] },
+      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18"] }
     ],
     personalizable:false },
+
+  // Libretas: por ahora son personalizadas (el cliente envía su foto o diseño para la tapa).
+  // Cuando haya libretas con diseños ya listos, se agregan como productos aparte (con su selector de diseño numerado).
+  { id:"libretas", categoria:"Libretas", nombre:"Libreta personalizada",
+    descripcion:"Libreta de 10 cm de ancho por 14 cm de alto, con 20 hojas en blanco. Lleva tu foto o tu diseño en la tapa: envíanoslo después de pagar.",
+    imagen:["imagenes/libretas-1.webp","imagenes/libretas-2.webp","imagenes/libretas-3.webp"],
+    alt:"Ejemplos de libretas con distintos diseños de tapa, ordenadas en filas",
+    precioBase:500,
+    opciones:[],
+    personalizable:true },
 
   { id:"papel-regalo", categoria:"Papel de regalo", nombre:"Papel de regalo",
     descripcion:"Elige el número de diseño.",
@@ -382,19 +394,25 @@ const TODOS_LOS_PRODUCTOS = [
     personalizable:false },
 
   { id:"etiqueta-cortada", categoria:"Etiquetas navideñas", nombre:"Etiqueta navideña (ya cortada)",
-    descripcion:"Etiqueta individual, ya cortada y lista para pegar en el regalo. Elige el diseño (uno por unidad si llevas más de 1).",
-    imagen:"", grupoPrecio:"Cantidad",
+    descripcion:"Etiqueta navideña individual de 7x7 cm, ya cortada y lista para pegar en el regalo. Elige el diseño, del 1 al 24 (uno por unidad si llevas más de 1).",
+    imagen:"imagenes/etiquetas-navidenas-disenos-1-24.webp",
+    alt:"Hoja con 24 etiquetas navideñas de diseños distintos, numeradas del 1 al 24",
+    grupoPrecio:"Cantidad",
     precios:{ "1 unidad":300, "2 unidades":500 },
     opciones:[
       { nombre:"Cantidad", valores:["1 unidad","2 unidades"] },
-      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5"] }
+      { nombre:"Diseño", multiplePorCantidad:"Cantidad", valores:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"] }
     ],
     personalizable:false },
 
   { id:"etiquetas", categoria:"Etiquetas navideñas", nombre:"Set de etiquetas navideñas (tira sin cortar)",
-    descripcion:"Tira sin cortar con diseños surtidos (no se elige diseño individual).",
-    imagen:"", precioBase:1000,
-    opciones:[],
+    descripcion:"Tira sin cortar con 6 etiquetas navideñas de 7x7 cm. Elige el diseño de tira, del 1 al 4.",
+    imagen:"imagenes/etiquetas-navidenas-tiras-1-4.webp",
+    alt:"Cuatro tiras de etiquetas navideñas, numeradas del 1 al 4, con 6 etiquetas cada una",
+    precioBase:1000,
+    opciones:[
+      { nombre:"Diseño", valores:["1","2","3","4"] }
+    ],
     personalizable:false },
 
   { id:"pizarra", categoria:"Pizarra infantil", nombre:"Pizarra infantil + plumones",
