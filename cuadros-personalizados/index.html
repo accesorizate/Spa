@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261110b"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -33,10 +33,11 @@
 })();
 </script>
 <noscript><style>.esperar-catalogo{visibility:visible!important}</style></noscript>
+<link rel="preload" as="image" href="imagenes/publicuadros.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261110b">
+<link rel="stylesheet" href="tienda.css?v=20261111a">
 </head>
 <body>
 
@@ -95,6 +96,8 @@
 
 <h2>Tamaños y marcos</h2>
 <p>El cuadro con tu foto es un cuadro de madera, disponible en 10x15, 13x18, 15x20 y 18x24 cm. Los colores de marco disponibles cambian según el tamaño; los ves al elegirlo. Los cuadros por ocasión vienen en 21x29 y 33x48 cm, con marco café, blanco o negro. El precio de cada opción aparece en la tarjeta del producto, más arriba.</p>
+
+<p>Si es tu primer cuadro, la guía de <a href="/ideas/como-crear-un-cuadro-personalizado-con-tus-fotos/">cómo crear un cuadro personalizado con tus fotos</a> te explica paso a paso cómo elegir la foto, el tamaño y el marco.</p>
 
 <h2>Cómo pedir tu cuadro</h2>
 <ol>
@@ -157,6 +160,7 @@
           <li><a href="/">Inicio</a></li>
           <li><a href="/#catalogo">Productos</a></li>
           <li><a href="/#personalizar">Personalizados</a></li>
+          <li><a href="/ideas/">Ideas y guías</a></li>
           <li><a href="/cuadros-personalizados/#contacto">Contacto</a></li>
         </ul>
       </div>
@@ -262,7 +266,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261110b"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
