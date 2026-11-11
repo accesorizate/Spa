@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -37,10 +37,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261111a">
+<link rel="stylesheet" href="tienda.css?v=20261111b">
 </head>
 <body>
 
+<p class="aviso-ideas">¿No sabes qué regalar para estas fechas? <a href="/ideas/">Haz clic aquí y mira nuestras ideas</a></p>
 <header>
   <div class="wrap">
     <a href="/" class="logo-link" aria-label="Accesorizate, ir al inicio"><img src="imagenes/logo.png" alt="Accesorizate" class="logo"></a>
@@ -86,7 +87,7 @@
 <p>Elige fotos nítidas y con buena luz: las originales, tal como están en tu celular, se ven mejor que las capturas de pantalla o las imágenes reenviadas por redes sociales. Algunos diseños admiten varias fotos y otros una sola imagen: mira las fotos de cada diseño y escríbenos por <a href="https://wa.me/56920635715" target="_blank" rel="noopener">WhatsApp</a> si tienes dudas.</p>
 
 <h2>Tamaños, marcos y diseños</h2>
-<p>El cuadro viene en 21x29 y 33x48 cm, con marco café, blanco o negro. Eliges el número de diseño entre los que aparecen en la tarjeta. El precio de cada tamaño aparece en la tarjeta del producto, más arriba.</p>
+<p>El cuadro viene en 21x29 y 33x48 cm (medidas de la imagen interior; el cuadro completo puede medir unos centímetros más según el diseño), con marco café, blanco o negro. Eliges el número de diseño entre los que aparecen en la tarjeta. El precio de cada tamaño aparece en la tarjeta del producto, más arriba.</p>
 <p>Si buscas otros formatos para el mismo regalo, mira todos los <a href="/cuadros-personalizados/">cuadros personalizados con foto</a>, las <a href="/etiquetas-navidenas/">etiquetas navideñas para regalos</a> para envolverlo y los <a href="/calendarios-personalizados/">calendarios personalizados</a>.</p>
 
 <p>Para más ideas de regalo, lee nuestra guía de <a href="/ideas/regalos-personalizados-con-fotos-para-navidad/">regalos personalizados con fotos para Navidad</a>; y si es tu primer cuadro, mira <a href="/ideas/como-crear-un-cuadro-personalizado-con-tus-fotos/">cómo crear un cuadro personalizado con tus fotos</a>.</p>
@@ -251,7 +252,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
