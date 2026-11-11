@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261110b"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -36,7 +36,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261110b">
+<link rel="stylesheet" href="tienda.css?v=20261111a">
 </head>
 <body>
 
@@ -81,6 +81,8 @@
 <p>Si no sabes qué regalarles, un calendario con fotos de los nietos y de toda la familia es un detalle que van a ver cada día.</p>
 <h3>Para el regalo de fin de año</h3>
 <p>Un calendario 2027 con tus fotos es un regalo sencillo y útil para Navidad o Año Nuevo, para la familia, los amigos o quien tú quieras.</p>
+
+<p>Si quieres más ideas sobre a quién regalárselo y cómo elegir la foto, lee nuestra guía de <a href="/ideas/calendarios-personalizados-para-regalar/">ideas de calendarios personalizados para regalar</a>.</p>
 
 <h2>Normal o imantado</h2>
 <p>Tenemos dos tipos de calendario 2027 personalizado: normal e imantado. El imantado se sostiene con imán, por ejemplo en el refrigerador. Elige el tipo en la tarjeta del producto, más arriba; ahí mismo ves el precio de cada uno.</p>
@@ -142,6 +144,7 @@
           <li><a href="/">Inicio</a></li>
           <li><a href="/#catalogo">Productos</a></li>
           <li><a href="/#personalizar">Personalizados</a></li>
+          <li><a href="/ideas/">Ideas y guías</a></li>
           <li><a href="/calendarios-personalizados/#contacto">Contacto</a></li>
         </ul>
       </div>
@@ -247,7 +250,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261110b"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
