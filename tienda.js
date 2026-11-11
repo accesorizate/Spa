@@ -157,15 +157,16 @@ document.addEventListener("error", e => {
 //   Página de categoría:  { categorias: [...], tituloSeccion: ... }
 //   Página de producto:   { productos: ["id-del-producto", ...], tituloSeccion: "...", categoriaActiva: "Cuadros" }
 //     (categoriaActiva = categoría que se marca en el menú, porque el producto vive dentro de esa categoría).
+//   Guía o página de ideas (carpeta /ideas/): { guia: true }. No muestra catálogo; solo el menú, el carrito y el texto de la página.
 const PAGINA = window.CONFIG_PAGINA || {};
-const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos);
+const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos || PAGINA.guia);
 
 // En las páginas de categoría, solo la primera foto se pide de inmediato y con prioridad alta (es lo primero que
 // ve el cliente); las demás esperan y van con prioridad baja para no quitarle velocidad a la primera.
 // En el inicio todas cargan al acercarse.
 let fotosConPrioridad = esPaginaPropia ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
-const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos ? [] : categorias);
+const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.guia ? [] : categorias);
 const catalogoEl = document.getElementById("catalogo");
 const navEl = document.getElementById("catNav");
 const chipsEl = document.getElementById("catNavChips");

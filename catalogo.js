@@ -84,9 +84,8 @@ const TODOS_LOS_PRODUCTOS = [
     descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elige el tamaño y el marco.",
     imagen:"imagenes/publicuadros.webp",
     alt:"Tres cuadros de madera con fotos impresas, en distintos tamaños y marcos",
-    // Tamaño "18x24" con precio de ejemplo ($6.500): cambialo por el real.
     grupoPrecio:"Tamaño",
-    precios:{ "10x15":3500, "13x18":4500, "15x20":5500, "18x24":6500 },
+    precios:{ "10x15":3500, "13x18":4500, "15x20":5500, "18x24":6000 },
     opciones:[
       { nombre:"Tamaño", valores:["10x15","13x18","15x20","18x24"] },
       { nombre:"Color del marco", dependeDe:"Tamaño", valoresPorPadre:{
@@ -177,33 +176,63 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"stickers-anime", categoria:"Stickers", nombre:"Set de stickers anime",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"imagenes/publisticker2.webp",
+    // Portada con una foto adicional (el set completo); al elegir un diseño se muestra la foto de ese diseño.
+    imagen:["imagenes/publisticker2.webp","imagenes/sticker-anime-set.webp"],
     alt:"Set de stickers anime en bolsa, con stickers sueltos alrededor", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
-      { nombre:"Diseño", valores:["1","2","3","4"] }
+      { nombre:"Diseño", valores:["1","2","3","4","5","6","7"] }
     ],
+    imagenesPorOpcion:{ "Diseño":{
+      "1":"imagenes/sticker-anime-diseno-1.webp", "2":"imagenes/sticker-anime-diseno-2.webp",
+      "3":"imagenes/sticker-anime-diseno-3.webp", "4":"imagenes/sticker-anime-diseno-4.webp",
+      "5":"imagenes/sticker-anime-diseno-5.webp", "6":"imagenes/sticker-anime-diseno-6.webp",
+      "7":"imagenes/sticker-anime-diseno-7.webp"
+    } },
     personalizable:false },
 
   { id:"stickers-caricaturas", categoria:"Stickers", nombre:"Set de stickers caricaturas",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"imagenes/publisticker3.png", grupoPrecio:"Tamaño / cantidad",
+    imagen:["imagenes/publisticker3.png","imagenes/sticker-caricaturas-set.webp"], grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
-      { nombre:"Diseño", valores:["1","2","3","4"] }
+      { nombre:"Diseño", valores:["1","2","3"] }
     ],
+    imagenesPorOpcion:{ "Diseño":{
+      "1":"imagenes/sticker-caricaturas-diseno-1.webp", "2":"imagenes/sticker-caricaturas-diseno-2.webp",
+      "3":"imagenes/sticker-caricaturas-diseno-3.webp"
+    } },
     personalizable:false },
 
   { id:"stickers-animales", categoria:"Stickers", nombre:"Set de stickers animales",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:"imagenes/publisticker1.png", grupoPrecio:"Tamaño / cantidad",
+    imagen:["imagenes/publisticker1.png","imagenes/sticker-animales-set.webp"], grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
       { nombre:"Diseño", valores:["Gatitos","Dinosaurios"] }
     ],
+    imagenesPorOpcion:{ "Diseño":{
+      "Gatitos":"imagenes/sticker-animales-gatitos.webp", "Dinosaurios":"imagenes/sticker-animales-dinosaurios.webp"
+    } },
+    personalizable:false },
+
+  // Stickers de temporada: hoy Halloween; cuando tengas Navidad, duplica este bloque (otro id, nombre y foto)
+  // o cambia la foto y el nombre. Mientras no confirmes precios, se consulta por WhatsApp (sin precio ni carrito).
+  // Cuando los tengas: quita "accionPersonalizada" y "sinPrecio", y agrega "grupoPrecio" + "precios" y "opciones"
+  // con el mismo formato de los otros sets de stickers.
+  { id:"stickers-halloween", categoria:"Stickers", nombre:"Set de stickers de Halloween",
+    descripcion:"Set de stickers de temporada con diseños de Halloween. Consúltanos por WhatsApp.",
+    imagen:"imagenes/sticker-temporada-halloween.webp",
+    alt:"Set de stickers de Halloween en bolsa, con calabazas, gatos y fantasmas",
+    opciones:[],
+    accionPersonalizada:{
+      tipo:"whatsapp",
+      mensaje:"Hola! Quiero consultar por el set de stickers de Halloween."
+    },
+    sinPrecio:true,
     personalizable:false },
 
   // Stickers a medida: se cotizan por WhatsApp (sin precio ni carrito) hasta que tengas precios y cantidades.
