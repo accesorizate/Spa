@@ -23,7 +23,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261112a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261111b">
+<link rel="stylesheet" href="tienda.css?v=20261112a">
 </head>
 <body>
 
@@ -43,7 +43,7 @@
 <header>
   <div class="wrap">
     <img src="imagenes/logo.png" alt="Accesorizate" class="logo">
-    <nav id="catNav"><a href="cuadros-personalizados/">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></nav>
+    <nav id="catNav"><a href="navidad/" class="nav-navidad">Navidad</a><a href="cuadros-personalizados/">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></nav>
     <div class="header-actions">
       <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -71,9 +71,50 @@
         <a href="#catalogo" class="btn btn-primary">Ver productos</a>
         <a href="#personalizar" class="btn btn-secondary">Personalizar</a>
       </div>
-      <div class="cat-nav" id="catNavChips"><a href="cuadros-personalizados/">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></div>
+      <div class="cat-nav" id="catNavChips"><a href="navidad/" class="nav-navidad">Navidad</a><a href="cuadros-personalizados/">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></div>
     </div>
-    <div class="hero-visual"><span>Tu idea, en papel, cuadro o regalo</span></div>
+    <div class="hero-carrusel" id="heroCarrusel" role="region" aria-roledescription="carrusel" aria-label="Regalos de Navidad personalizados">
+      <div class="hero-pista">
+        <div class="hero-slide" role="group" aria-roledescription="diapositiva" aria-label="1 de 5">
+          <a class="hero-slide-link" href="navidad/#regalos">
+            <img src="imagenes/publicuadronavidad1.png" alt="Cuadro personalizado navideño" width="600" height="600" loading="eager" fetchpriority="high" decoding="async">
+            <span class="hero-slide-texto"><strong>Cuadro navideño con tus fotos</strong><span>Ver regalos de Navidad</span></span>
+          </a>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="diapositiva" aria-label="2 de 5">
+          <a class="hero-slide-link" href="navidad/#regalos">
+            <img src="imagenes/navidad1a12.png" alt="Los 12 diseños del cuadro navideño, numerados del 1 al 12" width="600" height="600" loading="lazy" decoding="async">
+            <span class="hero-slide-texto"><strong>12 diseños de Navidad para elegir</strong><span>Ver regalos de Navidad</span></span>
+          </a>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="diapositiva" aria-label="3 de 5">
+          <a class="hero-slide-link" href="navidad/#envolver">
+            <img src="imagenes/etiquetas-navidenas-disenos-1-24.webp" alt="Hoja con 24 etiquetas navideñas de diseños distintos, numeradas del 1 al 24" width="600" height="600" loading="lazy" decoding="async">
+            <span class="hero-slide-texto"><strong>Etiquetas navideñas para tus regalos</strong><span>Ver regalos de Navidad</span></span>
+          </a>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="diapositiva" aria-label="4 de 5">
+          <a class="hero-slide-link" href="navidad/#envolver">
+            <img src="imagenes/etiquetas-navidenas-tiras-1-4.webp" alt="Cuatro tiras de etiquetas navideñas, numeradas del 1 al 4, con 6 etiquetas cada una" width="600" height="600" loading="lazy" decoding="async">
+            <span class="hero-slide-texto"><strong>Tiras de 6 etiquetas</strong><span>Ver regalos de Navidad</span></span>
+          </a>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="diapositiva" aria-label="5 de 5">
+          <a class="hero-slide-link" href="navidad/#emprendedores">
+            <img src="imagenes/stickers-personalizados-3-a-6-cm.webp" alt="Hojas de stickers circulares con un logo de ejemplo, en tamaños de 3x3 a 9x9 cm" width="600" height="600" loading="lazy" decoding="async">
+            <span class="hero-slide-texto"><strong>Stickers con tu logo para tu emprendimiento</strong><span>Ver regalos de Navidad</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="hero-puntos">
+        <button type="button" class="hero-punto" aria-label="Ir a la diapositiva 1" aria-current="true"></button>
+        <button type="button" class="hero-punto" aria-label="Ir a la diapositiva 2"></button>
+        <button type="button" class="hero-punto" aria-label="Ir a la diapositiva 3"></button>
+        <button type="button" class="hero-punto" aria-label="Ir a la diapositiva 4"></button>
+        <button type="button" class="hero-punto" aria-label="Ir a la diapositiva 5"></button>
+      </div>
+      <button type="button" class="hero-pausa" aria-label="Pausar el carrusel" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect class="ic-pausa" x="6" y="5" width="4" height="14"/><rect class="ic-pausa" x="14" y="5" width="4" height="14"/><path class="ic-play" d="M8 5l11 7-11 7z"/></svg></button>
+    </div>
   </div>
 </section>
 
@@ -273,7 +314,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261112a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");

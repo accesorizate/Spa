@@ -157,16 +157,18 @@ document.addEventListener("error", e => {
 //   Página de categoría:  { categorias: [...], tituloSeccion: ... }
 //   Página de producto:   { productos: ["id-del-producto", ...], tituloSeccion: "...", categoriaActiva: "Cuadros" }
 //     (categoriaActiva = categoría que se marca en el menú, porque el producto vive dentro de esa categoría).
+//   Página de temporada (/navidad/): { hub: true, secciones: [{ id, titulo, texto, productos: ["id", ...] }, ...] }
+//     Reúne productos de varias categorías, en secciones con su propio título.
 //   Guía o página de ideas (carpeta /ideas/): { guia: true }. No muestra catálogo; solo el menú, el carrito y el texto de la página.
 const PAGINA = window.CONFIG_PAGINA || {};
-const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos || PAGINA.guia);
+const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos || PAGINA.secciones || PAGINA.guia);
 
 // En las páginas de categoría, solo la primera foto se pide de inmediato y con prioridad alta (es lo primero que
 // ve el cliente); las demás esperan y van con prioridad baja para no quitarle velocidad a la primera.
 // En el inicio todas cargan al acercarse.
 let fotosConPrioridad = esPaginaPropia ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
-const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.guia ? [] : categorias);
+const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.secciones || PAGINA.guia ? [] : categorias);
 const catalogoEl = document.getElementById("catalogo");
 const navEl = document.getElementById("catNav");
 const chipsEl = document.getElementById("catNavChips");
@@ -189,7 +191,12 @@ function tituloDeSeccion(cat) {
 // El menú ya viene escrito en el HTML de cada página; aquí se vuelve a armar con lo que hay disponible
 // hoy, así que si coincide no se mueve nada.
 const direccionesDelMenu = new Set();
-let menuHtml = "";
+// Temporada de Navidad: "Navidad" va primero en el menú y lleva a la página /navidad/ (ver paginas.js).
+// Cuando termine la temporada, cambia true por false y la entrada desaparece del menú de todas las páginas.
+const MOSTRAR_NAVIDAD = true;
+let menuHtml = MOSTRAR_NAVIDAD
+  ? `<a href="navidad/" class="nav-navidad${PAGINA.hub ? " activa" : ""}"${PAGINA.hub ? ' aria-current="page"' : ""}>Navidad</a>`
+  : "";
 categorias.forEach(cat => {
   const href = enlaceDeCategoria(cat);
   if (direccionesDelMenu.has(href)) return;
@@ -211,6 +218,19 @@ if (productosDeLaPagina.length) {
   catalogoEl.appendChild(seccion);
 }
 
+// Página de temporada: varias secciones, cada una con los productos que ella nombra (los ocultos no aparecen
+// y una sección que se queda sin productos no se muestra).
+const seccionesDeLaPagina = (PAGINA.secciones || [])
+  .map(s => ({ ...s, lista: s.productos.map(id => productos.find(p => p.id === id)).filter(Boolean) }))
+  .filter(s => s.lista.length);
+seccionesDeLaPagina.forEach(s => {
+  const seccion = document.createElement("section");
+  seccion.className = "categoria";
+  seccion.id = s.id;
+  seccion.innerHTML = `<div class="wrap"><h2>${s.titulo}</h2>${s.texto ? `<p class="seccion-texto">${s.texto}</p>` : ""}<div class="grid">${s.lista.map(renderCard).join("")}</div></div>`;
+  catalogoEl.appendChild(seccion);
+});
+
 categoriasDeLaPagina.forEach(cat => {
   const slug = slugDeCategoria(cat);
   const seccion = document.createElement("section");
@@ -223,7 +243,7 @@ categoriasDeLaPagina.forEach(cat => {
 });
 
 // Página de categoría cuyos productos están todos ocultos por ahora.
-if ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length)) {
+if ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length) || (PAGINA.secciones && !seccionesDeLaPagina.length)) {
   catalogoEl.innerHTML = `<p class="sin-productos">Por ahora no tenemos productos disponibles en esta categoría. <a href="/">Volver al inicio</a>.</p>`;
 }
 
@@ -452,6 +472,89 @@ function datosEstructuradosDeProducto() {
   el.textContent = JSON.stringify(dato).replace(/</g, "\\u003c");
 }
 datosEstructuradosDeProducto();
+
+// -- Navidad: cuenta regresiva de las fechas límite (solo en /navidad/, donde hay elementos con data-plazo) --
+// La fecha de hoy se toma en horario de Chile, sin importar la zona horaria de quien mira la página.
+function hoyEnChile() {
+  try {
+    const f = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
+  } catch (e) { /* si el navegador no lo soporta, se usa la fecha del dispositivo */ }
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function diasEntre(desdeISO, hastaISO) {
+  const [a, b] = [desdeISO, hastaISO].map(f => { const [y, m, d] = f.split("-").map(Number); return Date.UTC(y, m - 1, d); });
+  return Math.round((b - a) / 86400000);
+}
+function textoCuentaRegresiva(dias) {
+  if (dias > 1) return `Faltan ${dias} días`;
+  if (dias === 1) return "Falta 1 día";
+  if (dias === 0) return "Hoy es el último día";
+  return "Plazo cerrado";
+}
+document.querySelectorAll("[data-plazo]").forEach(el => {
+  const cuenta = el.querySelector("[data-cuenta]");
+  if (!cuenta || !el.dataset.fecha) return;
+  const dias = diasEntre(hoyEnChile(), el.dataset.fecha);
+  cuenta.textContent = textoCuentaRegresiva(dias);
+  el.classList.toggle("cerrado", dias < 0);
+});
+
+// -- Carrusel de temporada del inicio (#heroCarrusel) --
+// Se desliza con el dedo (scroll-snap), tiene puntos y avanza solo cada 4,5 segundos. Se detiene cuando alguien lo toca,
+// lo mira con el mouse o enfoca algo dentro de él, cuando no se ve en pantalla y si el dispositivo pide menos movimiento.
+// El botón de pausa deja detenerlo a quien lo prefiera.
+(function iniciarCarruselDeTemporada() {
+  const carrusel = document.getElementById("heroCarrusel");
+  if (!carrusel) return;
+  const pista = carrusel.querySelector(".hero-pista");
+  const slides = [...carrusel.querySelectorAll(".hero-slide")];
+  const puntos = [...carrusel.querySelectorAll(".hero-punto")];
+  const botonPausa = carrusel.querySelector(".hero-pausa");
+  if (!pista || slides.length < 2) { if (botonPausa) botonPausa.remove(); return; }
+  const menosMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let actual = 0, detenido = menosMovimiento, pausaHasta = 0, visible = true;
+
+  function marcarActual() {
+    const i = Math.max(0, Math.min(slides.length - 1, Math.round(pista.scrollLeft / pista.clientWidth)));
+    actual = i;
+    puntos.forEach((p, n) => { if (n === i) p.setAttribute("aria-current", "true"); else p.removeAttribute("aria-current"); });
+  }
+  function irA(i, sinAnimacion) {
+    pista.scrollTo({ left: i * pista.clientWidth, behavior: menosMovimiento || sinAnimacion ? "auto" : "smooth" });
+  }
+  let esperaScroll = false;
+  pista.addEventListener("scroll", () => {
+    if (esperaScroll) return;
+    esperaScroll = true;
+    requestAnimationFrame(() => { marcarActual(); esperaScroll = false; });
+  });
+  puntos.forEach((p, n) => p.addEventListener("click", () => { pausaHasta = Date.now() + 8000; irA(n); }));
+  ["pointerdown", "touchstart", "wheel"].forEach(ev => pista.addEventListener(ev, () => { pausaHasta = Date.now() + 8000; }, { passive: true }));
+
+  if (botonPausa) {
+    if (menosMovimiento) botonPausa.remove();
+    else botonPausa.addEventListener("click", () => {
+      detenido = !detenido;
+      botonPausa.setAttribute("aria-pressed", String(detenido));
+      botonPausa.setAttribute("aria-label", detenido ? "Reanudar el carrusel" : "Pausar el carrusel");
+      botonPausa.classList.toggle("en-pausa", detenido);
+    });
+  }
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(entradas => { visible = entradas[0].isIntersecting; }, { threshold: 0.4 }).observe(carrusel);
+  }
+  if (!menosMovimiento) {
+    setInterval(() => {
+      if (detenido || !visible || document.hidden || Date.now() < pausaHasta) return;
+      if (carrusel.matches(":hover") || carrusel.querySelector(":focus-visible")) return;
+      const siguiente = (actual + 1) % slides.length;
+      irA(siguiente, siguiente === 0); // al volver a la primera no recorre todas las demás
+    }, 4500);
+  }
+  marcarActual();
+})();
 
 // Catálogo y destacados ya están armados: se muestra lo que iba debajo (ver .esperar-catalogo en tienda.css).
 document.body.classList.add("tienda-lista");
