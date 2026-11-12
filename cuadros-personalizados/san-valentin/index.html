@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261112a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -37,7 +37,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261111b">
+<link rel="stylesheet" href="tienda.css?v=20261112a">
 </head>
 <body>
 
@@ -45,7 +45,7 @@
 <header>
   <div class="wrap">
     <a href="/" class="logo-link" aria-label="Accesorizate, ir al inicio"><img src="imagenes/logo.png" alt="Accesorizate" class="logo"></a>
-    <nav id="catNav"><a href="cuadros-personalizados/" class="activa">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></nav>
+    <nav id="catNav"><a href="navidad/" class="nav-navidad">Navidad</a><a href="cuadros-personalizados/" class="activa">Cuadros</a><a href="stickers/">Stickers</a><a href="stickers-personalizados/">Stickers personalizados</a><a href="posters-personalizados/">Posters</a><a href="impresion-de-fotos/">Fotografías</a><a href="fotos-polaroid/">Fotografías Polaroid</a><a href="calendarios-personalizados/">Calendarios</a><a href="marcapaginas-personalizados/">Marcapáginas</a><a href="libretas/">Libretas</a><a href="etiquetas-navidenas/">Etiquetas navideñas</a><a href="llaveros-personalizados/">Llaveros</a><a href="photocards-personalizadas/">Photocards</a></nav>
     <div class="header-actions">
       <button class="icon-btn" type="button" id="btnBuscar" aria-label="Buscar" aria-expanded="false" title="Buscar productos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -251,7 +251,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261111b"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261112a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
