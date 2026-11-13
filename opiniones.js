@@ -32,21 +32,36 @@ const PEDIDOS_REALES_TEXTO = `
 # ----------------------------------------------------------------
 # Escribe aquí, una línea por foto (después de este comentario).
 # ----------------------------------------------------------------
-imagenes/pedido-real-01.webp | Pedido de Accesorizate en una bolsa de envío blanca con su etiqueta, sostenido frente a un portón
-imagenes/pedido-real-02.webp | Pedido grande de Accesorizate en una bolsa de envío blanca, sostenido con las dos manos
-imagenes/pedido-real-03.webp | Persona recibiendo su pedido de Accesorizate en una bolsa blanca, junto a una camioneta blanca
-imagenes/pedido-real-04.webp | Pedido de Accesorizate en una bolsa de envío blanca, entregado frente a una pared verde
-imagenes/pedido-real-05.webp | Pedido de Accesorizate en una bolsa de envío gris azulada, sostenido frente a una reja
-imagenes/pedido-real-06.webp | Dos paquetes de Accesorizate apilados, uno con una etiqueta roja de frágil, recibidos en una puerta
-imagenes/pedido-real-07.webp | Pedido de Accesorizate en una bolsa de envío lila, entregado en la calle
-imagenes/pedido-real-08.webp | Persona sosteniendo su pedido de Accesorizate en una bolsa blanca, en la calle frente a su casa
-imagenes/pedido-real-09.webp | Pedido grande de Accesorizate en una bolsa blanca, recibido a la entrada de una casa
-imagenes/pedido-real-10.webp | Cliente mostrando su pedido de Accesorizate en una bolsa de envío blanca, tras la reja de su casa
-imagenes/pedido-real-11.webp | Pedido de Accesorizate en una bolsa de envío blanca, entregado al anochecer en la calle
-imagenes/pedido-real-12.webp | Persona mostrando su pedido de Accesorizate en una bolsa blanca a través de una reja
-imagenes/pedido-real-13.webp | Pedido de Accesorizate en una bolsa blanca, visto a través de una reja
-imagenes/pedido-real-14.webp | Persona recibiendo su pedido de Accesorizate en una bolsa de envío blanca grande
-imagenes/pedido-real-15.webp | Pedido de Accesorizate en una bolsa de envío plateada, entregado de noche en la calle
+imagenes/pedido-real-01.webp
+imagenes/pedido-real-02.webp 
+imagenes/pedido-real-03.webp
+imagenes/pedido-real-04.webp 
+imagenes/pedido-real-05.webp
+imagenes/pedido-real-06.webp
+imagenes/pedido-real-07.webp
+imagenes/pedido-real-08.webp
+imagenes/pedido-real-09.webp
+imagenes/pedido-real-10.webp
+imagenes/pedido-real-11.webp
+imagenes/pedido-real-12.webp
+imagenes/pedido-real-13.webp
+imagenes/pedido-real-14.webp
+imagenes/pedido-real-15.webp
+imagenes/pedidos/pedido-real-16.webp
+imagenes/pedidos/pedido-real-17.webp
+imagenes/pedidos/pedido-real-18.webp
+imagenes/pedidos/pedido-real-19.webp
+imagenes/pedidos/pedido-real-20.webp
+imagenes/pedidos/pedido-real-21.webp
+imagenes/pedidos/pedido-real-22.webp
+imagenes/pedidos/pedido-real-23.webp 
+imagenes/pedidos/pedido-real-24.webp
+imagenes/pedidos/pedido-real-25.webp 
+imagenes/pedidos/pedido-real-26.webp  
+imagenes/pedidos/pedido-real-27.webp 
+imagenes/pedidos/pedido-real-28.webp 
+imagenes/pedidos/pedido-real-29.webp 
+imagenes/pedidos/pedido-real-30.webp 
 `;
 
 const OPINIONES_TEXTO = `
