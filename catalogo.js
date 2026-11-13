@@ -325,7 +325,8 @@ const TODOS_LOS_PRODUCTOS = [
   // (Cambia aquí cualquier precio: cada combinación de Tamaño y Cantidad tiene el suyo.)
   { id:"fotografias", categoria:"Fotografías", nombre:"Impresión de fotografías",
     descripcion:"Elige tamaño y cantidad de copias. Mientras más fotos, más descuento.",
-    imagen:"",
+    imagen:"imagenes/impresion-de-fotografias.webp",
+    alt:"Fotografía impresa de un gato atigrado sentado, sostenida con las dos manos",
     opciones:[
       { nombre:"Tamaño", valores:["10x15","21x29"] },
       { nombre:"Cantidad", valores:["5 unidades","10 unidades","20 unidades","50 unidades"] }
@@ -382,7 +383,9 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"calendario", categoria:"Calendarios", nombre:"Calendario 2027 personalizado",
     descripcion:"Elige el tipo de calendario.",
-    imagen:"", grupoPrecio:"Tipo",
+    imagen:"imagenes/calendario-2027-personalizado.webp",
+    alt:"Calendario de pared de enero 2027 con una ilustración de gatita blanca con lazo rosa, mini calendarios de diciembre y febrero y espacio para notas",
+    grupoPrecio:"Tipo",
     precios:{ "Normal":2000, "Imantado":2500 },
     opciones:[
       { nombre:"Tipo", valores:["Normal","Imantado"] }
@@ -465,7 +468,8 @@ const TODOS_LOS_PRODUCTOS = [
   // Papel de regalo: 1 unidad o 2 unidades (la de 2 cuesta menos por unidad). Los diseños (10) se agregan más adelante como opción "Diseño".
   { id:"papel-regalo", categoria:"Envoltorio de regalo", nombre:"Papel de regalo",
     descripcion:"Papel para envolver tus regalos. Si llevas 2 unidades, el valor por unidad baja.",
-    imagen:"",
+    imagen:"imagenes/papel-de-regalo.webp",
+    alt:"Rollo de papel de regalo rosado con diseños navideños de gatitas, estrellas y copos de nieve, a medio desenrollar",
     grupoPrecio:"Cantidad",
     precios:{ "1 unidad":300, "2 unidades":500 },
     opciones:[
@@ -477,7 +481,8 @@ const TODOS_LOS_PRODUCTOS = [
   // ("requiere"). Si el papel está en ocultos.js, el servicio tampoco se muestra; si el cliente saca el papel del carrito, se saca el servicio.
   { id:"envoltorio-regalo", categoria:"Envoltorio de regalo", nombre:"Servicio de envoltorio de regalo",
     descripcion:"Nos encargamos de envolver tu regalo. Para pedirlo, agrega primero papel de regalo a tu pedido. Se cobra por regalo y por separado del papel.",
-    imagen:"",
+    imagen:"imagenes/servicio-de-envoltorio-de-regalo.webp",
+    alt:"Regalo envuelto en papel rosado con motivos navideños y un gran lazo rojo de cinta",
     precioBase:500,
     requiere:"papel-regalo",
     requiereAviso:"Para pedir el servicio de envoltorio, agrega primero papel de regalo a tu pedido.",
@@ -532,7 +537,9 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"photocards", categoria:"Photocards", nombre:"Photocards",
     descripcion:"Elige el número de diseño y el acabado.",
-    imagen:"", precioBase:500,
+    imagen:"imagenes/photocards-personalizadas.webp",
+    alt:"Photocards con retratos de jóvenes con camisa y corbata, una sostenida en la mano y varias apiladas",
+    precioBase:500,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4","5"] },
       { nombre:"Acabado", valores:["Laminada","Plastificada"] }
