@@ -102,8 +102,8 @@ function crearStickersPersonalizados() {
   return {
     id:"stickers-personalizados", categoria:"Stickers personalizados", nombre:"Stickers personalizados con tu logo o imagen",
     descripcion:"Para packaging, bolsas y regalos. Elige la forma, la medida, el pack y el acabado: troquelado (cortado en la forma que elijas) o sin troquelar. Para otra medida, mira Stickers con medida personalizada.",
-    imagen:["imagenes/stickers-personalizados-afiche.webp","imagenes/stickers-personalizados-3-a-6-cm.webp","imagenes/stickers-personalizados-7-a-9-cm.webp"],
-    alt:"Stickers personalizados con frases y dibujos pegados en un notebook, con corte preciso",
+    imagen:["imagenes/stickers-personalizados-negocio.webp","imagenes/stickers-personalizados-3-a-6-cm.webp","imagenes/stickers-personalizados-7-a-9-cm.webp"],
+    alt:"Caja de envío blanca con tres stickers con logo pegados: uno triangular, uno redondo blanco y uno redondo celeste",
     opciones:[
       { nombre:"Forma", valores:["Circular","Cuadrado"] },
       { nombre:"Tamaño", valores:medidas },
@@ -346,8 +346,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
     descripcion:"Formato 5x8. Elige el acabado y la cantidad.",
-    imagen:["imagenes/fotos-polaroid-packs.webp","imagenes/publipolaroid.webp"],
-    alt:"Fotos estilo Polaroid personalizadas colgadas de un cordel con una pinza, con packs de 10, 35, 50 y 100 unidades",
+    imagen:["imagenes/fotos-polaroid-portada.webp","imagenes/publipolaroid.webp"],
+    alt:"Fotos estilo Polaroid colgadas de un cordel con un gancho de madera, sobre una pila de fotos",
     opciones:[
       { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
       { nombre:"Cantidad", dependeDe:"Acabado", valoresPorPadre:{
@@ -428,8 +428,8 @@ const TODOS_LOS_PRODUCTOS = [
   //  - "marcapaginas-princesas": diseños ya hechos, numerados del 1 al 18 (se elige uno por unidad).
   { id:"marcapaginas", categoria:"Marcapáginas", nombre:"Marcapáginas personalizado",
     descripcion:"Marcapáginas de 4 cm de ancho por 14 cm de alto con tu foto o tu diseño. Elige la cantidad y envíanos tu imagen después de pagar.",
-    imagen:"imagenes/marcapaginas-fotos.webp",
-    alt:"Marcapáginas con distintos diseños, ordenados en filas",
+    imagen:"imagenes/marcapaginas-personalizados.webp",
+    alt:"Abanico de marcapáginas plastificados con distintos diseños, sostenido en una mano",
     grupoPrecio:"Cantidad",
     precios:{ "1 unidad":400, "3 unidades":1000 },
     opciones:[
@@ -459,8 +459,8 @@ const TODOS_LOS_PRODUCTOS = [
   // Cuando haya libretas con diseños ya listos, se agregan como productos aparte (con su selector de diseño numerado).
   { id:"libretas", categoria:"Libretas", nombre:"Libreta personalizada",
     descripcion:"Libreta de 10 cm de ancho por 14 cm de alto, con 20 hojas en blanco. Lleva tu foto o tu diseño en la tapa: envíanoslo después de pagar.",
-    imagen:["imagenes/libretas-1.webp","imagenes/libretas-2.webp","imagenes/libretas-3.webp"],
-    alt:"Ejemplos de libretas con distintos diseños de tapa, ordenadas en filas",
+    imagen:"imagenes/libreta-personalizada.webp",
+    alt:"Libreta con una tapa de ilustraciones de cómic, sobre una mesa junto a una taza de café",
     precioBase:500,
     opciones:[],
     personalizable:true },
@@ -491,8 +491,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"etiqueta-cortada", categoria:"Etiquetas navideñas", nombre:"Etiqueta navideña (ya cortada)",
     descripcion:"Etiqueta navideña individual de 7x7 cm, ya cortada y lista para pegar en el regalo. Elige el diseño, del 1 al 24 (uno por unidad si llevas más de 1).",
-    imagen:"imagenes/etiquetas-navidenas-disenos-1-24.webp",
-    alt:"Hoja con 24 etiquetas navideñas de diseños distintos, numeradas del 1 al 24",
+    imagen:["imagenes/etiqueta-navidena-personalizada.webp","imagenes/etiquetas-navidenas-disenos-1-24.webp"],
+    alt:"Etiqueta navideña verde con un muñeco de jengibre y espacios para De y Para, pegada en un regalo de papel kraft con lazo rojo",
     grupoPrecio:"Cantidad",
     precios:{ "1 unidad":300, "2 unidades":500 },
     opciones:[
@@ -503,8 +503,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"etiquetas", categoria:"Etiquetas navideñas", nombre:"Set de etiquetas navideñas (tira sin cortar)",
     descripcion:"Tira sin cortar con 6 etiquetas navideñas de 7x7 cm. Elige el diseño de tira, del 1 al 4.",
-    imagen:"imagenes/etiquetas-navidenas-tiras-1-4.webp",
-    alt:"Cuatro tiras de etiquetas navideñas, numeradas del 1 al 4, con 6 etiquetas cada una",
+    imagen:["imagenes/etiqueta-navidena-personalizada.webp","imagenes/etiquetas-navidenas-tiras-1-4.webp"],
+    alt:"Etiqueta navideña verde con un muñeco de jengibre y espacios para De y Para, pegada en un regalo de papel kraft con lazo rojo",
     precioBase:1000,
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4"] }
@@ -521,16 +521,16 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"llavero", categoria:"Llaveros", nombre:"Llavero personalizado",
     descripcion:"Envía tu foto y te lo hacemos a medida.",
-    imagen:"imagenes/llaveros-personalizados.webp",
-    alt:"Llaveros acrílicos personalizados con una foto de pareja, un paisaje de montaña y una mascota con lentes",
+    imagen:"imagenes/llaveros-personalizados-portada.webp",
+    alt:"Tres llaveros acrílicos con fotos y diseños personalizados",
     precioBase:1290,
     opciones:[],
     personalizable:true },
 
   { id:"tarjetas-presentacion", categoria:"Tarjetas de presentación", nombre:"Tarjetas de presentación personalizadas",
     descripcion:"Pack de 100 tarjetas de presentación de 9 x 5,5 cm, impresas por una cara en papel fotográfico glossy de 230 gr, con tu diseño para tu negocio o tu marca personal.",
-    imagen:"imagenes/tarjetas-de-presentacion.webp",
-    alt:"Tarjetas de presentación personalizadas con logo, impresas en papel fotográfico glossy con colores nítidos",
+    imagen:"imagenes/tarjetas-de-presentacion-portada.webp",
+    alt:"Tarjetas de presentación personalizadas, una negra y una blanca con logo y código QR, apiladas sobre fondo gris",
     precioBase:7990,
     opciones:[],
     personalizable:true },
@@ -609,7 +609,7 @@ const SECCIONES_PRINCIPALES = [
     imagen:"imagenes/llaveros-personalizados-portada.webp", alt:"Tres llaveros acrílicos con fotos y diseños personalizados" },
   { id:"pymes", nombre:"Pymes", href:"pymes/",
     categorias:["Stickers personalizados","Imanes","Tarjetas de presentación"],
-    imagen:"imagenes/tarjetas-de-presentacion.webp", alt:"Tarjetas de presentación personalizadas con logo" },
+    imagen:"imagenes/tarjetas-de-presentacion-portada.webp", alt:"Tarjetas de presentación personalizadas con logo" },
 ];
 
 // ===========================================================
