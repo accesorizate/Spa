@@ -667,9 +667,13 @@ document.querySelectorAll("[data-plazo]").forEach(el => {
     return `${estrellasHtml(promedio)} <span><strong>${num(promedio)}</strong> de 5 · <strong>${ops.length}</strong> ${ops.length === 1 ? "reseña" : "reseñas"}</span>`;
   };
   // Para el inicio: unas pocas opiniones distintas, elegidas al azar en cada visita (primero de productos distintos).
-  function elegirVariadas(ops, max) {
-    const copia = ops.slice();
+  const mezclar = lista => {
+    const copia = lista.slice();
     for (let i = copia.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [copia[i], copia[j]] = [copia[j], copia[i]]; }
+    return copia;
+  };
+  function elegirVariadas(ops, max) {
+    const copia = mezclar(ops);
     const elegidas = [], productos = new Set();
     copia.forEach(o => { const k = o.producto.toLowerCase(); if (elegidas.length < max && !productos.has(k)) { productos.add(k); elegidas.push(o); } });
     copia.forEach(o => { if (elegidas.length < max && !elegidas.includes(o)) elegidas.push(o); });
@@ -734,7 +738,7 @@ document.querySelectorAll("[data-plazo]").forEach(el => {
     if (teaser) {
       if (!pedidos.length && !opiniones.length) { teaser.hidden = true; return; }
       const fotos = document.getElementById("pruebaGaleria"), res = document.getElementById("pruebaResumen"), ops = document.getElementById("pruebaOpiniones");
-      if (fotos) fotos.innerHTML = pedidos.length ? `<ul class="galeria-pedidos galeria-mini">${pedidos.slice(0, 4).map(p => fotoHtml(p, false)).join("")}</ul>` : "";
+      if (fotos) fotos.innerHTML = pedidos.length ? `<ul class="galeria-pedidos galeria-mini">${mezclar(pedidos).slice(0, 4).map(p => fotoHtml(p, false)).join("")}</ul>` : "";
       if (res) res.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
       if (ops) ops.innerHTML = elegirVariadas(opiniones, 5).map(opinionHtml).join("");
       // El título dice solo lo que se ve: opiniones, fotos o las dos cosas.
