@@ -28,7 +28,6 @@ const PRODUCTOS_OCULTOS = `
 # ----------------------------------------------------------------
 
 categoria: Encendedores
-Papel de regalo
 Pizarra infantil + plumones
 Álbum fotográfico personalizado
 
