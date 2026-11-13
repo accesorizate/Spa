@@ -48,7 +48,10 @@ function reglaVigente(regla) {
 }
 
 // Desde aquí, toda la tienda trabaja solo con los productos que sí están disponibles.
-const productos = TODOS_LOS_PRODUCTOS.filter(p => !REGLAS_OCULTOS.some(r => reglaVigente(r) && reglaCoincide(r, p)));
+const productosSinOcultos = TODOS_LOS_PRODUCTOS.filter(p => !REGLAS_OCULTOS.some(r => reglaVigente(r) && reglaCoincide(r, p)));
+// Un producto con "requiere" (por ejemplo, el servicio de envoltorio, que necesita papel de regalo) solo se muestra si el producto
+// que necesita también se muestra: así nadie ve algo que no puede pedir.
+const productos = productosSinOcultos.filter(p => !p.requiere || productosSinOcultos.some(q => q.id === p.requiere));
 
 REGLAS_OCULTOS.forEach(r => {
   if (!TODOS_LOS_PRODUCTOS.some(p => reglaCoincide(r, p))) {
@@ -368,11 +371,13 @@ function renderCard(prod) {
     <article class="card" data-card-id="${prod.id}">
       ${media}
       <div class="card-body">
+        ${prod.proximamente ? `<span class="etiqueta-proximamente">Próximamente</span>` : ""}
         <h3>${enlazarFicha ? `<a class="card-titulo-link" href="${fichaDelProducto}">${prod.nombre}</a>` : prod.nombre}</h3>
         <p class="desc">${prod.descripcion}</p>
         ${enlazarFicha ? `<a class="ver-detalles" href="${fichaDelProducto}" aria-label="Ver detalles de ${prod.nombre}">Ver detalles</a>` : ""}
         ${opcionesHtml}
         ${notaHtml}
+        ${prod.requiere ? `<p class="aviso-requisito" data-aviso-de="${prod.id}" role="status" hidden></p>` : ""}
         <div class="card-foot${prod.sinPrecio ? " sin-precio" : ""}">
           ${precioHtml}
           ${botonHtml}
@@ -436,8 +441,9 @@ if (destacadosGrid) {
 function datosEstructuradosDeProducto() {
   if (!esPaginaPropia) return;
   const visibles = PAGINA.productos ? productosDeLaPagina : productos.filter(p => categoriasDeLaPagina.includes(p.categoria));
-  if (visibles.length !== 1 || visibles[0].sinPrecio) return;
-  const prod = visibles[0];
+  const conPrecio = visibles.filter(p => !p.sinPrecio); // una tarjeta que solo cotiza por WhatsApp no cuenta como producto con precio
+  if (conPrecio.length !== 1) return;
+  const prod = conPrecio[0];
   const precio = precioProducto(prod, valoresPorDefecto(prod));
   if (!(precio > 0)) return;
   const dominio = "https://accesorizate.cl/";
@@ -556,6 +562,140 @@ document.querySelectorAll("[data-plazo]").forEach(el => {
   marcarActual();
 })();
 
+// -- Pedidos reales y opiniones: página /pedidos-reales/ y sección "Pedidos reales de nuestros clientes" del inicio --
+// Las fotos y las opiniones las escribe el dueño en opiniones.js (una línea por foto u opinión, separadas por |).
+// Aquí solo se leen y se dibujan. No se escriben datos estructurados (estrellas para Google): son opiniones del propio negocio.
+(function iniciarPedidosYOpiniones() {
+  const galeria = document.getElementById("galeriaPedidos");
+  const listaOp = document.getElementById("listaOpiniones");
+  const teaser = document.getElementById("pruebaSocial");
+  const form = document.getElementById("formOpinion");
+  if (!galeria && !listaOp && !teaser && !form) return;
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = n => String(n).replace(".", ",");
+  const estrellasHtml = n => `<span class="estrellas" style="--r:${n}" role="img" aria-label="${num(n)} de 5 estrellas"><span class="estrellas-fondo" aria-hidden="true">★★★★★</span><span class="estrellas-relleno" aria-hidden="true">★★★★★</span></span>`;
+  const lineas = texto => String(texto || "").split("\n").map(l => l.trim()).filter(l => l && !l.startsWith("#"));
+
+  function leerPedidos(texto) {
+    return lineas(texto).map(l => l.split("|").map(x => x.trim()))
+      .filter(c => /^[\w./-]+\.(webp|jpe?g|png|avif)$/i.test(c[0] || "") && c[1])
+      .map(c => ({ imagen: c[0], alt: c[1], producto: c[2] || "" }));
+  }
+  function leerOpiniones(texto) {
+    const salida = [];
+    lineas(texto).forEach(l => {
+      const c = l.split("|").map(x => x.trim());
+      const estrellas = Number(String(c[0]).replace(",", "."));
+      const opinion = c.slice(3).join(" | ");
+      if (!(estrellas >= 1 && estrellas <= 5) || (estrellas * 2) % 1 !== 0 || !c[1] || !opinion) { console.warn("Opinión ignorada, revisa cómo la escribiste:", l); return; }
+      salida.push({ estrellas, nombre: c[1], producto: c[2] || "", texto: opinion });
+    });
+    return salida;
+  }
+  const resumenHtml = ops => {
+    const promedio = Math.round(ops.reduce((s, o) => s + o.estrellas, 0) / ops.length * 10) / 10;
+    return `${estrellasHtml(promedio)} <span><strong>${num(promedio)}</strong> de 5 · ${ops.length} ${ops.length === 1 ? "opinión publicada" : "opiniones publicadas"}</span>`;
+  };
+  const opinionHtml = o => `
+    <article class="opinion">
+      <div class="opinion-cab">${estrellasHtml(o.estrellas)} <strong>${num(o.estrellas)}</strong></div>
+      <p class="opinion-texto">${esc(o.texto)}</p>
+      <p class="opinion-autor"><strong>${esc(o.nombre)}</strong>${o.producto ? ` · ${esc(o.producto)}` : ""}</p>
+    </article>`;
+  const fotoHtml = (p, conPie) => `<li><figure><img src="${esc(p.imagen)}" alt="${esc(p.alt)}" width="600" height="600" loading="lazy" decoding="async">${conPie && p.producto ? `<figcaption>${esc(p.producto)}</figcaption>` : ""}</figure></li>`;
+
+  function dibujar() {
+    const pedidos = leerPedidos(typeof PEDIDOS_REALES_TEXTO !== "undefined" ? PEDIDOS_REALES_TEXTO : "");
+    const opiniones = leerOpiniones(typeof OPINIONES_TEXTO !== "undefined" ? OPINIONES_TEXTO : "");
+    if (galeria) {
+      galeria.innerHTML = pedidos.length
+        ? `<ul class="galeria-pedidos">${pedidos.map(p => fotoHtml(p, true)).join("")}</ul>`
+        : `<p class="op-vacio">Muy pronto subiremos aquí fotos de pedidos reales.</p>`;
+    }
+    if (listaOp) {
+      const resumen = document.getElementById("resumenOpiniones");
+      if (resumen) resumen.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
+      listaOp.innerHTML = opiniones.length
+        ? opiniones.map(opinionHtml).join("")
+        : `<p class="op-vacio">Todavía no hay opiniones publicadas. Cuando compres, cuéntanos cómo te fue en el formulario de más abajo.</p>`;
+    }
+    if (teaser) {
+      if (!pedidos.length && !opiniones.length) { teaser.hidden = true; return; }
+      const fotos = document.getElementById("pruebaGaleria"), res = document.getElementById("pruebaResumen"), ops = document.getElementById("pruebaOpiniones");
+      if (fotos) fotos.innerHTML = pedidos.length ? `<ul class="galeria-pedidos galeria-mini">${pedidos.slice(0, 4).map(p => fotoHtml(p, false)).join("")}</ul>` : "";
+      if (res) res.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
+      if (ops) ops.innerHTML = opiniones.slice(0, 2).map(opinionHtml).join("");
+      teaser.hidden = false;
+    }
+  }
+  if (galeria || listaOp || teaser) {
+    // opiniones.js se pide solo en las páginas que lo usan; lleva un número que cambia cada minuto para que los cambios se vean enseguida.
+    if (typeof PEDIDOS_REALES_TEXTO !== "undefined") dibujar();
+    else {
+      const s = document.createElement("script");
+      s.src = "opiniones.js?t=" + Math.floor(Date.now() / 60000);
+      s.onload = dibujar;
+      s.onerror = dibujar; // si no existe el archivo, se ve el estado vacío
+      document.body.appendChild(s);
+    }
+  }
+
+  // Formulario "Deja tu opinión": no hay servidor, así que arma el mensaje y lo abre en WhatsApp o en el correo.
+  // Tú lo lees y decides si lo publicas (agregándolo a opiniones.js).
+  if (form) {
+    const campos = { nombre: form.elements.nombre, estrellas: form.elements.estrellas, producto: form.elements.producto, opinion: form.elements.opinion, acepta: form.elements.acepta };
+    const aviso = document.getElementById("opAviso"), vista = document.getElementById("opVista"), contador = document.getElementById("opContador");
+    const actualizarVista = () => { const v = Number(campos.estrellas.value); vista.innerHTML = v ? `${estrellasHtml(v)} <span>${num(v)} de 5</span>` : ""; };
+    campos.estrellas.addEventListener("change", actualizarVista);
+    campos.opinion.addEventListener("input", () => { contador.textContent = `${campos.opinion.value.length} de 600`; });
+    form.addEventListener("submit", e => e.preventDefault());
+
+    function validar() {
+      const errores = [
+        [campos.nombre, !campos.nombre.value.trim(), "Escribe tu nombre."],
+        [campos.estrellas, !campos.estrellas.value, "Elige tu calificación, de 1 a 5 estrellas."],
+        [campos.opinion, campos.opinion.value.trim().length < 10, "Cuéntanos un poco más: tu opinión debe tener al menos 10 caracteres."],
+        [campos.acepta, !campos.acepta.checked, "Marca la casilla para autorizarnos a publicar tu opinión."]
+      ];
+      Object.values(campos).forEach(c => c.removeAttribute("aria-invalid"));
+      const primero = errores.find(e => e[1]);
+      if (primero) {
+        primero[0].setAttribute("aria-invalid", "true");
+        aviso.textContent = primero[2]; aviso.classList.add("error");
+        primero[0].focus();
+        return false;
+      }
+      return true;
+    }
+    function mensaje() {
+      const lineasMensaje = [
+        "Hola! Quiero dejar mi opinión sobre Accesorizate.", "",
+        `Calificación: ${num(campos.estrellas.value)} de 5`,
+        campos.producto.value.trim() ? `Producto: ${campos.producto.value.trim()}` : "",
+        `Nombre: ${campos.nombre.value.trim()}`,
+        `Opinión: ${campos.opinion.value.trim()}`, "",
+        "Autorizo que se publique en el sitio con mi nombre (y mi foto, si envío una)."
+      ];
+      return lineasMensaje.filter((l, i) => l !== "" || i === 1 || i === lineasMensaje.length - 2).join("\n");
+    }
+    const listo = donde => {
+      aviso.classList.remove("error");
+      aviso.textContent = `Listo: se abrió el mensaje en ${donde} con tu opinión. Envíalo para que nos llegue; la revisamos antes de publicarla.`;
+    };
+    document.getElementById("opWsp").addEventListener("click", () => {
+      if (!validar()) return;
+      window.open(`https://wa.me/56920635715?text=${encodeURIComponent(mensaje())}`, "_blank", "noopener");
+      listo("WhatsApp");
+    });
+    document.getElementById("opCorreo").addEventListener("click", () => {
+      if (!validar()) return;
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=Venta.accesorizate@gmail.com&su=${encodeURIComponent("Mi opinión sobre Accesorizate")}&body=${encodeURIComponent(mensaje())}`, "_blank", "noopener");
+      listo("tu correo");
+    });
+  }
+})();
+
 // Catálogo y destacados ya están armados: se muestra lo que iba debajo (ver .esperar-catalogo en tienda.css).
 document.body.classList.add("tienda-lista");
 
@@ -667,6 +807,14 @@ function guardarAvisosCarrito(lista) {
 function agregarAlCarrito(id) {
   const prod = productos.find(p => p.id === id);
   const card = document.querySelector(`.card[data-card-id="${id}"]`);
+  if (prod.requiere && !carrito.some(l => l.id === prod.requiere)) {
+    const aviso = card.querySelector(`[data-aviso-de="${id}"]`);
+    if (aviso) {
+      aviso.textContent = prod.requiereAviso || `Para pedir este producto, agrega primero ${(productos.find(p => p.id === prod.requiere) || {}).nombre || "el producto que necesita"} a tu pedido.`;
+      aviso.hidden = false;
+    }
+    return;
+  }
   const seleccion = leerSeleccionDeCard(card);
   const precio = precioProducto(prod, seleccion);
   // Foto que el cliente está viendo en la tarjeta (la de la variante elegida).
@@ -781,7 +929,30 @@ function eliminarLinea(lineaId) {
   guardarYRenderizarCarrito();
 }
 
+// Lo que un producto requiere (por ejemplo, papel de regalo para el servicio de envoltorio): si ya no está en el carrito,
+// se quita también el producto que lo necesitaba y se le explica al cliente.
+let avisosRequisito = [];
+function aplicarRequisitosDelCarrito() {
+  const sobran = carrito.filter(l => {
+    const prod = productos.find(p => p.id === l.id);
+    return prod && prod.requiere && !carrito.some(x => x.id === prod.requiere);
+  });
+  if (sobran.length) {
+    carrito = carrito.filter(l => !sobran.includes(l));
+    [...new Set(sobran.map(l => l.nombre))].forEach(nombre => {
+      const prod = productos.find(p => p.nombre === nombre);
+      const necesita = (productos.find(p => p.id === (prod && prod.requiere)) || {}).nombre || "el producto que necesita";
+      avisosRequisito.push(`Quitamos «${nombre}» de tu pedido porque necesita «${necesita}» y ya no está en tu pedido.`);
+    });
+  }
+  document.querySelectorAll(".aviso-requisito").forEach(el => {
+    const prod = productos.find(p => p.id === el.dataset.avisoDe);
+    if (prod && carrito.some(l => l.id === prod.requiere)) el.hidden = true;
+  });
+}
+
 function guardarYRenderizarCarrito() {
+  aplicarRequisitosDelCarrito();
   localStorage.setItem("carrito", JSON.stringify(carrito));
   renderizarCarrito();
 }
@@ -907,12 +1078,12 @@ function renderizarCarrito() {
   // Aviso de productos que se quitaron del carrito por no estar disponibles.
   const avisoEl = document.getElementById("cartAviso");
   const avisos = leerAvisosCarrito();
-  avisoEl.hidden = avisos.length === 0;
-  avisoEl.textContent = avisos.length === 1
-    ? `«${avisos[0]}» ya no está disponible por ahora, así que lo quitamos de tu pedido.`
-    : avisos.length > 1
-      ? `Estos productos ya no están disponibles por ahora y los quitamos de tu pedido: ${avisos.map(n => `«${n}»`).join(", ")}.`
-      : "";
+  const textosAviso = [];
+  if (avisos.length === 1) textosAviso.push(`«${avisos[0]}» ya no está disponible por ahora, así que lo quitamos de tu pedido.`);
+  else if (avisos.length > 1) textosAviso.push(`Estos productos ya no están disponibles por ahora y los quitamos de tu pedido: ${avisos.map(n => `«${n}»`).join(", ")}.`);
+  textosAviso.push(...avisosRequisito);
+  avisoEl.hidden = textosAviso.length === 0;
+  avisoEl.textContent = textosAviso.join(" ");
 
   const totalCantidad = carrito.reduce((s, l) => s + l.cantidad, 0);
   document.getElementById("cartCount").textContent = totalCantidad;
@@ -942,24 +1113,15 @@ function cerrarCarrito() {
   document.getElementById("overlay").classList.remove("open");
   // Un cambio sin guardar no queda "a medias" al volver a abrir el carrito, y el
   // aviso de productos quitados se muestra una sola vez.
-  const habiaAviso = leerAvisosCarrito().length > 0;
-  if (habiaAviso) guardarAvisosCarrito([]);
+  const habiaAviso = leerAvisosCarrito().length > 0 || avisosRequisito.length > 0;
+  if (leerAvisosCarrito().length > 0) guardarAvisosCarrito([]);
+  avisosRequisito = [];
   if (edicion || habiaAviso) { edicion = null; renderizarCarrito(); }
 }
 
 document.getElementById("cartToggle").addEventListener("click", abrirCarrito);
 document.getElementById("cartClose").addEventListener("click", cerrarCarrito);
 document.getElementById("overlay").addEventListener("click", cerrarCarrito);
-
-// -- Newsletter (solo interfaz: no hay backend conectado todavía) --
-const formNewsletter = document.getElementById("formNewsletter");
-if (formNewsletter) {
-  formNewsletter.addEventListener("submit", e => {
-    e.preventDefault();
-    document.getElementById("newsletterMsg").style.display = "block";
-    formNewsletter.reset();
-  });
-}
 
 // Arma el mensaje de WhatsApp con el resumen del pedido, el envío elegido
 // y los datos del cliente (con la dirección de envío solo si no es retiro).
@@ -1087,10 +1249,13 @@ if (new URLSearchParams(location.search).has("ocultos")) {
       <strong>Revisión de productos ocultos</strong>
       <span>(solo lo ves tú, porque abriste la tienda con ?ocultos)</span>
       ${REGLAS_OCULTOS.length ? `<ul>${filas}</ul>` : `<p>La lista está vacía: se muestran todos los productos.</p>`}
+      ${productosSinOcultos.length > productos.length ? `<p>Estos productos no se muestran porque necesitan otro que está oculto: ${productosSinOcultos.filter(p => !productos.includes(p)).map(p => esc(p.nombre)).join(", ")}.</p>` : ""}
       <p>Se muestran ${productos.length} de ${TODOS_LOS_PRODUCTOS.length} productos.</p>
     </div>
   `);
 }
 
 actualizarSeccionEnvio();
+aplicarRequisitosDelCarrito();
+localStorage.setItem("carrito", JSON.stringify(carrito));
 renderizarCarrito();

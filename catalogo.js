@@ -70,6 +70,52 @@ const ENCENDEDORES_TEMATICOS = [
   ["thor", "Thor"],
 ];
 
+// Stickers personalizados (con tu logo o imagen): 3 packs por medida.
+// CANTIDADES: cuántos stickers trae cada pack en cada medida, en este orden: [pack 1, pack 2, pack 3].
+// PRECIOS: lo que cuesta cada pack según el acabado. Es el mismo precio para todas las medidas.
+// Para cambiar una cantidad o un precio, cambia el número aquí; el resto de la tienda se arma sola.
+const STICKERS_PERSONALIZADOS_CANTIDADES = {
+  "3x3 cm": [120, 240, 480],
+  "4x4 cm": [70, 140, 280],
+  "5x5 cm": [45, 90, 180],
+  "6x6 cm": [35, 70, 140],
+  "7x7 cm": [24, 48, 90],
+  "8x8 cm": [18, 36, 70],
+  "9x9 cm": [18, 36, 70]
+};
+const STICKERS_PERSONALIZADOS_PRECIOS = [
+  { "Troquelado": 4500,  "Sin troquelar": 3000 },
+  { "Troquelado": 7500,  "Sin troquelar": 6000 },
+  { "Troquelado": 13500, "Sin troquelar": 12000 }
+];
+function crearStickersPersonalizados() {
+  const medidas = Object.keys(STICKERS_PERSONALIZADOS_CANTIDADES);
+  const acabados = Object.keys(STICKERS_PERSONALIZADOS_PRECIOS[0]);
+  const valoresPorPadre = {}, preciosPorCombinacion = {};
+  medidas.forEach(medida => {
+    const cantidades = STICKERS_PERSONALIZADOS_CANTIDADES[medida];
+    valoresPorPadre[medida] = cantidades.map(n => `${n} unidades`);
+    cantidades.forEach((n, pack) => acabados.forEach(acabado => {
+      preciosPorCombinacion[`${medida}|${n} unidades|${acabado}`] = STICKERS_PERSONALIZADOS_PRECIOS[pack][acabado];
+    }));
+  });
+  return {
+    id:"stickers-personalizados", categoria:"Stickers personalizados", nombre:"Stickers personalizados con tu logo o imagen",
+    descripcion:"Para packaging, bolsas y regalos. Elige la forma, la medida, el pack y el acabado: troquelado (cortado en la forma que elijas) o sin troquelar. Para otra medida, mira Stickers con medida personalizada.",
+    imagen:["imagenes/stickers-personalizados-afiche.webp","imagenes/stickers-personalizados-3-a-6-cm.webp","imagenes/stickers-personalizados-7-a-9-cm.webp"],
+    alt:"Stickers personalizados con frases y dibujos pegados en un notebook, con corte preciso",
+    opciones:[
+      { nombre:"Forma", valores:["Circular","Cuadrado"] },
+      { nombre:"Tamaño", valores:medidas },
+      { nombre:"Cantidad", dependeDe:"Tamaño", valoresPorPadre },
+      { nombre:"Acabado", valores:acabados }
+    ],
+    combinacionPrecio:["Tamaño","Cantidad","Acabado"],
+    preciosPorCombinacion,
+    personalizable:true
+  };
+}
+
 // ===========================================================
 // 1) TUS PRODUCTOS — edita nombres, precios (CLP), imágenes y opciones aquí.
 // ===========================================================
@@ -231,20 +277,21 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:false },
 
-  // Stickers a medida: se cotizan por WhatsApp (sin precio ni carrito) hasta que tengas precios y cantidades.
-  // Forma y Tamaño que elige el cliente viajan en el mensaje de WhatsApp. Cuando tengas precios,
-  // quita "accionPersonalizada" y "sinPrecio" y agrega "combinacionPrecio" + "preciosPorCombinacion".
-  { id:"stickers-personalizados", categoria:"Stickers personalizados", nombre:"Stickers personalizados con tu logo o imagen",
-    descripcion:"Para packaging, bolsas y regalos. Elige forma y tamaño y cuéntanos tu idea por WhatsApp: te cotizamos.",
+  // Stickers con tu logo: precios por medida, pack y acabado (tablas al comienzo de este archivo).
+  crearStickersPersonalizados(),
+
+  // Medida personalizada: se cotiza por WhatsApp (sin precio ni carrito).
+  { id:"stickers-medida-personalizada", categoria:"Stickers personalizados", nombre:"Stickers con medida personalizada",
+    descripcion:"¿Necesitas otra medida? Cuéntanos el tamaño y la cantidad por WhatsApp y te cotizamos.",
     imagen:["imagenes/stickers-personalizados-3-a-6-cm.webp","imagenes/stickers-personalizados-7-a-9-cm.webp"],
     alt:"Hojas de stickers circulares con un logo de ejemplo, en tamaños de 3x3 a 9x9 cm",
     opciones:[
       { nombre:"Forma", valores:["Circular","Cuadrado"] },
-      { nombre:"Tamaño", valores:["3x3 cm","4x4 cm","5x5 cm","6x6 cm","7x7 cm","8x8 cm","9x9 cm","Medida personalizada"] }
+      { nombre:"Acabado", valores:["Troquelado","Sin troquelar"] }
     ],
     accionPersonalizada:{
       tipo:"whatsapp",
-      mensaje:"Hola! Quiero cotizar stickers personalizados con mi logo o imagen."
+      mensaje:"Hola! Quiero cotizar stickers con una medida personalizada."
     },
     sinPrecio:true,
     personalizable:false },
@@ -298,8 +345,8 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
     descripcion:"Formato 5x8. Elige el acabado y la cantidad.",
-    imagen:"imagenes/publipolaroid.webp",
-    alt:"Fotos estilo Polaroid personalizadas en acabado normal, laminado e imantado",
+    imagen:["imagenes/fotos-polaroid-packs.webp","imagenes/publipolaroid.webp"],
+    alt:"Fotos estilo Polaroid personalizadas colgadas de un cordel con una pinza, con packs de 10, 35, 50 y 100 unidades",
     opciones:[
       { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
       { nombre:"Cantidad", dependeDe:"Acabado", valoresPorPadre:{
@@ -341,6 +388,36 @@ const TODOS_LOS_PRODUCTOS = [
       { nombre:"Tipo", valores:["Normal","Imantado"] }
     ],
     personalizable:true },
+
+  // Próximamente: imanes y calendario imantado. Aún sin precio, se cotizan por WhatsApp (sin carrito).
+  // Cuando tengan precio: quita "proximamente", "accionPersonalizada" y "sinPrecio", y agrega "combinacionPrecio" + "preciosPorCombinacion".
+  // Sin foto por ahora (muestra el logo). Cuando la tengas, escribe su ruta en "imagen" y su descripción en "alt".
+  { id:"imanes", categoria:"Imanes", nombre:"Imanes personalizados",
+    descripcion:"Imanes con tu foto o diseño, de 5x5 cm, de 7x7 cm o en otra medida, normales o laminados. Cuéntanos qué necesitas por WhatsApp y te cotizamos.",
+    imagen:"",
+    opciones:[
+      { nombre:"Medida", valores:["5x5 cm","7x7 cm","Medida personalizada"] },
+      { nombre:"Acabado", valores:["Normal","Laminado"] }
+    ],
+    accionPersonalizada:{
+      tipo:"whatsapp",
+      mensaje:"Hola! Quiero cotizar imanes personalizados."
+    },
+    sinPrecio:true,
+    proximamente:true,
+    personalizable:false },
+
+  { id:"calendario-imantado", categoria:"Imanes", nombre:"Calendario imantado",
+    descripcion:"Imagen de 7x7 cm en formato imán, más un mini calendario de 7,5 x 5,5 cm. Cuéntanos qué necesitas por WhatsApp y te cotizamos.",
+    imagen:"",
+    opciones:[],
+    accionPersonalizada:{
+      tipo:"whatsapp",
+      mensaje:"Hola! Quiero cotizar un calendario imantado."
+    },
+    sinPrecio:true,
+    proximamente:true,
+    personalizable:false },
 
   // Marcapáginas: tres productos. Todos miden 4 cm de ancho por 14 cm de alto.
   //  - "marcapaginas": personalizado (el cliente envía su foto o diseño).
@@ -385,12 +462,26 @@ const TODOS_LOS_PRODUCTOS = [
     opciones:[],
     personalizable:true },
 
-  { id:"papel-regalo", categoria:"Papel de regalo", nombre:"Papel de regalo",
-    descripcion:"Elige el número de diseño.",
-    imagen:"", precioBase:2500,
+  // Papel de regalo: 1 unidad o 2 unidades (la de 2 cuesta menos por unidad). Los diseños (10) se agregan más adelante como opción "Diseño".
+  { id:"papel-regalo", categoria:"Envoltorio de regalo", nombre:"Papel de regalo",
+    descripcion:"Papel para envolver tus regalos. Si llevas 2 unidades, el valor por unidad baja.",
+    imagen:"",
+    grupoPrecio:"Cantidad",
+    precios:{ "1 unidad":300, "2 unidades":500 },
     opciones:[
-      { nombre:"Diseño", valores:["1","2","3","4","5"] }
+      { nombre:"Cantidad", valores:["1 unidad","2 unidades"] }
     ],
+    personalizable:false },
+
+  // Servicio de envoltorio: se cobra por regalo, aparte del papel. Solo se puede agregar si el pedido ya tiene papel de regalo
+  // ("requiere"). Si el papel está en ocultos.js, el servicio tampoco se muestra; si el cliente saca el papel del carrito, se saca el servicio.
+  { id:"envoltorio-regalo", categoria:"Envoltorio de regalo", nombre:"Servicio de envoltorio de regalo",
+    descripcion:"Nos encargamos de envolver tu regalo. Para pedirlo, agrega primero papel de regalo a tu pedido. Se cobra por regalo y por separado del papel.",
+    imagen:"",
+    precioBase:500,
+    requiere:"papel-regalo",
+    requiereAviso:"Para pedir el servicio de envoltorio, agrega primero papel de regalo a tu pedido.",
+    opciones:[],
     personalizable:false },
 
   { id:"etiqueta-cortada", categoria:"Etiquetas navideñas", nombre:"Etiqueta navideña (ya cortada)",
@@ -425,7 +516,17 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"llavero", categoria:"Llaveros", nombre:"Llavero personalizado",
     descripcion:"Envía tu foto y te lo hacemos a medida.",
-    imagen:"", precioBase:1290,
+    imagen:"imagenes/llaveros-personalizados.webp",
+    alt:"Llaveros acrílicos personalizados con una foto de pareja, un paisaje de montaña y una mascota con lentes",
+    precioBase:1290,
+    opciones:[],
+    personalizable:true },
+
+  { id:"tarjetas-presentacion", categoria:"Tarjetas de presentación", nombre:"Tarjetas de presentación personalizadas",
+    descripcion:"Pack de 100 tarjetas de presentación de 9 x 5,5 cm, impresas por una cara en papel fotográfico glossy de 230 gr, con tu diseño para tu negocio o tu marca personal.",
+    imagen:"imagenes/tarjetas-de-presentacion.webp",
+    alt:"Tarjetas de presentación personalizadas con logo, impresas en papel fotográfico glossy con colores nítidos",
+    precioBase:7990,
     opciones:[],
     personalizable:true },
 
@@ -469,6 +570,7 @@ const PAGINAS_DE_CATEGORIA = {
   "Marcapáginas": "marcapaginas-personalizados/",
   "Libretas": "libretas/",
   "Photocards": "photocards-personalizadas/",
+  "Tarjetas de presentación": "tarjetas-de-presentacion/",
 };
 
 // ===========================================================

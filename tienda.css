@@ -69,6 +69,12 @@
          las líneas estén bien escritas. Si un cliente tenía ese producto
          en el carrito, se le quita con un aviso. Los productos siguen
          guardados en el arreglo TODOS_LOS_PRODUCTOS: ocultar no borra nada.
+     27. PEDIDOS REALES Y OPINIONES: el archivo opiniones.js (tuyo, con instrucciones dentro) tiene dos listas de
+         texto: las fotos de pedidos reales y las opiniones de clientes con estrellas (de 1 a 5, con medias). Se ven
+         en /pedidos-reales/ y en la sección del inicio, que se oculta sola si no hay nada. El formulario de la página
+         arma el mensaje del cliente y lo abre en WhatsApp o en el correo: tú decides si lo publicas.
+     28. STICKERS PERSONALIZADOS: al comienzo de catalogo.js hay dos tablas (cantidades por medida y precios por pack
+         y acabado). Cambia el número y el producto se arma solo.
      26. ACCESIBILIDAD: los selects del catálogo y del carrito llevan aria-label (lo leen los
          lectores de pantalla), los puntos de las fotos miden 24x24 px y los encabezados
          del pie y de "Así hacemos realidad tus ideas" llevan aria-level="3".
@@ -129,6 +135,12 @@
     color: var(--ink); cursor: pointer; flex: none;
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .contacto-btn {
+    height: 38px; display: inline-flex; align-items: center; padding: 0 14px; border: 1px solid var(--line);
+    background: var(--bg); border-radius: 2px; color: var(--ink); font-size: 0.9rem; text-decoration: none; flex: none;
+  }
+  .contacto-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .contacto-btn svg { display: none; width: 17px; height: 17px; }
   .icon-btn svg { width: 17px; height: 17px; }
   .icon-btn[aria-expanded="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
@@ -272,6 +284,15 @@
     padding: 8px 10px; border-radius: 2px; color: var(--ink-soft);
   }
   section.categoria:nth-of-type(even) .nota-personalizada { background: var(--bg); }
+  .etiqueta-proximamente {
+    align-self: flex-start; font-size: 0.72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: var(--bg-alt); border: 1px solid var(--ink); border-radius: 999px; padding: 2px 10px;
+  }
+  .aviso-requisito {
+    margin: 0; font-size: 0.8rem; background: var(--bg-alt); border: 1px solid var(--ink); padding: 8px 10px;
+    border-radius: 2px; color: var(--ink);
+  }
+  section.categoria:nth-of-type(even) .aviso-requisito { background: var(--bg); }
 
   .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 6px; }
   .card-foot.sin-precio { justify-content: flex-end; }
@@ -312,23 +333,6 @@
     color: var(--ink); font-size: 0.85rem;
   }
   .siguenos-links a:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* --- Newsletter --- */
-  .newsletter { background: var(--ink); color: var(--bg); padding: 30px 0; }
-  .newsletter .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-  .newsletter h3 { color: var(--bg); font-size: 1.05rem; margin: 0 0 4px; }
-  .newsletter p { color: rgba(251,250,247,0.65); margin: 0; font-size: 0.85rem; }
-  .newsletter form { display: flex; gap: 8px; flex-wrap: wrap; }
-  .newsletter input {
-    font-family: inherit; font-size: 0.85rem; padding: 10px 12px; border: 1px solid rgba(251,250,247,0.3);
-    background: transparent; color: var(--bg); border-radius: 2px; min-width: 220px;
-  }
-  .newsletter input::placeholder { color: rgba(251,250,247,0.5); }
-  .newsletter button {
-    font-family: inherit; font-size: 0.82rem; font-weight: 600; padding: 10px 16px; border: none;
-    background: var(--accent); color: var(--accent-ink); border-radius: 2px; cursor: pointer;
-  }
-  .newsletter-msg { font-size: 0.8rem; color: var(--bg); margin-top: 6px; display: none; }
 
   /* --- Carrito lateral ---
      Estructura (de arriba hacia abajo):
@@ -516,6 +520,9 @@
       -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     nav::-webkit-scrollbar { display: none; }
+    .contacto-btn { width: 38px; padding: 0; justify-content: center; }
+    .contacto-btn svg { display: block; }
+    .contacto-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .footer-grid { grid-template-columns: 1fr; }
   }
 
@@ -662,4 +669,52 @@
     .navidad-banner { padding-top: 58px; }
     .navidad-guirnalda { height: 37px; background-size: 204px 37px; }
     .navidad-guirnalda::before, .navidad-guirnalda::after { background-size: 204px 37px; }
+  }
+
+  /* --- Pedidos reales y opiniones (página /pedidos-reales/ y sección del inicio) --- */
+  .estrellas { position: relative; display: inline-block; font-size: 1.2rem; line-height: 1; letter-spacing: 0; white-space: nowrap; vertical-align: middle; }
+  .estrellas-fondo { color: #CFC4B0; }
+  .estrellas-relleno { position: absolute; left: 0; top: 0; overflow: hidden; width: calc(var(--r) / 5 * 100%); color: #9A7420; }
+  .op-seccion { padding: 40px 0 8px; }
+  .op-seccion h2 { font-size: 1.5rem; margin: 0 0 6px; }
+  .op-seccion > .wrap > p { max-width: 62ch; }
+  .op-vacio { color: var(--ink-soft); padding: 18px 0; margin: 0; }
+  .galeria-pedidos { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .galeria-pedidos figure { margin: 0; }
+  .galeria-pedidos img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 4px; background: var(--bg-alt); }
+  .galeria-pedidos figcaption { margin-top: 6px; font-size: 0.85rem; color: var(--ink-soft); }
+  .op-resumen { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; font-size: 1rem; color: var(--ink); }
+  .op-resumen:empty { display: none; }
+  .op-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 18px; }
+  .op-lista > .op-vacio { grid-column: 1 / -1; }
+  .opinion { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .opinion-cab { display: flex; align-items: center; gap: 8px; color: var(--ink); }
+  .opinion-texto { margin: 0; color: var(--ink); }
+  .opinion-autor { margin: 0; margin-top: auto; font-size: 0.88rem; color: var(--ink-soft); }
+  .form-opinion { max-width: 640px; margin-top: 18px; display: grid; gap: 16px; }
+  .form-opinion label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; color: var(--ink); }
+  .form-opinion label .opcional { font-weight: 400; color: var(--ink-soft); }
+  .form-opinion input[type="text"], .form-opinion select, .form-opinion textarea {
+    width: 100%; font-family: inherit; font-size: 1rem; padding: 11px 12px; color: var(--ink);
+    background: #fff; border: 1px solid rgba(32, 27, 24, 0.45); border-radius: 2px;
+  }
+  .form-opinion textarea { min-height: 130px; resize: vertical; }
+  .form-opinion [aria-invalid="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(140, 47, 57, 0.25); }
+  .op-vista { display: flex; align-items: center; gap: 8px; min-height: 1.6rem; margin-top: 8px; font-size: 0.92rem; color: var(--ink); }
+  .op-contador { display: block; margin-top: 4px; font-size: 0.8rem; color: var(--ink-soft); text-align: right; }
+  .form-opinion .op-acepta { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; }
+  .form-opinion .op-acepta input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+  .op-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+  .op-aviso { margin: 0; min-height: 1.4em; font-size: 0.92rem; color: var(--ink); }
+  .op-aviso.error { color: var(--accent); font-weight: 600; }
+  .op-nota { font-size: 0.88rem; color: var(--ink-soft); margin: 0; }
+  .prueba-social { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  .prueba-social h2 { margin-bottom: 6px; }
+  .prueba-social .op-resumen { margin: 0 0 4px; }
+  .prueba-social .galeria-mini { grid-template-columns: repeat(4, 1fr); }
+  .prueba-social .op-lista { margin-top: 18px; }
+  .prueba-social .btn { margin-top: 20px; }
+  @media (max-width: 700px) {
+    .prueba-social .galeria-mini { grid-template-columns: repeat(2, 1fr); }
+    .galeria-pedidos { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   }
