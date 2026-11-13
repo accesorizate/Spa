@@ -32,7 +32,7 @@ const PEDIDOS_REALES_TEXTO = `
 # ----------------------------------------------------------------
 # Escribe aquí, una línea por foto (después de este comentario).
 # ----------------------------------------------------------------
-
+imagenes/pedidos/pedido-real-01.webp | Me encantaron los stickers personalizados, quedaron preciosos y los colores son tal cual los esperaba. ¡Volvería a comprar sin duda!
 `;
 
 const OPINIONES_TEXTO = `
