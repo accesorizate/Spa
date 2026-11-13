@@ -664,8 +664,56 @@ document.querySelectorAll("[data-plazo]").forEach(el => {
   }
   const resumenHtml = ops => {
     const promedio = Math.round(ops.reduce((s, o) => s + o.estrellas, 0) / ops.length * 10) / 10;
-    return `${estrellasHtml(promedio)} <span><strong>${num(promedio)}</strong> de 5 · ${ops.length} ${ops.length === 1 ? "opinión publicada" : "opiniones publicadas"}</span>`;
+    return `${estrellasHtml(promedio)} <span><strong>${num(promedio)}</strong> de 5 · <strong>${ops.length}</strong> ${ops.length === 1 ? "reseña" : "reseñas"}</span>`;
   };
+  // Para el inicio: unas pocas opiniones distintas, elegidas al azar en cada visita (primero de productos distintos).
+  function elegirVariadas(ops, max) {
+    const copia = ops.slice();
+    for (let i = copia.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [copia[i], copia[j]] = [copia[j], copia[i]]; }
+    const elegidas = [], productos = new Set();
+    copia.forEach(o => { const k = o.producto.toLowerCase(); if (elegidas.length < max && !productos.has(k)) { productos.add(k); elegidas.push(o); } });
+    copia.forEach(o => { if (elegidas.length < max && !elegidas.includes(o)) elegidas.push(o); });
+    return elegidas;
+  }
+  // Página de opiniones: barras por estrella que también filtran, y la lista de 9 en 9.
+  const POR_PAGINA = 9;
+  const cubeta = o => Math.floor(o.estrellas); // 4 y 4,5 van en "4"; solo 5 va en "5"
+  function dibujarLista(opiniones) {
+    const lista = document.getElementById("listaOpiniones"), dist = document.getElementById("distribucionOpiniones"),
+      estado = document.getElementById("estadoOpiniones"), mas = document.getElementById("masOpiniones");
+    const resumen = document.getElementById("resumenOpiniones");
+    if (resumen) resumen.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
+    if (!opiniones.length) {
+      lista.innerHTML = `<p class="op-vacio">Todavía no hay opiniones publicadas. Cuando compres, cuéntanos cómo te fue en el formulario de más abajo.</p>`;
+      if (dist) dist.innerHTML = ""; if (estado) estado.textContent = ""; if (mas) mas.hidden = true;
+      return;
+    }
+    const total = opiniones.length, conteos = [0, 0, 0, 0, 0, 0];
+    opiniones.forEach(o => conteos[cubeta(o)]++);
+    let filtro = 0, visibles = POR_PAGINA;
+    const hayMedias = opiniones.some(o => o.estrellas % 1 !== 0);
+    if (dist) {
+      dist.innerHTML = `<button type="button" class="op-dist-fila op-dist-todas" data-f="0" aria-pressed="true"><span>Todas las reseñas</span><span class="op-dist-c">${total}</span></button>`
+        + [5, 4, 3, 2, 1].map(n => {
+          const rango = n < 5 && hayMedias ? `${n} a ${num(n + 0.5)} estrellas` : `${n} ${n === 1 ? "estrella" : "estrellas"}`;
+          return `<button type="button" class="op-dist-fila" data-f="${n}" aria-pressed="false"${conteos[n] ? "" : " disabled"} aria-label="Ver solo las reseñas de ${rango} (${conteos[n]})"><span class="op-dist-n" aria-hidden="true">${n} ★</span><span class="op-dist-barra" aria-hidden="true"><span style="width:${Math.round(conteos[n] / total * 100)}%"></span></span><span class="op-dist-c" aria-hidden="true">${conteos[n]}</span></button>`;
+        }).join("");
+    }
+    function pintar() {
+      const filas = filtro ? opiniones.filter(o => cubeta(o) === filtro) : opiniones;
+      lista.innerHTML = filas.slice(0, visibles).map(opinionHtml).join("");
+      const n = Math.min(visibles, filas.length);
+      if (estado) estado.textContent = `Mostrando ${n} de ${filas.length} ${filas.length === 1 ? "reseña" : "reseñas"}${filtro ? ` de ${filtro} ${filtro === 1 ? "estrella" : "estrellas"}` : ""}.`;
+      if (mas) mas.hidden = filas.length <= visibles;
+      if (dist) dist.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(Number(b.dataset.f) === filtro)));
+    }
+    if (dist) dist.onclick = e => {
+      const b = e.target.closest("button[data-f]"); if (!b || b.disabled) return;
+      const f = Number(b.dataset.f); filtro = f && f === filtro ? 0 : f; visibles = POR_PAGINA; pintar();
+    };
+    if (mas) mas.onclick = () => { visibles += POR_PAGINA; pintar(); };
+    pintar();
+  }
   const opinionHtml = o => `
     <article class="opinion">
       <div class="opinion-cab">${estrellasHtml(o.estrellas)} <strong>${num(o.estrellas)}</strong></div>
@@ -682,20 +730,22 @@ document.querySelectorAll("[data-plazo]").forEach(el => {
         ? `<ul class="galeria-pedidos">${pedidos.map(p => fotoHtml(p, true)).join("")}</ul>`
         : `<p class="op-vacio">Muy pronto subiremos aquí fotos de pedidos reales.</p>`;
     }
-    if (listaOp) {
-      const resumen = document.getElementById("resumenOpiniones");
-      if (resumen) resumen.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
-      listaOp.innerHTML = opiniones.length
-        ? opiniones.map(opinionHtml).join("")
-        : `<p class="op-vacio">Todavía no hay opiniones publicadas. Cuando compres, cuéntanos cómo te fue en el formulario de más abajo.</p>`;
-    }
+    if (listaOp) dibujarLista(opiniones);
     if (teaser) {
       if (!pedidos.length && !opiniones.length) { teaser.hidden = true; return; }
       const fotos = document.getElementById("pruebaGaleria"), res = document.getElementById("pruebaResumen"), ops = document.getElementById("pruebaOpiniones");
       if (fotos) fotos.innerHTML = pedidos.length ? `<ul class="galeria-pedidos galeria-mini">${pedidos.slice(0, 4).map(p => fotoHtml(p, false)).join("")}</ul>` : "";
       if (res) res.innerHTML = opiniones.length ? resumenHtml(opiniones) : "";
-      if (ops) ops.innerHTML = opiniones.slice(0, 2).map(opinionHtml).join("");
+      if (ops) ops.innerHTML = elegirVariadas(opiniones, 5).map(opinionHtml).join("");
+      // El título dice solo lo que se ve: opiniones, fotos o las dos cosas.
+      const titulo = teaser.querySelector("h2");
+      if (titulo) titulo.textContent = opiniones.length && pedidos.length ? "Opiniones y pedidos reales de nuestros clientes" : opiniones.length ? "Opiniones de nuestros clientes" : "Pedidos reales de nuestros clientes";
       teaser.hidden = false;
+    }
+    // Si se llegó con un ancla (por ejemplo, desde "Deja tu opinión" del inicio), el contenido de arriba se dibujó recién ahora y movió la página: se vuelve a la sección.
+    if (location.hash.length > 1 && (galeria || listaOp)) {
+      let ancla = null; try { ancla = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { /* ancla mal escrita */ }
+      if (ancla) ancla.scrollIntoView();
     }
   }
   if (galeria || listaOp || teaser) {

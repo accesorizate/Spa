@@ -23,7 +23,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113a"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113b"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261113a">
+<link rel="stylesheet" href="tienda.css?v=20261113b">
 </head>
 <body>
 
@@ -168,12 +168,15 @@
 <section class="prueba-social esperar-catalogo" id="pruebaSocial" hidden>
   <div class="wrap">
     <div class="section-head">
-      <h2>Pedidos reales de nuestros clientes</h2>
+      <h2>Opiniones y pedidos reales de nuestros clientes</h2>
       <p class="op-resumen" id="pruebaResumen"></p>
     </div>
+    <div class="op-lista" id="pruebaOpiniones" role="region" aria-label="Opiniones de clientes" tabindex="0"></div>
     <div id="pruebaGaleria"></div>
-    <div class="op-lista" id="pruebaOpiniones"></div>
-    <a class="btn btn-secondary" href="/pedidos-reales/">Ver más pedidos y opiniones</a>
+    <div class="prueba-acciones">
+      <a class="btn btn-secondary" href="/pedidos-reales/">Ver todas las opiniones y pedidos</a>
+      <a class="btn btn-secondary" href="/pedidos-reales/#deja-tu-opinion">Deja tu opinión</a>
+    </div>
   </div>
 </section>
 
@@ -330,7 +333,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113a"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113b"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
