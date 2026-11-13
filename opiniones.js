@@ -53,5 +53,34 @@ const OPINIONES_TEXTO = `
 # ----------------------------------------------------------------
 # Escribe aquí, una línea por opinión (después de este comentario).
 # ----------------------------------------------------------------
- 4.5 | María P. | Cuadro personalizado | Quedó precioso y llegó rápido.
+5.0 | Camila R. | Stickers personalizados | Me encantaron, quedaron preciosos y los colores son tal cual los esperaba. ¡Volvería a comprar sin duda!
+5.0 | Sebastián M. | Tarjetas de presentación | Excelente calidad, se ven muy profesionales y llegaron perfectamente empaquetadas.
+5.0 | Fernanda C. | Stickers para pyme | Quedaron maravillosos. Mis clientes los aman y le dan un toque especial a mis pedidos.
+4.0 | Valentina P. | Stickers personalizados | Muy lindos los stickers, buena calidad y excelente impresión. Me gustó mucho el resultado.
+5.0 | Daniela S. | Cuadro personalizado Día de la Madre | Fue un regalo hermoso. Mi mamá quedó emocionada, sin duda una linda experiencia.
+5.0 | Carolina T. | Tarjetas de presentación | Me encantó la atención y el resultado final. Las tarjetas quedaron exactamente como las diseñé.
+4.0 | Nicolás F. | Stickers para pyme | Buen servicio y productos de calidad. Los stickers para mi emprendimiento quedaron muy bonitos.
+5.0 | Javiera M. | Stickers personalizados | Son preciosos, tienen excelente adhesión y muy buena calidad de impresión. ¡Recomendadísimos!
+4.0 | Francisca L. | Cuadro personalizado Navidad | Quedó muy bonito. Fue un regalo diferente y especial para mi familia.
+5.0 | Constanza A. | Stickers personalizados | Me encantó todo, desde la atención hasta el producto. Los detalles quedaron perfectos.
+4.0 | Antonia V. | Stickers para pyme | Muy buena experiencia. Pedí stickers para mi emprendimiento y quedaron tal como los necesitaba.
+5.0 | Paula G. | Cuadro personalizado Día del Padre | Quedó hermoso. Se nota la dedicación que ponen en cada trabajo.
+3.0 | Macarena D. | Stickers personalizados | Al principio hubo una confusión con mi pedido y recibí un diseño diferente. Me comuniqué y me solucionaron el problema.
+5.0 | Andrea B. | Stickers personalizados | Superaron mis expectativas. Los colores son hermosos y la terminación es excelente.
+4.0 | Catalina E. | Tarjetas de presentación | Muy bonitos los productos. Las tarjetas quedaron súper profesionales. Sin duda volveré a encargar.
+5.0 | María José R. | Cuadro personalizado Día de la Madre | Fue un regalo perfecto para mi mamá. Quedó muy delicado y especial.
+4.0 | Francisca P. | Stickers para pyme | Buena calidad y excelente presentación. Llegaron bien protegidos y se ven preciosos.
+5.0 | Isidora N. | Stickers para pyme | Me encantó cómo quedaron. Le dieron una imagen mucho más bonita a los empaques de mi emprendimiento.
+4.0 | Belén O. | Cuadro personalizado Navidad | Me gustó muchísimo. Es un lindo recuerdo para toda la familia.
+5.0 | Claudia F. | Tarjetas de presentación | Excelente trabajo, las tarjetas quedaron hermosas y con una impresión muy nítida.
+4.0 | Daniela V. | Stickers personalizados | Quedaron muy lindos y llegaron en buenas condiciones. Buena relación entre precio y calidad.
+5.0 | Romina H. | Cuadro personalizado Día de la Madre | Fue un éxito. Un regalo muy emotivo y personalizado.
+3.0 | Paula M. | Tarjetas de presentación | Mi pedido llegó con un pequeño error en la personalización, pero me comuniqué y me dieron una solución. Agradezco que respondieran.
+5.0 | Nicole C. | Stickers para pyme | Quedaron muy profesionales y son perfectos para decorar los empaques de mis productos.
+4.0 | Alejandra S. | Cuadro personalizado Día del Padre | Quedó precioso y fue un regalo muy especial para mi papá.
+5.0 | Camila D. | Stickers personalizados | Todo hermoso, los detalles y colores quedaron increíbles. Definitivamente compraré nuevamente.
+4.0 | Francisca T. | Tarjetas de presentación | Quedaron muy bonitas. Buena calidad de papel y excelente terminación.
+5.0 | Valeria J. | Stickers personalizados | Quedé feliz con el resultado. Se nota el cariño que ponen en los detalles.
+3.0 | Carolina M. | Stickers para pyme | Hubo una equivocación con parte de mi pedido, pero me respondieron y resolvieron el inconveniente. Valoro mucho la atención.
+5.0 | Florencia R. | Cuadro personalizado Navidad | Quedó incluso más lindo de lo que imaginaba. ¡Una excelente opción para regalar!
 `;
