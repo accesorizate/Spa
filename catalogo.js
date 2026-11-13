@@ -553,25 +553,57 @@ const TODOS_LOS_PRODUCTOS = [
 // 2) PÁGINAS DE CATEGORÍA
 // Cada categoría que tiene su propia página (con su propia dirección en Google)
 // va aquí:   "Nombre de la categoría": "carpeta/"
-// El menú y los enlaces de la tienda llevan a esas páginas. Si una categoría no
-// está en esta lista, el menú la lleva a su sección dentro del inicio.
+// Las categorías que aún no tienen página propia van a la sección de la portada donde se muestran
+// (por ejemplo "pymes/#imanes"). Con esto la búsqueda y los enlaces de la tienda saben a dónde llevar.
 // ===========================================================
 const PAGINAS_DE_CATEGORIA = {
   "Calendarios": "calendarios-personalizados/",
   "Etiquetas navideñas": "etiquetas-navidenas/",
-  "Cuadros": "cuadros-personalizados/",
-  "Cuadros personalizados": "cuadros-personalizados/",
+  "Cuadros": "cuadros-con-foto/",
+  "Cuadros personalizados": "cuadros-personalizados/por-ocasion/",
   "Fotografías": "impresion-de-fotos/",
   "Fotografías Polaroid": "fotos-polaroid/",
   "Posters": "posters-personalizados/",
-  "Stickers": "stickers/",
+  "Stickers": "stickers-troquelados/",
   "Stickers personalizados": "stickers-personalizados/",
   "Llaveros": "llaveros-personalizados/",
   "Marcapáginas": "marcapaginas-personalizados/",
   "Libretas": "libretas/",
   "Photocards": "photocards-personalizadas/",
   "Tarjetas de presentación": "tarjetas-de-presentacion/",
+  "Imanes": "pymes/#imanes",
+  "Envoltorio de regalo": "regalos-personalizados/#papel-y-envoltorio",
+  "Pizarra infantil": "regalos-personalizados/#mas-regalos",
+  "Álbum fotográfico": "regalos-personalizados/#mas-regalos",
+  "Encendedores": "regalos-personalizados/#mas-regalos",
 };
+
+// ===========================================================
+// 2a) SECCIONES PRINCIPALES
+// Son las 5 secciones grandes de la tienda: salen en el menú de arriba y como tarjetas en el inicio.
+// Cada una abre su portada. El "Desde $" lo calcula la tienda sola con el precio más bajo de los productos de las
+// categorías de esa sección (los ocultos y los que se cotizan por WhatsApp no cuentan), así que no hay que escribirlo.
+//   nombre: lo que se ve · href: la portada · categorias: las categorías que cuentan para el "Desde"
+//   imagen / alt: la foto cuadrada (1:1) de la tarjeta del inicio y su descripción
+// Si una sección se queda sin productos disponibles, desaparece sola del menú y del inicio.
+// ===========================================================
+const SECCIONES_PRINCIPALES = [
+  { id:"cuadros", nombre:"Cuadros", href:"cuadros-personalizados/",
+    categorias:["Cuadros","Cuadros personalizados"],
+    imagen:"imagenes/cuadro-con-foto-portada.webp", alt:"Cuadro de madera con la foto de una pareja sentada frente a un lago al atardecer" },
+  { id:"stickers", nombre:"Stickers", href:"stickers/",
+    categorias:["Stickers","Stickers personalizados"],
+    imagen:"imagenes/stickers-anime-portada.webp", alt:"Dos sets de stickers de anime y varios stickers troquelados sueltos" },
+  { id:"fotografias", nombre:"Fotografías", href:"fotografias/",
+    categorias:["Fotografías","Fotografías Polaroid"],
+    imagen:"imagenes/fotos-polaroid-portada.webp", alt:"Fotos estilo Polaroid colgadas de un cordel con un gancho de madera, sobre una pila de fotos" },
+  { id:"regalos", nombre:"Regalos", href:"regalos-personalizados/",
+    categorias:["Libretas","Posters","Calendarios","Marcapáginas","Llaveros","Photocards","Envoltorio de regalo","Etiquetas navideñas","Pizarra infantil","Álbum fotográfico","Encendedores"],
+    imagen:"imagenes/llaveros-personalizados-portada.webp", alt:"Tres llaveros acrílicos con fotos y diseños personalizados" },
+  { id:"pymes", nombre:"Pymes", href:"pymes/",
+    categorias:["Stickers personalizados","Imanes","Tarjetas de presentación"],
+    imagen:"imagenes/tarjetas-de-presentacion.webp", alt:"Tarjetas de presentación personalizadas con logo" },
+];
 
 // ===========================================================
 // 2b) PÁGINAS DE PRODUCTO

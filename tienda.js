@@ -163,15 +163,24 @@ document.addEventListener("error", e => {
 //   Página de temporada (/navidad/): { hub: true, secciones: [{ id, titulo, texto, productos: ["id", ...] }, ...] }
 //     Reúne productos de varias categorías, en secciones con su propio título.
 //   Guía o página de ideas (carpeta /ideas/): { guia: true }. No muestra catálogo; solo el menú, el carrito y el texto de la página.
+//   Inicio: { inicio: true }. Muestra las 5 secciones principales (SECCIONES_PRINCIPALES en catalogo.js) como tarjetas con su "Desde $".
+//   Portada de una sección (/stickers/, /cuadros-personalizados/, /regalos-personalizados/, /pymes/...):
+//     { portada: true, seccionActiva: "stickers", tarjetas: [{ titulo, href, texto, categorias: [...] | productos: [...], imagen, alt }], secciones: [...] }
+//     Muestra una tarjeta por cada línea de productos, con su foto y su "Desde $" (el precio más bajo disponible).
+//     "secciones" es opcional: igual que en la página de temporada, muestra debajo los productos que no tienen página propia.
+//   En las páginas de categoría y de producto, "seccionActiva" (opcional) indica qué sección principal se marca en el menú;
+//   si no se escribe, se deduce de la categoría.
 const PAGINA = window.CONFIG_PAGINA || {};
-const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos || PAGINA.secciones || PAGINA.guia);
+const SECCIONES = typeof SECCIONES_PRINCIPALES !== "undefined" ? SECCIONES_PRINCIPALES : [];
+const esPaginaPropia = !!(PAGINA.categorias || PAGINA.productos || PAGINA.secciones || PAGINA.guia || PAGINA.portada || PAGINA.inicio);
+const esPortadaDeTarjetas = !!(PAGINA.inicio || PAGINA.portada);
 
 // En las páginas de categoría, solo la primera foto se pide de inmediato y con prioridad alta (es lo primero que
 // ve el cliente); las demás esperan y van con prioridad baja para no quitarle velocidad a la primera.
-// En el inicio todas cargan al acercarse.
-let fotosConPrioridad = esPaginaPropia ? 1 : 0;
+// En las portadas, esa primera foto es la de la primera tarjeta (ver más abajo). En el inicio todas cargan al acercarse.
+let fotosConPrioridad = esPaginaPropia && !esPortadaDeTarjetas ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
-const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.secciones || PAGINA.guia ? [] : categorias);
+const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.secciones || PAGINA.guia || esPortadaDeTarjetas ? [] : categorias);
 const catalogoEl = document.getElementById("catalogo");
 const navEl = document.getElementById("catNav");
 const chipsEl = document.getElementById("catNavChips");
@@ -200,16 +209,73 @@ const MOSTRAR_NAVIDAD = true;
 let menuHtml = MOSTRAR_NAVIDAD
   ? `<a href="navidad/" class="nav-navidad${PAGINA.hub ? " activa" : ""}"${PAGINA.hub ? ' aria-current="page"' : ""}>Navidad</a>`
   : "";
-categorias.forEach(cat => {
-  const href = enlaceDeCategoria(cat);
-  if (direccionesDelMenu.has(href)) return;
-  direccionesDelMenu.add(href);
-  const esLaPagina = !!(PAGINA.categorias && PAGINA.categorias.includes(cat));
-  const esLaSeccion = !esLaPagina && !!PAGINA.categoriaActiva && enlaceDeCategoria(PAGINA.categoriaActiva) === href;
-  menuHtml += `<a href="${href}"${esLaPagina ? ' class="activa" aria-current="page"' : esLaSeccion ? ' class="activa"' : ""}>${cat}</a>`;
-});
+// Menú: Navidad y las 5 secciones principales (SECCIONES_PRINCIPALES en catalogo.js). Una sección sin productos disponibles no aparece.
+// Se marca la sección donde estás: con aria-current si estás en su portada, y solo resaltada si estás en una página dentro de ella.
+function seccionDeCategoria(cat) { const s = SECCIONES.find(x => x.categorias.includes(cat)); return s ? s.id : null; }
+const seccionActivaId = PAGINA.seccionActiva
+  || (PAGINA.categorias ? seccionDeCategoria(PAGINA.categorias[0]) : PAGINA.categoriaActiva ? seccionDeCategoria(PAGINA.categoriaActiva) : null);
+if (SECCIONES.length) {
+  SECCIONES.filter(s => productos.some(p => s.categorias.includes(p.categoria))).forEach(s => {
+    const esLaPortada = !!PAGINA.portada && seccionActivaId === s.id;
+    const estoyDentro = !esLaPortada && seccionActivaId === s.id;
+    menuHtml += `<a href="${s.href}"${esLaPortada ? ' class="activa" aria-current="page"' : estoyDentro ? ' class="activa"' : ""}>${s.nombre}</a>`;
+  });
+} else {
+  // Si el catálogo no trae SECCIONES_PRINCIPALES, el menú se arma con una entrada por categoría, como antes.
+  categorias.forEach(cat => {
+    const href = enlaceDeCategoria(cat);
+    if (direccionesDelMenu.has(href)) return;
+    direccionesDelMenu.add(href);
+    const esLaPagina = !!(PAGINA.categorias && PAGINA.categorias.includes(cat));
+    const esLaSeccion = !esLaPagina && !!PAGINA.categoriaActiva && enlaceDeCategoria(PAGINA.categoriaActiva) === href;
+    menuHtml += `<a href="${href}"${esLaPagina ? ' class="activa" aria-current="page"' : esLaSeccion ? ' class="activa"' : ""}>${cat}</a>`;
+  });
+}
 navEl.innerHTML = menuHtml;
 if (chipsEl) chipsEl.innerHTML = menuHtml;
+
+// -- Tarjetas de portada: foto, nombre y "Desde $X" --
+// El "Desde" es el precio más bajo entre los productos disponibles de esa tarjeta (no cuentan los que se cotizan por WhatsApp
+// ni los "Próximamente"). Si una tarjeta se queda sin productos disponibles, no se muestra.
+function productosDeTarjeta(t) {
+  if (t.productos) return t.productos.map(id => productos.find(p => p.id === id)).filter(Boolean);
+  return productos.filter(p => (t.categorias || []).includes(p.categoria));
+}
+function etiquetaDesde(lista) {
+  const precios = lista.filter(p => !p.sinPrecio && !p.proximamente).map(precioDesde).filter(n => n > 0);
+  if (precios.length) return `<span class="desde">Desde ${formatoCLP(Math.min(...precios))}</span>`;
+  return `<span class="desde sin-precio">${lista.every(p => p.proximamente) ? "Próximamente" : "Cotiza por WhatsApp"}</span>`;
+}
+function hrefDeTarjeta(href) {
+  // Un enlace a un lugar de esta misma página (#imanes) lleva la dirección de la página: las páginas usan <base href="/">.
+  return href.startsWith("#") ? location.pathname + href : href;
+}
+function renderTarjetaPortada(t, lista, prioridad) {
+  const primero = lista[0];
+  const foto = t.imagen || listaImagenesProducto(primero, valoresPorDefecto(primero), { priorizarPortada: true })[0];
+  const carga = prioridad ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+  // En el inicio las tarjetas van bajo un título H2 ("Elige qué quieres personalizar"), así que llevan H3; en las portadas van justo bajo el H1, así que llevan H2.
+  const h = PAGINA.inicio ? "h3" : "h2";
+  return `<a class="tarjeta-portada" href="${hrefDeTarjeta(t.href)}">
+    <div class="tarjeta-portada-media"><img src="${foto}" data-respaldo="${imagenRespaldo(primero)}" alt="${t.alt || t.titulo}" ${carga} decoding="async"></div>
+    <div class="tarjeta-portada-body"><${h}>${t.titulo}</${h}>${t.texto ? `<p>${t.texto}</p>` : ""}${etiquetaDesde(lista)}</div>
+  </a>`;
+}
+const tarjetasVisibles = (PAGINA.inicio
+    ? SECCIONES.map(s => ({ titulo: s.nombre, href: s.href, categorias: s.categorias, imagen: s.imagen, alt: s.alt }))
+    : PAGINA.portada ? (PAGINA.tarjetas || []) : [])
+  .map(t => ({ t, lista: productosDeTarjeta(t) }))
+  .filter(x => x.lista.length);
+if (esPortadaDeTarjetas && tarjetasVisibles.length) {
+  let contenedor = document.getElementById("tarjetasPortada");
+  if (!contenedor) {
+    contenedor = document.createElement("div");
+    contenedor.id = "tarjetasPortada";
+    catalogoEl.prepend(contenedor);
+  }
+  contenedor.className = `portada-tarjetas n-${tarjetasVisibles.length}`;
+  contenedor.innerHTML = tarjetasVisibles.map((x, i) => renderTarjetaPortada(x.t, x.lista, !!PAGINA.portada && i === 0)).join("");
+}
 
 // Página de producto: una sola sección con los productos que ella nombra (los ocultos no aparecen).
 const productosDeLaPagina = PAGINA.productos ? PAGINA.productos.map(id => productos.find(p => p.id === id)).filter(Boolean) : [];
@@ -223,8 +289,11 @@ if (productosDeLaPagina.length) {
 
 // Página de temporada: varias secciones, cada una con los productos que ella nombra (los ocultos no aparecen
 // y una sección que se queda sin productos no se muestra).
+// Cada sección nombra sus productos por código ("productos") o por categoría completa ("categorias").
 const seccionesDeLaPagina = (PAGINA.secciones || [])
-  .map(s => ({ ...s, lista: s.productos.map(id => productos.find(p => p.id === id)).filter(Boolean) }))
+  .map(s => ({ ...s, lista: s.productos
+    ? s.productos.map(id => productos.find(p => p.id === id)).filter(Boolean)
+    : productos.filter(p => (s.categorias || []).includes(p.categoria)) }))
   .filter(s => s.lista.length);
 seccionesDeLaPagina.forEach(s => {
   const seccion = document.createElement("section");
@@ -246,7 +315,7 @@ categoriasDeLaPagina.forEach(cat => {
 });
 
 // Página de categoría cuyos productos están todos ocultos por ahora.
-if ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length) || (PAGINA.secciones && !seccionesDeLaPagina.length)) {
+if (esPortadaDeTarjetas ? !tarjetasVisibles.length : ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length) || (PAGINA.secciones && !seccionesDeLaPagina.length))) {
   catalogoEl.innerHTML = `<p class="sin-productos">Por ahora no tenemos productos disponibles en esta categoría. <a href="/">Volver al inicio</a>.</p>`;
 }
 
@@ -439,7 +508,7 @@ if (destacadosGrid) {
 // el cliente ve al abrir la página (el de las opciones que vienen marcadas) y, si un producto está oculto, no se escribe nada.
 // Los cotizados por WhatsApp (sinPrecio) no llevan precio, por lo tanto tampoco llevan este marcado.
 function datosEstructuradosDeProducto() {
-  if (!esPaginaPropia) return;
+  if (!esPaginaPropia || esPortadaDeTarjetas) return; // una portada es un listado de líneas de productos, no un producto
   const visibles = PAGINA.productos ? productosDeLaPagina : productos.filter(p => categoriasDeLaPagina.includes(p.categoria));
   const conPrecio = visibles.filter(p => !p.sinPrecio); // una tarjeta que solo cotiza por WhatsApp no cuenta como producto con precio
   if (conPrecio.length !== 1) return;
@@ -1209,7 +1278,47 @@ inputBuscar.addEventListener("input", () => {
   filtrarCatalogoPorBusqueda(inputBuscar.value);
 });
 
+// En el inicio y en las portadas no hay tarjetas de producto que filtrar: la búsqueda recorre todo el catálogo disponible y muestra
+// una lista de resultados (foto, nombre y "Desde") que lleva a la página de cada producto. Sin texto, vuelve a verse la portada normal.
+function buscarEnTodoElCatalogo(termino) {
+  const busqueda = normalizarTexto(termino);
+  let cont = document.getElementById("resultadosBusqueda");
+  if (!cont) {
+    cont = document.createElement("section");
+    cont.id = "resultadosBusqueda";
+    cont.className = "resultados-busqueda";
+    cont.style.display = "none";
+    cont.addEventListener("click", e => {
+      // Un resultado que lleva a un lugar de esta misma página (como #imanes): se cierra la búsqueda para que ese lugar quede a la vista.
+      const enlace = e.target.closest("a");
+      const destino = enlace && new URL(enlace.getAttribute("href"), document.baseURI);
+      if (destino && destino.hash && destino.pathname === location.pathname) {
+        inputBuscar.value = "";
+        buscarEnTodoElCatalogo("");
+      }
+    });
+    catalogoEl.prepend(cont);
+  }
+  [...catalogoEl.children].forEach(el => { if (el !== cont) el.style.display = busqueda ? "none" : ""; });
+  // Cada palabra escrita debe aparecer en el nombre, la descripción o la categoría ("cuadro navideño" encuentra "Cuadro personalizado navideño").
+  const palabras = busqueda.split(" ").filter(Boolean);
+  const resultados = busqueda
+    ? productos.filter(p => { const texto = normalizarTexto(`${p.nombre} ${p.descripcion} ${p.categoria}`); return palabras.every(w => texto.includes(w)); })
+    : [];
+  cont.style.display = busqueda && resultados.length ? "" : "none";
+  cont.innerHTML = resultados.length
+    ? `<div class="wrap"><h2>Resultados</h2><div class="resultados-lista">${resultados.map(p => {
+        const ficha = typeof PAGINAS_DE_PRODUCTO !== "undefined" && PAGINAS_DE_PRODUCTO[p.id];
+        const destino = hrefDeTarjeta(ficha || enlaceDeCategoria(p.categoria));
+        const foto = listaImagenesProducto(p, valoresPorDefecto(p), { priorizarPortada: true })[0];
+        return `<a class="resultado-busqueda" href="${destino}"><img src="${foto}" data-respaldo="${imagenRespaldo(p)}" alt="" loading="lazy" decoding="async"><span class="resultado-texto"><strong>${p.nombre}</strong>${etiquetaDesde([p])}</span></a>`;
+      }).join("")}</div></div>`
+    : "";
+  searchEmptyMsg.classList.toggle("visible", busqueda !== "" && !resultados.length);
+}
+
 function filtrarCatalogoPorBusqueda(termino) {
+  if (esPortadaDeTarjetas) return buscarEnTodoElCatalogo(termino);
   const busqueda = termino.trim().toLowerCase();
   let hayResultados = !busqueda;
 
