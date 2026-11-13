@@ -536,7 +536,8 @@ function datosEstructuradosDeProducto() {
       "seller": { "@type": "Organization", "name": "Accesorizate" }
     }
   };
-  if (portada) dato.image = new URL(portada, dominio).href;
+  // `image` es obligatorio para Google (sin él la ficha queda como "no válida"): si el producto aún no tiene foto, va el logo.
+  dato.image = new URL(portada || "imagenes/logo.png", dominio).href;
   let el = document.getElementById("ld-producto");
   if (!el) {
     el = document.createElement("script");
