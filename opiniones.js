@@ -39,5 +39,5 @@ const OPINIONES_TEXTO = `
 # ----------------------------------------------------------------
 # Escribe aquí, una línea por opinión (después de este comentario).
 # ----------------------------------------------------------------
-
+ 4.5 | María P. | Cuadro personalizado | Quedó precioso y llegó rápido.
 `;
