@@ -568,7 +568,7 @@ const TODOS_LOS_PRODUCTOS = [
 // Cada categoría que tiene su propia página (con su propia dirección en Google)
 // va aquí:   "Nombre de la categoría": "carpeta/"
 // Las categorías que aún no tienen página propia van a la sección de la portada donde se muestran
-// (por ejemplo "pymes/#imanes"). Con esto la búsqueda y los enlaces de la tienda saben a dónde llevar.
+// (por ejemplo "regalos-personalizados/#mas-regalos"). Con esto la búsqueda y los enlaces de la tienda saben a dónde llevar.
 // ===========================================================
 const PAGINAS_DE_CATEGORIA = {
   "Calendarios": "calendarios-personalizados/",
@@ -585,7 +585,7 @@ const PAGINAS_DE_CATEGORIA = {
   "Libretas": "libretas/",
   "Photocards": "photocards-personalizadas/",
   "Tarjetas de presentación": "tarjetas-de-presentacion/",
-  "Imanes": "pymes/#imanes",
+  "Imanes": "imanes-personalizados/",
   "Envoltorio de regalo": "regalos-personalizados/#papel-y-envoltorio",
   "Pizarra infantil": "regalos-personalizados/#mas-regalos",
   "Álbum fotográfico": "regalos-personalizados/#mas-regalos",

@@ -1,3 +1,7 @@
+// Los imanes antes se pedían en /pymes/#imanes y ahora tienen su propia página: los enlaces viejos (por ejemplo los que ya
+// compartiste en redes) siguen funcionando y llevan a la página nueva.
+if (location.pathname.replace(/\/+$/, "") === "/pymes" && location.hash === "#imanes") location.replace("/imanes-personalizados/");
+
 // ===========================================================
 // PRODUCTOS OCULTOS
 // La lista se escribe al comienzo del archivo (PRODUCTOS_OCULTOS). Aquí solo
