@@ -351,6 +351,10 @@
   .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 6px; }
   .card-foot.sin-precio { justify-content: flex-end; }
   .price { font-family: 'Fraunces', serif; font-style: italic; font-size: 1.05rem; }
+  .precio-wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; min-width: 0; }
+  .precio-unidad { font-size: 0.74rem; color: var(--ink-soft); white-space: nowrap; }
+  .precio-unidad[hidden] { display: none; }
+  .precio-unidad abbr { text-decoration: none; }
   .add-btn {
     font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border: 1px solid var(--ink);
     border-radius: 2px; background: var(--ink); color: var(--bg); cursor: pointer; font-family: inherit;
@@ -529,6 +533,11 @@
   .datos-transferencia strong { color: var(--ink); }
   .datos-transferencia p { margin: 0 0 8px; }
   .datos-transferencia p:last-child { margin-bottom: 0; }
+  .datos-transferencia .cuentas-aviso { color: var(--ink); }
+  .datos-transferencia .cuenta-bancaria {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 2px; padding: 8px 10px;
+    overflow-wrap: anywhere; /* el correo no debe romper el ancho del carrito en pantallas angostas */
+  }
   #notaPedido {
     display: block; width: 100%; font-family: inherit; font-size: 0.85rem; padding: 8px; border: 1px solid var(--line);
     border-radius: 2px; margin: 0; resize: vertical; min-height: 50px;

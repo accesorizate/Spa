@@ -98,6 +98,42 @@ function precioProducto(prod, seleccion) {
   return prod.precioBase ?? 0;
 }
 
+// -- Precio por unidad --
+// Cuántas unidades trae lo que el cliente tiene elegido, para mostrar cuánto sale cada una al lado del precio.
+//  - Una opción con la forma "10 unidades" (o "1 unidad"): se toma de ahí.
+//  - Un tamaño que dice "(15-20 unidades)", como en los sets de stickers: da un rango.
+//  - Packs fijos (tarjetas de presentación, tira de etiquetas): campo "unidades" del producto en el catálogo.
+// Devuelve { min, max } o null cuando es 1 sola unidad (no hay nada que dividir).
+function unidadesElegidas(prod, seleccion) {
+  if (prod.unidades > 1) return { min: prod.unidades, max: prod.unidades };
+  for (const nombre in seleccion) {
+    const v = seleccion[nombre];
+    if (typeof v !== "string") continue;
+    let m = /^(\d+)\s+unidades?$/i.exec(v.trim());
+    if (m) { const n = parseInt(m[1], 10); return n > 1 ? { min: n, max: n } : null; }
+    m = /\((\d+)(?:\s*-\s*(\d+))?\s+unidades?\)/i.exec(v);
+    if (m) {
+      const a = parseInt(m[1], 10), b = m[2] ? parseInt(m[2], 10) : a;
+      return Math.max(a, b) > 1 ? { min: Math.min(a, b), max: Math.max(a, b) } : null;
+    }
+  }
+  return null;
+}
+
+// Texto "$199 c/u" para la tarjeta ("" si es 1 sola unidad). El peso chileno no tiene decimales: si la división no
+// es exacta se redondea al peso más cercano y se avisa con "aprox."; un rango de unidades da un rango de precios.
+function precioPorUnidadHtml(prod, seleccion) {
+  const u = unidadesElegidas(prod, seleccion);
+  const precio = precioProducto(prod, seleccion);
+  if (!u || !(precio > 0)) return "";
+  const cu = `<abbr title="por unidad">c/u</abbr>`;
+  if (u.min === u.max) {
+    const v = precio / u.min;
+    return `${Number.isInteger(v) ? "" : "aprox. "}${formatoCLP(Math.round(v))} ${cu}`;
+  }
+  return `${formatoCLP(Math.round(precio / u.max))} a ${formatoCLP(Math.round(precio / u.min))} ${cu}`;
+}
+
 function precioDesde(prod) {
   if (prod.preciosPorCombinacion) return Math.min(...Object.values(prod.preciosPorCombinacion));
   if (prod.grupoPrecio) return Math.min(...Object.values(prod.precios));
@@ -434,7 +470,9 @@ function renderCard(prod) {
 
   const precioHtml = prod.sinPrecio
     ? ""
-    : `<span class="price" data-precio-de="${prod.id}">${formatoCLP(precioProducto(prod, seleccionInicial))}</span>`;
+    : `<span class="precio-wrap"><span class="price" data-precio-de="${prod.id}">${formatoCLP(precioProducto(prod, seleccionInicial))}</span>${
+        (txt => `<span class="precio-unidad" data-unidad-de="${prod.id}"${txt ? "" : " hidden"}>${txt}</span>`)(precioPorUnidadHtml(prod, seleccionInicial))
+      }</span>`;
 
   return `
     <article class="card" data-card-id="${prod.id}">
@@ -861,6 +899,8 @@ document.addEventListener("change", e => {
   const seleccion = leerSeleccionDeCard(card);
   if (!prod.sinPrecio) {
     card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(precioProducto(prod, seleccion));
+    const unidadEl = card.querySelector(`[data-unidad-de="${id}"]`);
+    if (unidadEl) { const html = precioPorUnidadHtml(prod, seleccion); unidadEl.innerHTML = html; unidadEl.hidden = !html; }
   }
 
   const mediaEl = card.querySelector(`[data-media-de="${id}"]`);
@@ -1145,7 +1185,7 @@ function htmlLineaCarrito(l) {
         </div>
         <div class="cart-line-editor" data-editor="${l.lineaId}">
           ${opcionesHtmlDe(prod, edicion.seleccion, `data-edit="${l.lineaId}"`)}
-          <div class="editor-precio"><span>Precio por unidad</span><b data-editor-precio>${formatoCLP(precioProducto(prod, edicion.seleccion))}</b></div>
+          <div class="editor-precio"><span>Precio de cada producto</span><b data-editor-precio>${formatoCLP(precioProducto(prod, edicion.seleccion))}</b></div>
           <div class="editor-acciones">
             <button type="button" class="btn-guardar" onclick="guardarEdicion()">Guardar cambios</button>
             <button type="button" class="btn-cancelar" onclick="cancelarEdicion()">Cancelar</button>

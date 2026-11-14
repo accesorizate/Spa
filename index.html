@@ -23,7 +23,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113b"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261113b">
+<link rel="stylesheet" href="tienda.css?v=20261114a">
 </head>
 <body>
 
@@ -133,7 +133,7 @@
     <div class="tarjeta-portada-body"><h3>Regalos</h3><span class="desde">Desde $300</span></div>
   </a><a class="tarjeta-portada" href="pymes/">
     <div class="tarjeta-portada-media"><img src="imagenes/tarjetas-de-presentacion-portada.webp" data-respaldo="imagenes/stickers-personalizados-negocio.webp" alt="Tarjetas de presentación personalizadas con logo" loading="lazy" decoding="async"></div>
-    <div class="tarjeta-portada-body"><h3>Pymes</h3><span class="desde">Desde $3.000</span></div>
+    <div class="tarjeta-portada-body"><h3>Pymes</h3><span class="desde">Desde $2.070</span></div>
   </a></div><!--/tarjetas-->
   </section>
 </main>
@@ -301,11 +301,19 @@
         </div>
       </div>
       <div class="datos-transferencia" id="datosTransferencia">
-        <p>
+        <p class="cuentas-aviso">Puedes transferir a cualquiera de estas dos cuentas. Si no puedes pagar en una, usa la otra.</p>
+        <p class="cuenta-bancaria">
           <strong>ACCESORIZATE SPA</strong><br>
           RUT: 78.367.632-K<br>
-          Banco Estado — Chequera Electrónica<br>
+          Banco Estado — Cuenta Corriente<br>
           Cuenta: 91270163373
+        </p>
+        <p class="cuenta-bancaria">
+          <strong>ACCESORIZATE SPA</strong><br>
+          RUT: 78.367.632-K<br>
+          Mercado Pago — Cuenta Vista<br>
+          Cuenta: 1060495933<br>
+          venta.accesorizate@gmail.com
         </p>
         <p>Transfiere el total y luego haz clic en el botón de abajo: se abre WhatsApp con el resumen de tu pedido para que envíes el comprobante.</p>
       </div>
@@ -333,7 +341,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261113b"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");

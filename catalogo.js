@@ -392,35 +392,40 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:true },
 
-  // Próximamente: imanes y calendario imantado. Aún sin precio, se cotizan por WhatsApp (sin carrito).
-  // Cuando tengan precio: quita "proximamente", "accionPersonalizada" y "sinPrecio", y agrega "combinacionPrecio" + "preciosPorCombinacion".
-  // Sin foto por ahora (muestra el logo). Cuando la tengas, escribe su ruta en "imagen" y su descripción en "alt".
+  // Imanes: imán solo (7x7 o 5x5 cm) e imán de 7x7 con mini calendario. Cada uno se vende por pack de unidades.
   { id:"imanes", categoria:"Imanes", nombre:"Imanes personalizados",
-    descripcion:"Imanes con tu foto o diseño, de 5x5 cm, de 7x7 cm o en otra medida, normales o laminados. Cuéntanos qué necesitas por WhatsApp y te cotizamos.",
-    imagen:"",
+    descripcion:"Imanes con tu foto o diseño, de 7x7 cm o de 5x5 cm. Elige la medida y la cantidad. Envíanos tu imagen después de pagar.",
+    imagen:"imagenes/imanes-personalizados.webp",
+    alt:"Imán cuadrado personalizado con logo, código QR y datos de contacto, junto a su parte trasera imantada de color negro",
     opciones:[
-      { nombre:"Medida", valores:["5x5 cm","7x7 cm","Medida personalizada"] },
-      { nombre:"Acabado", valores:["Normal","Laminado"] }
+      { nombre:"Medida", valores:["7x7 cm","5x5 cm"] },
+      { nombre:"Cantidad", dependeDe:"Medida", valoresPorPadre:{
+          "7x7 cm":["10 unidades","50 unidades","100 unidades"],
+          "5x5 cm":["10 unidades","40 unidades","100 unidades"]
+        }
+      }
     ],
-    accionPersonalizada:{
-      tipo:"whatsapp",
-      mensaje:"Hola! Quiero cotizar imanes personalizados."
+    combinacionPrecio:["Medida","Cantidad"],
+    preciosPorCombinacion:{
+      "7x7 cm|10 unidades":3200,
+      "7x7 cm|50 unidades":15300,
+      "7x7 cm|100 unidades":24000,
+      "5x5 cm|10 unidades":2070,
+      "5x5 cm|40 unidades":5175,
+      "5x5 cm|100 unidades":10350
     },
-    sinPrecio:true,
-    proximamente:true,
-    personalizable:false },
+    personalizable:true },
 
   { id:"calendario-imantado", categoria:"Imanes", nombre:"Calendario imantado",
-    descripcion:"Imagen de 7x7 cm en formato imán, más un mini calendario de 7,5 x 5,5 cm. Cuéntanos qué necesitas por WhatsApp y te cotizamos.",
-    imagen:"",
-    opciones:[],
-    accionPersonalizada:{
-      tipo:"whatsapp",
-      mensaje:"Hola! Quiero cotizar un calendario imantado."
-    },
-    sinPrecio:true,
-    proximamente:true,
-    personalizable:false },
+    descripcion:"Imagen de 7x7 cm en formato imán, más un mini calendario de 7,5 x 5,5 cm. Elige la cantidad. Envíanos tu imagen después de pagar.",
+    imagen:"imagenes/imanes-con-calendario.webp",
+    alt:"Mano sosteniendo varios imanes con un mini calendario de enero 2027, logo, código QR y datos de contacto, con una pila de imanes al fondo",
+    grupoPrecio:"Cantidad",
+    precios:{ "10 unidades":4960, "50 unidades":19900, "100 unidades":32500 },
+    opciones:[
+      { nombre:"Cantidad", valores:["10 unidades","50 unidades","100 unidades"] }
+    ],
+    personalizable:true },
 
   // Marcapáginas: tres productos. Todos miden 4 cm de ancho por 14 cm de alto.
   //  - "marcapaginas": personalizado (el cliente envía su foto o diseño).
@@ -506,6 +511,7 @@ const TODOS_LOS_PRODUCTOS = [
     imagen:["imagenes/etiqueta-navidena-personalizada.webp","imagenes/etiquetas-navidenas-tiras-1-4.webp"],
     alt:"Etiqueta navideña verde con un muñeco de jengibre y espacios para De y Para, pegada en un regalo de papel kraft con lazo rojo",
     precioBase:1000,
+    unidades:6, // la tira trae 6 etiquetas: con esto la tarjeta muestra cuánto sale cada una
     opciones:[
       { nombre:"Diseño", valores:["1","2","3","4"] }
     ],
@@ -532,6 +538,7 @@ const TODOS_LOS_PRODUCTOS = [
     imagen:"imagenes/tarjetas-de-presentacion-portada.webp",
     alt:"Tarjetas de presentación personalizadas, una negra y una blanca con logo y código QR, apiladas sobre fondo gris",
     precioBase:7990,
+    unidades:100, // pack de 100 tarjetas: la tarjeta muestra cuánto sale cada una
     opciones:[],
     personalizable:true },
 
