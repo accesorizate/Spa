@@ -222,6 +222,9 @@ let fotosConPrioridad = esPaginaPropia && !esPortadaDeTarjetas ? 1 : 0;
 const categorias = [...new Set(productos.map(p => p.categoria))];
 const categoriasDeLaPagina = PAGINA.categorias ? categorias.filter(c => PAGINA.categorias.includes(c)) : (PAGINA.productos || PAGINA.secciones || PAGINA.guia || esPortadaDeTarjetas ? [] : categorias);
 const catalogoEl = document.getElementById("catalogo");
+// Las páginas traen escrita una copia de las tarjetas (nombre, foto, precio) dentro de <main id="catalogo">, para que Google y
+// quien no tenga JavaScript vean el producto y su precio sin esperar. Aquí se quita y se dibujan las tarjetas de verdad.
+if (catalogoEl) catalogoEl.querySelectorAll("[data-catalogo-base]").forEach(el => el.remove());
 const navEl = document.getElementById("catNav");
 const chipsEl = document.getElementById("catNavChips");
 
@@ -353,6 +356,9 @@ categoriasDeLaPagina.forEach(cat => {
   }</div></div>`;
   catalogoEl.appendChild(seccion);
 });
+
+// Productos que esta página muestra hoy (los ocultos no cuentan).
+const productosVisiblesDePagina = PAGINA.productos ? productosDeLaPagina : productos.filter(p => categoriasDeLaPagina.includes(p.categoria));
 
 // Página de categoría cuyos productos están todos ocultos por ahora.
 if (esPortadaDeTarjetas ? !tarjetasVisibles.length : ((PAGINA.categorias && !categoriasDeLaPagina.length) || (PAGINA.productos && !productosDeLaPagina.length) || (PAGINA.secciones && !seccionesDeLaPagina.length))) {
@@ -549,14 +555,16 @@ if (destacadosGrid) {
 // producto, no en listados). Se arman desde el mismo catálogo que dibuja la tarjeta, así que el precio es el que
 // el cliente ve al abrir la página (el de las opciones que vienen marcadas) y, si un producto está oculto, no se escribe nada.
 // Los cotizados por WhatsApp (sinPrecio) no llevan precio, por lo tanto tampoco llevan este marcado.
+// El HTML de la página ya trae estos datos escritos (así Google los lee sin ejecutar JavaScript). Si hoy ya no corresponden
+// (el producto se ocultó o dejó de tener precio), se quitan para que no queden datos viejos.
 function datosEstructuradosDeProducto() {
-  if (!esPaginaPropia || esPortadaDeTarjetas) return; // una portada es un listado de líneas de productos, no un producto
-  const visibles = PAGINA.productos ? productosDeLaPagina : productos.filter(p => categoriasDeLaPagina.includes(p.categoria));
-  const conPrecio = visibles.filter(p => !p.sinPrecio); // una tarjeta que solo cotiza por WhatsApp no cuenta como producto con precio
-  if (conPrecio.length !== 1) return;
+  const quitarViejo = () => { const v = document.getElementById("ld-producto"); if (v) v.remove(); };
+  if (!esPaginaPropia || esPortadaDeTarjetas) { quitarViejo(); return; } // una portada es un listado de líneas de productos, no un producto
+  const conPrecio = productosVisiblesDePagina.filter(p => !p.sinPrecio); // una tarjeta que solo cotiza por WhatsApp no cuenta como producto con precio
+  if (conPrecio.length !== 1) { quitarViejo(); return; }
   const prod = conPrecio[0];
   const precio = precioProducto(prod, valoresPorDefecto(prod));
-  if (!(precio > 0)) return;
+  if (!(precio > 0)) { quitarViejo(); return; }
   const dominio = "https://accesorizate.cl/";
   const canonica = (document.querySelector('link[rel="canonical"]') || {}).href || dominio;
   const meta = document.querySelector('meta[name="description"]');
@@ -590,6 +598,59 @@ function datosEstructuradosDeProducto() {
   el.textContent = JSON.stringify(dato).replace(/</g, "\\u003c");
 }
 datosEstructuradosDeProducto();
+
+// -- Precios escritos en el texto de la página --
+// Los <span data-precios-pagina> del texto se llenan con los precios reales de los productos de la página
+// ("21x29 cm: $9.990 · 33x48 cm: $16.990"), para que se lean sin abrir la tarjeta y no queden desactualizados:
+// salen del mismo catálogo que las tarjetas. El HTML ya trae escrito el valor de cuando se armó la página.
+function nombreDeOpcionDePrecio(v) { return /^\d+x\d+$/.test(v) ? `${v} cm` : v; }
+function resumenDePrecios(prod) {
+  if (prod.sinPrecio || prod.proximamente) return "";
+  const lista = (filas, siempreDesde = false) => filas.map(([etiqueta, min, max]) => `${etiqueta}: ${siempreDesde || min !== max ? "desde " : ""}${formatoCLP(min)}`).join(" · ");
+  if (prod.combinacionPrecio && prod.preciosPorCombinacion) {
+    const n = prod.combinacionPrecio.length;
+    const entradas = Object.entries(prod.preciosPorCombinacion).map(([k, v]) => [k.split("|"), v]);
+    // Solo se nombran las opciones que de verdad cambian el precio (por ejemplo, en los stickers la medida no lo cambia).
+    const cambia = i => entradas.some(([a, va]) => entradas.some(([b, vb]) => va !== vb && a[i] !== b[i] && a.every((x, j) => j === i || x === b[j])));
+    const usar = [...Array(n).keys()].filter(cambia);
+    const agrupar = indices => {
+      const filas = new Map();
+      entradas.forEach(([k, v]) => {
+        const etiqueta = indices.map(i => nombreDeOpcionDePrecio(k[i])).join(", ");
+        const f = filas.get(etiqueta) || [etiqueta, v, v];
+        f[1] = Math.min(f[1], v); f[2] = Math.max(f[2], v);
+        filas.set(etiqueta, f);
+      });
+      return [...filas.values()];
+    };
+    const todas = agrupar(usar);
+    if (!usar.length) return formatoCLP(todas[0][1]);
+    if (todas.length <= 8) return lista(todas);
+    const porPrimera = agrupar(usar.slice(0, 1));
+    if (porPrimera.length <= 6) return lista(porPrimera, true); // "desde" en cada una
+    return `desde ${formatoCLP(precioDesde(prod))}`;
+  }
+  if (prod.grupoPrecio && prod.precios) {
+    const filas = Object.entries(prod.precios);
+    if (filas.length <= 8) return lista(filas.map(([k, v]) => [nombreDeOpcionDePrecio(k), v, v]));
+    return `desde ${formatoCLP(precioDesde(prod))}`;
+  }
+  return prod.precioBase > 0 ? formatoCLP(prod.precioBase) : "";
+}
+(function escribirPreciosEnElTexto() {
+  const destinos = document.querySelectorAll("[data-precios-pagina]");
+  if (!destinos.length) return;
+  const enSecciones = seccionesDeLaPagina.flatMap(s => s.lista);
+  const lista = [...new Set([...productosVisiblesDePagina, ...enSecciones])];
+  const resumenes = [...new Set(lista.map(resumenDePrecios).filter(Boolean))];
+  let texto = "";
+  if (resumenes.length === 1) texto = resumenes[0];
+  else if (resumenes.length > 1) {
+    const minimo = Math.min(...lista.filter(p => !p.sinPrecio && !p.proximamente).map(precioDesde).filter(n => n > 0));
+    texto = `desde ${formatoCLP(minimo)}`;
+  }
+  if (texto) destinos.forEach(el => { el.textContent = texto; });
+})();
 
 // -- Navidad: cuenta regresiva de las fechas límite (solo en /navidad/, donde hay elementos con data-plazo) --
 // La fecha de hoy se toma en horario de Chile, sin importar la zona horaria de quien mira la página.
@@ -950,7 +1011,15 @@ function cotizarPorWhatsapp(id) {
 }
 
 // -- Carrito --
-let carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+// El carrito se guarda en el almacenamiento local del navegador. Si el navegador no lo permite (algunos modos privados o
+// navegadores incorporados), el carrito sigue funcionando mientras no se cierre la página.
+function leerCarrito() {
+  try { return JSON.parse(localStorage.getItem("carrito") || "[]"); } catch (e) { return []; }
+}
+function guardarCarrito() {
+  try { localStorage.setItem("carrito", JSON.stringify(carrito)); } catch (e) { /* sin almacenamiento: no pasa nada */ }
+}
+let carrito = leerCarrito();
 // Mientras el cliente edita un producto del carrito: { lineaId, seleccion } con lo que va eligiendo.
 let edicion = null;
 
@@ -967,7 +1036,7 @@ function guardarAvisosCarrito(lista) {
   const quitadas = carrito.filter(l => !idsVisibles.has(l.id));
   if (quitadas.length) {
     carrito = carrito.filter(l => idsVisibles.has(l.id));
-    localStorage.setItem("carrito", JSON.stringify(carrito));
+    guardarCarrito();
     guardarAvisosCarrito([...new Set([...leerAvisosCarrito(), ...quitadas.map(l => l.nombre)])]);
   }
 }
@@ -1121,7 +1190,7 @@ function aplicarRequisitosDelCarrito() {
 
 function guardarYRenderizarCarrito() {
   aplicarRequisitosDelCarrito();
-  localStorage.setItem("carrito", JSON.stringify(carrito));
+  guardarCarrito();
   renderizarCarrito();
 }
 
@@ -1465,5 +1534,5 @@ if (new URLSearchParams(location.search).has("ocultos")) {
 
 actualizarSeccionEnvio();
 aplicarRequisitosDelCarrito();
-localStorage.setItem("carrito", JSON.stringify(carrito));
+guardarCarrito();
 renderizarCarrito();

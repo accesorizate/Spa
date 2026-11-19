@@ -116,6 +116,8 @@
   /* --- Header --- */
   .aviso-ideas { margin: 0; padding: 8px 16px; text-align: center; font-size: .9rem; line-height: 1.4; color: var(--ink); background: var(--bg-alt); border-bottom: 1px solid var(--line); }
   .aviso-ideas a { color: var(--accent); font-weight: 600; text-decoration: underline; }
+  /* Copia de las tarjetas escrita en el HTML (la reemplaza tienda.js al cargar): no agrega ninguna caja, las tarjetas se ven donde estarán. */
+  [data-catalogo-base] { display: contents; }
   header { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
   header .wrap { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; gap: 16px; }
   .logo {
@@ -413,7 +415,8 @@
   }
   .cart-panel.open { right: 0; visibility: visible; transition: right 0.25s, visibility 0s; }
   .cart-head { flex: none; padding: 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
-  .cart-head h2 { font-size: 1.3rem; margin: 0; }
+  /* "Tu carrito" y "Tu pedido" son rótulos del panel, no títulos del contenido de la página: llevan el mismo aspecto de un título pero no son H2/H3. */
+  .cart-titulo { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.3rem; line-height: 1.2; margin: 0; }
   .cart-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--ink); }
 
   .cart-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -421,7 +424,7 @@
   /* Lista de productos del pedido */
   .cart-pedido { background: var(--bg-alt); border-bottom: 1px solid var(--line); padding: 16px 20px 8px; }
   .cart-pedido-titulo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-  .cart-pedido-titulo h3 { font-size: 1.05rem; margin: 0; }
+  .cart-pedido-nombre { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.05rem; line-height: 1.2; margin: 0; }
   .cart-pedido-titulo span { font-size: 0.8rem; color: var(--ink-soft); }
   .cart-empty { color: var(--ink-soft); font-size: 0.9rem; padding: 4px 0 14px; margin: 0; }
   .cart-line {
@@ -739,6 +742,8 @@
   .estrellas-fondo { color: #CFC4B0; }
   .estrellas-relleno { position: absolute; left: 0; top: 0; overflow: hidden; width: calc(var(--r) / 5 * 100%); color: #9A7420; }
   .op-seccion { padding: 40px 0 8px; scroll-margin-top: 72px; }
+  /* Títulos con ancla dentro de los textos (p. ej. /politica-de-privacidad/#medicion): que no queden bajo la cabecera fija */
+  .contenido-cat h2[id] { scroll-margin-top: 84px; }
   .op-seccion h2 { font-size: 1.5rem; margin: 0 0 6px; }
   .op-seccion > .wrap > p { max-width: 62ch; }
   .op-vacio { color: var(--ink-soft); padding: 18px 0; margin: 0; }
