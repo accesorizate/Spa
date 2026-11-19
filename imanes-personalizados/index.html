@@ -14,8 +14,8 @@
 <meta property="og:title" content="Imanes personalizados con tu foto o logo | Accesorizate">
 <meta property="og:description" content="Imanes personalizados de 7x7 o 5x5 cm, y con mini calendario, con tu foto, logo o diseño. Packs desde 10 unidades. Envíos a todo Chile o retiro en Maipú.">
 <meta property="og:url" content="https://accesorizate.cl/imanes-personalizados/">
-<meta property="og:image" content="https://accesorizate.cl/imagenes/logo.png">
-<meta property="og:image:alt" content="Logo de Accesorizate">
+<meta property="og:image" content="https://accesorizate.cl/imagenes/imanes-personalizados.webp">
+<meta property="og:image:alt" content="Imán cuadrado personalizado con logo, código QR y datos de contacto, junto a su parte trasera imantada de color negro">
 <meta name="twitter:card" content="summary">
 <script type="application/ld+json" id="ld-migas">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://accesorizate.cl/"},{"@type":"ListItem","position":2,"name":"Pymes","item":"https://accesorizate.cl/pymes/"},{"@type":"ListItem","position":3,"name":"Imanes personalizados","item":"https://accesorizate.cl/imanes-personalizados/"}]}</script>
 <script>
@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261118a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -37,11 +37,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261114a">
+<link rel="stylesheet" href="tienda.css?v=20261118a">
 </head>
 <body>
 
-<p class="aviso-ideas">¿No sabes qué regalar para estas fechas? <a href="/ideas/">Haz clic aquí y mira nuestras ideas</a></p>
+<p class="aviso-ideas" id="avisoNavidad" data-envio="2026-12-17" data-retiro="2026-12-21"><span data-fase="envio">Navidad: pide con envío hasta el jueves 17 de diciembre o con retiro en Maipú hasta el lunes 21. <a href="/ideas/">¿No sabes qué regalar? Mira nuestras ideas</a></span><span data-fase="retiro" hidden>Navidad: el envío ya cerró; con retiro en Maipú puedes pedir hasta el lunes 21 de diciembre. <a href="/ideas/">¿No sabes qué regalar? Mira nuestras ideas</a></span><span data-fase="ideas" hidden>¿No sabes qué regalar para estas fechas? <a href="/ideas/">Haz clic aquí y mira nuestras ideas</a></span></p>
+<script data-aviso>(function(){var a=document.getElementById("avisoNavidad");if(!a)return;var h;try{h=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Santiago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}catch(e){}if((h||"").length!==10){var d=new Date();h=d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}var f=h<=a.dataset.envio?"envio":h<=a.dataset.retiro?"retiro":"ideas";[].forEach.call(a.querySelectorAll("[data-fase]"),function(s){s.hidden=s.dataset.fase!==f})})();</script>
 <header>
   <div class="wrap">
     <a href="/" class="logo-link" aria-label="Accesorizate, ir al inicio"><img src="imagenes/logo.png" alt="Accesorizate" class="logo"></a>
@@ -70,7 +71,80 @@
   </div>
 </section>
 
-<main id="catalogo" class="wrap"></main>
+<main id="catalogo" class="wrap"><div data-catalogo-base><section class="categoria" id="imanes"><div class="wrap"><h2>Tus imanes</h2><div class="grid">
+    <article class="card" data-card-id="imanes">
+      
+    <div class="card-media" data-media-de="imanes" data-imagenes="[&quot;imagenes/imanes-personalizados.webp&quot;]">
+      <img data-imagen-de="imanes" src="imagenes/imanes-personalizados.webp" data-respaldo="imagenes/imanes-personalizados.webp" alt="Imán cuadrado personalizado con logo, código QR y datos de contacto, junto a su parte trasera imantada de color negro" loading="eager" fetchpriority="high" decoding="async">
+      
+      
+    </div>
+  
+      <div class="card-body">
+        
+        <h3>Imanes personalizados</h3>
+        <p class="desc">Imanes con tu foto o diseño, de 7x7 cm o de 5x5 cm. Elige la medida y la cantidad. Envíanos tu imagen después de pagar.</p>
+        
+        
+      <div class="opcion">
+        <label>Medida</label>
+        
+    <select data-prod="imanes" data-opcion="Medida" aria-label="Medida de Imanes personalizados">
+      <option value="7x7 cm" selected="">7x7 cm</option><option value="5x5 cm">5x5 cm</option>
+    </select>
+  
+      </div>
+    
+      <div class="opcion">
+        <label>Cantidad</label>
+        
+    <select data-prod="imanes" data-opcion="Cantidad" aria-label="Cantidad de Imanes personalizados" data-depende-de="Medida">
+      <option value="10 unidades" selected="">10 unidades</option><option value="50 unidades">50 unidades</option><option value="100 unidades">100 unidades</option>
+    </select>
+  
+      </div>
+    
+        <p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>
+        
+        <div class="card-foot">
+          <span class="precio-wrap"><span class="price" data-precio-de="imanes">$3.200</span><span class="precio-unidad" data-unidad-de="imanes">$320 <abbr title="por unidad">c/u</abbr></span></span>
+          <button type="button" class="add-btn" onclick="agregarAlCarrito('imanes')">Agregar</button>
+        </div>
+      </div>
+    </article>
+  
+    <article class="card" data-card-id="calendario-imantado">
+      
+    <div class="card-media" data-media-de="calendario-imantado" data-imagenes="[&quot;imagenes/imanes-con-calendario.webp&quot;]">
+      <img data-imagen-de="calendario-imantado" src="imagenes/imanes-con-calendario.webp" data-respaldo="imagenes/imanes-con-calendario.webp" alt="Mano sosteniendo varios imanes con un mini calendario de enero 2027, logo, código QR y datos de contacto, con una pila de imanes al fondo" loading="lazy" fetchpriority="low" decoding="async">
+      
+      
+    </div>
+  
+      <div class="card-body">
+        
+        <h3>Calendario imantado</h3>
+        <p class="desc">Imagen de 7x7 cm en formato imán, más un mini calendario de 7,5 x 5,5 cm. Elige la cantidad. Envíanos tu imagen después de pagar.</p>
+        
+        
+      <div class="opcion">
+        <label>Cantidad</label>
+        
+    <select data-prod="calendario-imantado" data-opcion="Cantidad" aria-label="Cantidad de Calendario imantado">
+      <option value="10 unidades" selected="">10 unidades</option><option value="50 unidades">50 unidades</option><option value="100 unidades">100 unidades</option>
+    </select>
+  
+      </div>
+    
+        <p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>
+        
+        <div class="card-foot">
+          <span class="precio-wrap"><span class="price" data-precio-de="calendario-imantado">$4.960</span><span class="precio-unidad" data-unidad-de="calendario-imantado">$496 <abbr title="por unidad">c/u</abbr></span></span>
+          <button type="button" class="add-btn" onclick="agregarAlCarrito('calendario-imantado')">Agregar</button>
+        </div>
+      </div>
+    </article>
+  </div></div></section></div></main>
 
 <section class="contenido-cat esperar-catalogo">
   <div class="wrap">
@@ -100,7 +174,7 @@
 <h3>¿Cuántos imanes trae cada pack?</h3>
 <p>El imán de 7x7 cm viene en packs de 10, 50 o 100 unidades; el de 5x5 cm, en packs de 10, 40 o 100 unidades; y el imán con mini calendario, en packs de 10, 50 o 100 unidades.</p>
 <h3>¿Cuánto sale cada imán?</h3>
-<p>El valor de cada pack y cuánto sale por unidad aparecen en la tarjeta al elegir la medida y la cantidad.</p>
+<p>El valor de cada pack y cuánto sale por unidad aparecen en la tarjeta al elegir la medida y la cantidad. Los packs parten <span data-precios-pagina>desde $2.070</span>.</p>
 <h3>¿Qué debo enviar?</h3>
 <p>Tu foto, tu logo o tu diseño en el archivo original y con buena calidad (si es PNG o PDF, mejor). Envíalo después de pagar, indicando tu número de pedido.</p>
 <h3>¿Cómo envío mi imagen?</h3>
@@ -143,6 +217,9 @@
           <li><a href="/#personalizar">Personalizados</a></li>
           <li><a href="/ideas/">Ideas y guías</a></li>
           <li><a href="/pedidos-reales/">Pedidos reales y opiniones</a></li>
+          <li><a href="/envios/">Envíos y plazos</a></li>
+          <li><a href="/cambios-y-devoluciones/">Cambios y devoluciones</a></li>
+          <li><a href="/politica-de-privacidad/">Política de privacidad</a></li>
           <li><a href="/imanes-personalizados/#contacto">Contacto</a></li>
         </ul>
       </div>
@@ -166,9 +243,9 @@
 </footer>
 
 <div class="overlay" id="overlay"></div>
-<aside class="cart-panel" id="cartPanel">
+<aside class="cart-panel" id="cartPanel" aria-label="Tu carrito">
   <div class="cart-head">
-    <h2>Tu carrito</h2>
+    <p class="cart-titulo">Tu carrito</p>
     <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">×</button>
   </div>
 
@@ -177,7 +254,7 @@
     <!-- 1) Lista de productos: lo primero que ve el cliente -->
     <div class="cart-pedido">
       <div class="cart-pedido-titulo">
-        <h3>Tu pedido</h3>
+        <p class="cart-pedido-nombre">Tu pedido</p>
         <span id="cartPedidoResumen">0 productos</span>
       </div>
       <div class="cart-aviso" id="cartAviso" role="status" hidden></div>
@@ -256,7 +333,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261118a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
@@ -267,5 +344,6 @@
   setTimeout(function () { document.body.classList.add("tienda-lista"); }, 6000);
 })();
 </script>
+<script src="medicion.js?v=20261118a" data-ga="G-68D6H2FVEW" defer></script>
 </body>
 </html>
