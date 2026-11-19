@@ -24,7 +24,7 @@
 // y no quedan guardados en la memoria (caché) de Cloudflare ni del navegador.
 (function () {
   var minuto = Math.floor(Date.now() / 60000);
-  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
+  window.ARCHIVOS_TIENDA = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261118a"];
   window.ARCHIVOS_TIENDA.forEach(function (src) {
     var l = document.createElement("link");
     l.rel = "preload"; l.as = "script"; l.href = src;
@@ -36,7 +36,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tienda.css?v=20261114a">
+<link rel="stylesheet" href="tienda.css?v=20261118a">
 </head>
 <body>
 
@@ -117,6 +117,9 @@
           <li><a href="/#personalizar">Personalizados</a></li>
           <li><a href="/ideas/">Ideas y guías</a></li>
           <li><a href="/pedidos-reales/">Pedidos reales y opiniones</a></li>
+          <li><a href="/envios/">Envíos y plazos</a></li>
+          <li><a href="/cambios-y-devoluciones/">Cambios y devoluciones</a></li>
+          <li><a href="/politica-de-privacidad/">Política de privacidad</a></li>
           <li><a href="/ideas/#contacto">Contacto</a></li>
         </ul>
       </div>
@@ -140,9 +143,9 @@
 </footer>
 
 <div class="overlay" id="overlay"></div>
-<aside class="cart-panel" id="cartPanel">
+<aside class="cart-panel" id="cartPanel" aria-label="Tu carrito">
   <div class="cart-head">
-    <h2>Tu carrito</h2>
+    <p class="cart-titulo">Tu carrito</p>
     <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">×</button>
   </div>
 
@@ -151,7 +154,7 @@
     <!-- 1) Lista de productos: lo primero que ve el cliente -->
     <div class="cart-pedido">
       <div class="cart-pedido-titulo">
-        <h3>Tu pedido</h3>
+        <p class="cart-pedido-nombre">Tu pedido</p>
         <span id="cartPedidoResumen">0 productos</span>
       </div>
       <div class="cart-aviso" id="cartAviso" role="status" hidden></div>
@@ -230,7 +233,7 @@
   var archivos = window.ARCHIVOS_TIENDA;
   if (!archivos) {
     var minuto = Math.floor(Date.now() / 60000);
-    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261114a"];
+    archivos = ["ocultos.js?t=" + minuto, "catalogo.js?t=" + minuto, "tienda.js?v=20261118a"];
   }
   archivos.forEach(function (src) {
     var s = document.createElement("script");
@@ -241,6 +244,6 @@
   setTimeout(function () { document.body.classList.add("tienda-lista"); }, 6000);
 })();
 </script>
+<script src="medicion.js?v=20261118a" data-ga="G-68D6H2FVEW" defer></script>
 </body>
 </html>
-
