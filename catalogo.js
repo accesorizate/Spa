@@ -128,7 +128,7 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"cuadro-foto", categoria:"Cuadros", nombre:"Cuadro + foto",
     descripcion:"Imprimimos tu fotografía en un cuadro de madera. Elige el tamaño y el marco.",
-    imagen:"imagenes/publicuadros.webp",
+    imagen:"imagenes/cuadros-de-madera-con-foto-portada.webp",
     alt:"Tres cuadros de madera con fotos impresas, en distintos tamaños y marcos",
     grupoPrecio:"Tamaño",
     precios:{ "10x15":3500, "13x18":4500, "15x20":5500, "18x24":6000 },
@@ -144,25 +144,25 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     combinacionImagen:["Tamaño","Color del marco"],
     imagenesPorCombinacion:{
-      "10x15|Café con blanco (diseño 1)":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "10x15|Café con blanco (diseño 2)":["imagenes/cuadro10x15cafeconblanco2.png","imagenes/cuadro10x15cafeconblanco2tras.png"],
-      "13x18|Café con blanco":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "15x20|Café con blanco":["imagenes/cuadro10x15cafeconblanco1.png","imagenes/cuadro10x15cafeconblancotras.png"],
-      "13x18|Café":["imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"],
-      "18x24|Café":["imagenes/cuadro10x15cafe.png","imagenes/cuadro10x15cafetras.png"]
+      "10x15|Café con blanco (diseño 1)":["imagenes/cuadro-con-foto-cafe-con-blanco-1-frente.webp","imagenes/cuadro-con-foto-cafe-con-blanco-1-reverso.webp"],
+      "10x15|Café con blanco (diseño 2)":["imagenes/cuadro-con-foto-cafe-con-blanco-2-frente.webp","imagenes/cuadro-con-foto-cafe-con-blanco-2-reverso.webp"],
+      "13x18|Café con blanco":["imagenes/cuadro-con-foto-cafe-con-blanco-1-frente.webp","imagenes/cuadro-con-foto-cafe-con-blanco-1-reverso.webp"],
+      "15x20|Café con blanco":["imagenes/cuadro-con-foto-cafe-con-blanco-1-frente.webp","imagenes/cuadro-con-foto-cafe-con-blanco-1-reverso.webp"],
+      "13x18|Café":["imagenes/cuadro-con-foto-cafe-frente.webp","imagenes/cuadro-con-foto-cafe-reverso.webp"],
+      "18x24|Café":["imagenes/cuadro-con-foto-cafe-frente.webp","imagenes/cuadro-con-foto-cafe-reverso.webp"]
     },
     personalizable:true },
 
   // --- Cuadros personalizados ---
   crearCuadroPersonalizado({ id:"cuadro-navideno", nombre:"Cuadro personalizado navideño",
     descripcion:"Cuadro grande con tu diseño navideño personalizado.",
-    imagen:["imagenes/publicuadronavidad1.png","imagenes/navidad1a12.png"],
+    imagen:["imagenes/cuadro-navidad-personalizado-portada.webp","imagenes/cuadro-navidad-disenos-1-12.webp"],
     disenos:12,
-    imagenPlantilla:"imagenes/naviidad{Número de diseño}.png"}),
+    imagenPlantilla:"imagenes/cuadro-navidad-diseno-{Número de diseño}.webp"}),
 
   crearCuadroPersonalizado({ id:"cuadro-enamorados", nombre:"Cuadro personalizado enamorados",
     descripcion:"Cuadro grande con tu diseño personalizado para tu pareja.",
-    imagen:"imagenes/publicuadroenamorados1.png",
+    imagen:"imagenes/cuadro-enamorados-personalizado-portada.webp",
     disenos:12,
     imagenPlantilla:"imagenes/enamorado{Número de diseño}.png" }),
 
@@ -174,27 +174,27 @@ const TODOS_LOS_PRODUCTOS = [
 
   crearCuadroPersonalizado({ id:"cuadro-diamadre", nombre:"Cuadro personalizado Día de la Madre",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día de la Madre.",
-    imagen:"imagenes/publicuadromama1.png",
+    imagen:["imagenes/cuadro-dia-de-la-madre-portada.webp","imagenes/cuadro-dia-de-la-madre-disenos-1-12.webp"],
     disenos:12,
-    imagenPlantilla:"imagenes/madre{Número de diseño}.png" }),
+    imagenPlantilla:"imagenes/cuadro-dia-de-la-madre-diseno-{Número de diseño}.webp" }),
 
   crearCuadroPersonalizado({ id:"cuadro-diapadre", nombre:"Cuadro personalizado Día del Padre",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Padre.",
-    imagen:["imagenes/publicuadropapa1.jpg","imagenes/papa1a12.png","imagenes/papa13a17.png"],
+    imagen:["imagenes/cuadro-dia-del-padre-portada.webp","imagenes/cuadro-dia-del-padre-disenos-1-12.webp","imagenes/cuadro-dia-del-padre-disenos-13-17.webp"],
     disenos:17,
-    imagenPlantilla:"imagenes/papa{Número de diseño}.png" }),
+    imagenPlantilla:"imagenes/cuadro-dia-del-padre-diseno-{Número de diseño}.webp" }),
 
   crearCuadroPersonalizado({ id:"cuadro-spotify", nombre:"Cuadro personalizado Spotify",
     descripcion:"Cuadro grande con tu canción favorita en formato placa Spotify.",
-    imagen:"imagenes/publicuadrospotify1.png",
+    imagen:"imagenes/cuadro-spotify-personalizado-portada.webp",
     disenos:12,
     imagenPlantilla:"imagenes/spotify{Número de diseño}.png" }),
 
   crearCuadroPersonalizado({ id:"cuadro-nacimiento", nombre:"Cuadro personalizado nacimiento",
     descripcion:"Cuadro grande para anunciar o recordar el nacimiento de tu bebé.",
-    imagen:["imagenes/publicuadronacimiento1.png","imagenes/nacidos1a12.png","imagenes/nacidos13a15.png"],
+    imagen:["imagenes/cuadro-recien-nacido-portada.webp","imagenes/cuadro-recien-nacido-disenos-1-12.webp","imagenes/cuadro-recien-nacido-disenos-13-15.webp"],
     disenos:15,
-    imagenPlantilla:"imagenes/nacidos{Número de diseño}.png" }),
+    imagenPlantilla:"imagenes/cuadro-recien-nacido-diseno-{Número de diseño}.webp" }),
 
   crearCuadroPersonalizado({ id:"cuadro-dianino", nombre:"Cuadro personalizado Día del Niño",
     descripcion:"Cuadro grande con tu diseño personalizado para el Día del Niño.",
@@ -211,7 +211,7 @@ const TODOS_LOS_PRODUCTOS = [
   // Solo cotiza por WhatsApp: no pasa por el carrito ni muestra precio.
   { id:"cuadro-graduacion", categoria:"Cuadros personalizados", nombre:"Cuadro personalizado graduación",
     descripcion:"Cuadro para celebrar una graduación. Escríbenos para cotizar tu diseño.",
-    imagen:"imagenes/publicuadrograduacion1.png",
+    imagen:"imagenes/cuadro-graduacion-personalizado-portada.webp",
     opciones:[],
     accionPersonalizada:{
       tipo:"whatsapp",
@@ -223,7 +223,7 @@ const TODOS_LOS_PRODUCTOS = [
   { id:"stickers-anime", categoria:"Stickers", nombre:"Set de stickers anime",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
     // Portada con una foto adicional (el set completo); al elegir un diseño se muestra la foto de ese diseño.
-    imagen:["imagenes/publisticker2.webp","imagenes/sticker-anime-set.webp"],
+    imagen:["imagenes/sticker-anime-portada.webp","imagenes/sticker-anime-set.webp"],
     alt:"Set de stickers anime en bolsa, con stickers sueltos alrededor", grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
@@ -240,7 +240,7 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"stickers-caricaturas", categoria:"Stickers", nombre:"Set de stickers caricaturas",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:["imagenes/publisticker3.png","imagenes/sticker-caricaturas-set.webp"], grupoPrecio:"Tamaño / cantidad",
+    imagen:["imagenes/sticker-caricaturas-portada.webp","imagenes/sticker-caricaturas-set.webp"], grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -254,7 +254,7 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"stickers-animales", categoria:"Stickers", nombre:"Set de stickers animales",
     descripcion:"Elige el tamaño (con su cantidad aproximada) y el diseño.",
-    imagen:["imagenes/publisticker1.png","imagenes/sticker-animales-set.webp"], grupoPrecio:"Tamaño / cantidad",
+    imagen:["imagenes/sticker-animales-portada.webp","imagenes/sticker-animales-set.webp"], grupoPrecio:"Tamaño / cantidad",
     precios:{ "5cm (15-20 unidades)":1000, "8cm (7-8 unidades)":1000, "12cm (5 unidades)":1500 },
     opciones:[
       { nombre:"Tamaño / cantidad", valores:["5cm (15-20 unidades)","8cm (7-8 unidades)","12cm (5 unidades)"] },
@@ -298,7 +298,7 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"posters", categoria:"Posters", nombre:"Poster",
     descripcion:"Elige tamaño y acabado.",
-    imagen:"imagenes/publiposters.webp",
+    imagen:"imagenes/posters-anime-kpop-futbol-portada.webp",
     alt:"Posters personalizados de anime, K-pop y fútbol en distintos tamaños",
     opciones:[
       { nombre:"Tamaño", valores:["21x29","29x42","33x48"] },
@@ -346,7 +346,7 @@ const TODOS_LOS_PRODUCTOS = [
 
   { id:"polaroid", categoria:"Fotografías Polaroid", nombre:"Foto estilo Polaroid",
     descripcion:"Formato 5x8. Elige el acabado y la cantidad.",
-    imagen:["imagenes/fotos-polaroid-portada.webp","imagenes/publipolaroid.webp"],
+    imagen:["imagenes/fotos-polaroid-portada.webp","imagenes/fotos-polaroid-tipos.webp"],
     alt:"Fotos estilo Polaroid colgadas de un cordel con un gancho de madera, sobre una pila de fotos",
     opciones:[
       { nombre:"Acabado", valores:["Normal","Laminada","Laminada imantada"] },
