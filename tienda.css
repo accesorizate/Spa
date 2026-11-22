@@ -303,6 +303,10 @@
     font-family: 'Fraunces', serif; font-size: 2rem; font-style: italic; color: var(--accent);
   }
   .card-media img { width: 100%; height: 100%; object-fit: cover; }
+  /* Libretas con diseño: la vista previa es la tapa abierta (horizontal); se muestra entera, sin recortar el marco de la foto. */
+  .card[data-card-id^="libreta-"] .card-media img { object-fit: contain; background: var(--bg-alt); }
+  /* Productos sin foto (por ejemplo los "próximamente"): se muestra el logo entero y centrado, no ampliado y recortado. */
+  .card-media img[src$="imagenes/logo.png"], .tarjeta-portada-media img[src$="imagenes/logo.png"] { object-fit: contain; padding: 22%; box-sizing: border-box; }
   .card-media-dots {
     position: absolute; left: 0; right: 0; bottom: 0; display: flex;
     justify-content: center; gap: 0; z-index: 2; pointer-events: none;
@@ -499,6 +503,13 @@
   .qty button { width: 30px; height: 30px; border: none; background: var(--bg); color: var(--ink); font-size: 1rem; cursor: pointer; }
   .qty button:hover { background: var(--bg-alt); }
   .qty span { min-width: 28px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+  /* Cantidad que se escribe (caritas y otros productos con precio por cantidad): en la tarjeta y en el carrito. 16 px para que el celular no haga zoom al escribir. */
+  .qty .qty-input { width: 56px; height: 30px; padding: 0; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; text-align: center; font: inherit; font-size: 1rem; font-weight: 600; color: var(--ink); background: var(--bg); -moz-appearance: textfield; appearance: textfield; }
+  .qty .qty-input::-webkit-outer-spin-button, .qty .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .opcion-cantidad .qty { align-self: flex-start; }
+  .escalas-precio { margin: 4px 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--ink-soft); }
+  .escalas-precio b { color: var(--ink); font-weight: 600; }
+  .cart-line-escala { margin: 4px 0 0; font-size: 0.74rem; line-height: 1.35; color: var(--ink-soft); }
   .cart-line-precio { display: flex; flex-direction: column; align-items: flex-end; font-size: 0.95rem; font-weight: 600; color: var(--ink); }
   .cart-line-precio small { font-size: 0.72rem; font-weight: 400; color: var(--ink-soft); }
 
@@ -529,6 +540,7 @@
     border-radius: 2px; background: var(--bg); width: 100%;
   }
   .datos-envio-grid input.full { grid-column: 1 / -1; }
+  .datos-envio-ayuda { grid-column: 1 / -1; margin: -2px 0 2px; font-size: 0.74rem; line-height: 1.35; color: var(--ink-soft); }
   .datos-transferencia {
     font-size: 0.82rem; background: var(--bg-alt); border: 1px solid var(--line);
     padding: 10px 12px; border-radius: 2px; margin-bottom: 12px; color: var(--ink-soft);

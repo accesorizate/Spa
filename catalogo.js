@@ -24,6 +24,21 @@ function crearCuadroPersonalizado({ id, nombre, descripcion, imagen = "", diseno
   };
 }
 
+// Libretas con diseño listo: portada y vista previa de cada diseño salen del nombre del tema (imagenes/libreta-<tema>-portada.webp y
+// imagenes/libreta-<tema>-diseno-N.webp). Misma medida y mismo precio que la libreta personalizada.
+function crearLibretaConDiseno({ id, nombre, tema, disenos, tapa, alt }) {
+  return {
+    id, categoria:"Libretas", nombre,
+    descripcion:`Libreta de 10 cm de ancho por 14 cm de alto, con 20 hojas en blanco y ${tapa}. Eliges el número de diseño entre ${disenos} y, después de pagar, nos envías la foto que irá en el marco de la tapa.`,
+    imagen:`imagenes/libreta-${tema}-portada.webp`,
+    alt,
+    precioBase:500,
+    opciones:[ { nombre:"Número de diseño", valores:rango(1, disenos) } ],
+    imagenPlantilla:`imagenes/libreta-${tema}-diseno-{Número de diseño}.webp`,
+    personalizable:true
+  };
+}
+
 // Encendedores temáticos: la portada sale sola del nombre del slug.
 function crearEncendedor(slug, nombre, disenos = 12, extra = {}) {
   return {
@@ -460,8 +475,9 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:false },
 
-  // Libretas: por ahora son personalizadas (el cliente envía su foto o diseño para la tapa).
-  // Cuando haya libretas con diseños ya listos, se agregan como productos aparte (con su selector de diseño numerado).
+  // Libretas: la primera es personalizada (el cliente envía su foto o diseño para la tapa). Después vienen las libretas con diseño listo,
+  // una por tema (flores, mascotas, Navidad y princesas), con selector de diseño numerado: el cliente elige el número y envía la foto
+  // que va en el marco de la tapa. Mismo tamaño y mismo precio que la libreta personalizada.
   { id:"libretas", categoria:"Libretas", nombre:"Libreta personalizada",
     descripcion:"Libreta de 10 cm de ancho por 14 cm de alto, con 20 hojas en blanco. Lleva tu foto o tu diseño en la tapa: envíanoslo después de pagar.",
     imagen:"imagenes/libreta-personalizada.webp",
@@ -469,6 +485,22 @@ const TODOS_LOS_PRODUCTOS = [
     precioBase:500,
     opciones:[],
     personalizable:true },
+
+  crearLibretaConDiseno({ id:"libreta-florales", nombre:"Libreta de flores con tu foto", tema:"florales", disenos:12,
+    tapa:"una tapa ilustrada con flores",
+    alt:"Doce diseños de tapas de libreta con flores (tulipanes, girasoles, lavanda, flores de cerezo y más), numerados del 1 al 12; cada tapa tiene un marco para tu foto" }),
+
+  crearLibretaConDiseno({ id:"libreta-mascotas", nombre:"Libreta de mascotas con tu foto", tema:"mascotas", disenos:11,
+    tapa:"una tapa ilustrada con temática de mascotas",
+    alt:"Once diseños de tapas de libreta con temática de mascotas, numerados del 1 al 11; cada tapa tiene un marco para tu foto" }),
+
+  crearLibretaConDiseno({ id:"libreta-navidad", nombre:"Libreta navideña con tu foto", tema:"navidad", disenos:12,
+    tapa:"una tapa ilustrada con motivos navideños",
+    alt:"Doce diseños de tapas de libreta navideñas (árbol, chimenea, aldea nevada, galletas de jengibre y más), numerados del 1 al 12; cada tapa tiene un marco para tu foto" }),
+
+  crearLibretaConDiseno({ id:"libreta-princesas", nombre:"Libreta de princesas con tu foto", tema:"princesas", disenos:13,
+    tapa:"una tapa ilustrada con temática de princesas",
+    alt:"Trece diseños de tapas de libreta de princesas (castillos, jardines, joyas y más), numerados del 1 al 13; cada tapa tiene un marco para tu foto" }),
 
   // Papel de regalo: 1 unidad o 2 unidades (la de 2 cuesta menos por unidad). Los diseños (10) se agregan más adelante como opción "Diseño".
   { id:"papel-regalo", categoria:"Envoltorio de regalo", nombre:"Papel de regalo",
@@ -561,6 +593,58 @@ const TODOS_LOS_PRODUCTOS = [
     ],
     personalizable:true },
 
+  // --- Despedidas de soltera y de soltero ---
+  // Precio por cantidad: la lista de cada tipo son pares [desde cuántas unidades, precio por unidad]; el cliente escribe la cantidad
+  // (o la suma de 1 en 1, sin tope) y el precio por unidad baja solo. Para cambiar un precio o una escala, se cambia aquí.
+  { id:"caritas", categoria:"Despedidas", nombre:"Caritas personalizadas 15x20 cm",
+    descripcion:"Caritas de 15 x 20 cm con la foto que elijas, para tu despedida de soltera o de soltero. Elige si las quieres con varilla o sin varilla y escribe cuántas necesitas: mientras más pides, menos cuesta cada una.",
+    imagen:"imagenes/caritas-despedida-portada.webp",
+    alt:"Caritas de 15x20 cm con fotos, unas con varilla y otras sin varilla, para una despedida de soltera",
+    opciones:[
+      { nombre:"Varilla", valores:["Con varilla","Sin varilla"] }
+    ],
+    cantidadLibre:true,
+    escalasPrecio:{ opcion:"Varilla", listas:{
+      "Con varilla":[ [1,1000], [10,900], [20,800] ],
+      "Sin varilla":[ [1,800],  [10,700], [20,600] ]
+    } },
+    personalizable:true },
+
+  // Un diseño cuesta $1.500 y cada diseño adicional suma $500. Las unidades del pack se reparten entre los diseños.
+  { id:"sticker-vaso-shot", categoria:"Despedidas", nombre:"Stickers para vaso de shots",
+    descripcion:"Stickers para decorar los vasos de shots de tu despedida o tu fiesta. Elige el tamaño (3x3 cm trae 40 stickers y 4x4 cm trae 24) y cuántos diseños quieres: las unidades se reparten entre los diseños y cada diseño adicional suma al valor.",
+    imagen:"imagenes/stickers-vaso-shot-portada.webp",
+    alt:"Stickers cuadrados con distintos diseños pegados en vasos de shots",
+    opciones:[
+      { nombre:"Tamaño", valores:["3x3 cm (40 unidades)","4x4 cm (24 unidades)"] },
+      { nombre:"Cantidad de diseños", valores:["1 diseño", ...Array.from({ length:11 }, (_, i) => `${i + 2} diseños`)] }
+    ],
+    combinacionPrecio:["Cantidad de diseños"],
+    preciosPorCombinacion:Object.fromEntries(["1 diseño", ...Array.from({ length:11 }, (_, i) => `${i + 2} diseños`)].map((v, i) => [v, 1500 + 500 * i])),
+    personalizable:true },
+
+  // --- Cumpleaños (próximamente): se ven en la tienda con la etiqueta "Próximamente" y un botón para que el cliente pregunte por WhatsApp.
+  // Cuando estén listos, se quita "proximamente" y "sinPrecio", se agrega el precio (precioBase u opciones) y la foto, y se borra "accionPersonalizada".
+  { id:"banderines-cumpleanos", categoria:"Cumpleaños", nombre:"Banderines de cumpleaños",
+    descripcion:"Los estamos preparando. Escríbenos por WhatsApp y te avisamos cuando estén disponibles.",
+    imagen:"", opciones:[], proximamente:true, sinPrecio:true, personalizable:false,
+    accionPersonalizada:{ tipo:"whatsapp", boton:"Avísame por WhatsApp", mensaje:"Hola! Quiero que me avisen cuando estén disponibles los banderines de cumpleaños." } },
+
+  { id:"numeros-velita", categoria:"Cumpleaños", nombre:"Números de velita",
+    descripcion:"Los estamos preparando. Escríbenos por WhatsApp y te avisamos cuando estén disponibles.",
+    imagen:"", opciones:[], proximamente:true, sinPrecio:true, personalizable:false,
+    accionPersonalizada:{ tipo:"whatsapp", boton:"Avísame por WhatsApp", mensaje:"Hola! Quiero que me avisen cuando estén disponibles los números de velita." } },
+
+  { id:"cajas-dulces", categoria:"Cumpleaños", nombre:"Cajas de dulces",
+    descripcion:"Las estamos preparando. Escríbenos por WhatsApp y te avisamos cuando estén disponibles.",
+    imagen:"", opciones:[], proximamente:true, sinPrecio:true, personalizable:false,
+    accionPersonalizada:{ tipo:"whatsapp", boton:"Avísame por WhatsApp", mensaje:"Hola! Quiero que me avisen cuando estén disponibles las cajas de dulces." } },
+
+  { id:"toppers", categoria:"Cumpleaños", nombre:"Toppers",
+    descripcion:"Los estamos preparando. Escríbenos por WhatsApp y te avisamos cuando estén disponibles.",
+    imagen:"", opciones:[], proximamente:true, sinPrecio:true, personalizable:false,
+    accionPersonalizada:{ tipo:"whatsapp", boton:"Avísame por WhatsApp", mensaje:"Hola! Quiero que me avisen cuando estén disponibles los toppers." } },
+
 ];
 
 // ===========================================================
@@ -590,11 +674,13 @@ const PAGINAS_DE_CATEGORIA = {
   "Pizarra infantil": "regalos-personalizados/#mas-regalos",
   "Álbum fotográfico": "regalos-personalizados/#mas-regalos",
   "Encendedores": "regalos-personalizados/#mas-regalos",
+  "Despedidas": "despedida-de-soltera/",
+  "Cumpleaños": "fiestas/#cumpleanos",
 };
 
 // ===========================================================
 // 2a) SECCIONES PRINCIPALES
-// Son las 5 secciones grandes de la tienda: salen en el menú de arriba y como tarjetas en el inicio.
+// Son las 6 secciones grandes de la tienda: salen en el menú de arriba y como tarjetas en el inicio.
 // Cada una abre su portada. El "Desde $" lo calcula la tienda sola con el precio más bajo de los productos de las
 // categorías de esa sección (los ocultos y los que se cotizan por WhatsApp no cuentan), así que no hay que escribirlo.
 //   nombre: lo que se ve · href: la portada · categorias: las categorías que cuentan para el "Desde"
@@ -617,6 +703,9 @@ const SECCIONES_PRINCIPALES = [
   { id:"pymes", nombre:"Pymes", href:"pymes/",
     categorias:["Stickers personalizados","Imanes","Tarjetas de presentación"],
     imagen:"imagenes/tarjetas-de-presentacion-portada.webp", alt:"Tarjetas de presentación personalizadas con logo" },
+  { id:"fiestas", nombre:"Fiestas", href:"fiestas/",
+    categorias:["Despedidas","Cumpleaños"],
+    imagen:"imagenes/caritas-despedida-portada.webp", alt:"Caritas de 15x20 cm con fotos, unas con varilla y otras sin varilla, para una despedida de soltera" },
 ];
 
 // ===========================================================

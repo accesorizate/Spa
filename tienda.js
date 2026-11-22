@@ -92,7 +92,52 @@ function formatoValorSeleccion(v) {
   return Array.isArray(v) ? v.join(", ") : v;
 }
 
-function precioProducto(prod, seleccion) {
+// -- Precios por cantidad (escalas) --
+// Un producto con "escalasPrecio" baja su precio por unidad cuando el cliente pide más unidades (ver las caritas en catalogo.js).
+//   escalasPrecio: { opcion: "Varilla", listas: { "Con varilla": [[1,1000],[10,900],[20,800]], ... } }
+//   Cada lista son pares [desde cuántas unidades, precio por unidad]. "opcion" es la opción cuyo valor elige la lista.
+//   Con "cantidadLibre: true" la tarjeta pide la cantidad escribiéndola o sumando de 1 en 1, sin tope fijo.
+const CANTIDAD_MAXIMA = 999;
+function normalizarCantidad(valor) {
+  const n = parseInt(valor, 10);
+  return Number.isFinite(n) ? Math.min(Math.max(n, 1), CANTIDAD_MAXIMA) : 1;
+}
+function escalasDeProducto(prod, seleccion) {
+  const e = prod.escalasPrecio;
+  if (!e) return null;
+  const lista = e.listas[e.opcion ? seleccion[e.opcion] : "*"];
+  return lista && lista.length ? lista : null;
+}
+function precioPorEscala(prod, seleccion, cantidad) {
+  const lista = escalasDeProducto(prod, seleccion);
+  if (!lista) return null;
+  let precio = lista[0][1];
+  lista.forEach(([desde, p]) => { if (cantidad >= desde) precio = p; });
+  return precio;
+}
+// "1 a 9 unidades: $1.000 c/u · 10 a 19 unidades: $900 c/u · 20 o más unidades: $800 c/u"
+function textoEscalas(prod, seleccion) {
+  const lista = escalasDeProducto(prod, seleccion);
+  if (!lista || lista.length < 2) return "";
+  const partes = lista.map(([desde, precio], i) => {
+    const sig = lista[i + 1];
+    const rango = !sig ? `${desde} o más` : sig[0] - 1 === desde ? `${desde}` : `${desde} a ${sig[0] - 1}`;
+    return `${rango} unidades: <b>${formatoCLP(precio)} c/u</b>`;
+  });
+  return `Precio por unidad según la cantidad: ${partes.join(" · ")}`;
+}
+// Aviso corto para el carrito: cuánto falta para el próximo precio ("" si ya está en el más bajo).
+function avisoEscalaSiguiente(prod, seleccion, cantidad) {
+  const lista = escalasDeProducto(prod, seleccion);
+  const sig = lista && lista.find(([desde]) => desde > cantidad);
+  return sig ? `Desde ${sig[0]} unidades, ${formatoCLP(sig[1])} c/u` : "";
+}
+
+function precioProducto(prod, seleccion, cantidad = 1) {
+  if (prod.escalasPrecio) {
+    const porEscala = precioPorEscala(prod, seleccion, cantidad);
+    if (porEscala !== null) return porEscala;
+  }
   if (prod.combinacionPrecio && prod.preciosPorCombinacion) {
     const clave = prod.combinacionPrecio.map(opcionNombre => seleccion[opcionNombre]).join("|");
     const precio = prod.preciosPorCombinacion[clave];
@@ -139,6 +184,8 @@ function precioPorUnidadHtml(prod, seleccion) {
 }
 
 function precioDesde(prod) {
+  // Con escalas, el "Desde" es el precio más bajo de 1 sola unidad (los precios por volumen se explican en la tarjeta).
+  if (prod.escalasPrecio) return Math.min(...Object.values(prod.escalasPrecio.listas).map(l => l[0][1]));
   if (prod.preciosPorCombinacion) return Math.min(...Object.values(prod.preciosPorCombinacion));
   if (prod.grupoPrecio) return Math.min(...Object.values(prod.precios));
   return prod.precioBase ?? 0;
@@ -456,6 +503,17 @@ function renderCard(prod) {
 
   const opcionesHtml = opcionesHtmlDe(prod, seleccionInicial, `data-prod="${prod.id}"`);
 
+  const cantidadHtml = prod.cantidadLibre ? `
+        <div class="opcion opcion-cantidad">
+          <label for="cantidad-${prod.id}">Cantidad</label>
+          <div class="qty qty-card">
+            <button type="button" data-cantidad-menos="${prod.id}" aria-label="Una unidad menos">−</button>
+            <input type="number" id="cantidad-${prod.id}" class="qty-input" data-cantidad-de="${prod.id}" value="1" min="1" max="${CANTIDAD_MAXIMA}" step="1" inputmode="numeric" aria-label="Cantidad de ${prod.nombre}">
+            <button type="button" data-cantidad-mas="${prod.id}" aria-label="Una unidad más">+</button>
+          </div>
+        </div>
+        ${prod.escalasPrecio ? `<p class="escalas-precio" data-escalas-de="${prod.id}">${textoEscalas(prod, seleccionInicial)}</p>` : ""}` : "";
+
   const notaHtml = prod.personalizable
     ? `<p class="nota-personalizada">Después de comprar, envíanos tu foto o diseño a <strong>venta.accesorizate@gmail.com</strong> indicando tu número de pedido.</p>`
     : "";
@@ -475,7 +533,7 @@ function renderCard(prod) {
   `;
 
   const botonHtml = prod.accionPersonalizada?.tipo === "whatsapp"
-    ? `<button type="button" class="add-btn" onclick="cotizarPorWhatsapp('${prod.id}')">Cotizar por WhatsApp</button>`
+    ? `<button type="button" class="add-btn" onclick="cotizarPorWhatsapp('${prod.id}')">${prod.accionPersonalizada.boton || "Cotizar por WhatsApp"}</button>`
     : `<button type="button" class="add-btn" onclick="agregarAlCarrito('${prod.id}')">Agregar</button>`;
 
   const precioHtml = prod.sinPrecio
@@ -492,7 +550,7 @@ function renderCard(prod) {
         <h3>${enlazarFicha ? `<a class="card-titulo-link" href="${fichaDelProducto}">${prod.nombre}</a>` : prod.nombre}</h3>
         <p class="desc">${prod.descripcion}</p>
         ${enlazarFicha ? `<a class="ver-detalles" href="${fichaDelProducto}" aria-label="Ver detalles de ${prod.nombre}">Ver detalles</a>` : ""}
-        ${opcionesHtml}
+        ${opcionesHtml}${cantidadHtml}
         ${notaHtml}
         ${prod.requiere ? `<p class="aviso-requisito" data-aviso-de="${prod.id}" role="status" hidden></p>` : ""}
         <div class="card-foot${prod.sinPrecio ? " sin-precio" : ""}">
@@ -634,6 +692,11 @@ function resumenDePrecios(prod) {
     const filas = Object.entries(prod.precios);
     if (filas.length <= 8) return lista(filas.map(([k, v]) => [nombreDeOpcionDePrecio(k), v, v]));
     return `desde ${formatoCLP(precioDesde(prod))}`;
+  }
+  if (prod.escalasPrecio) {
+    // Precio de 1 unidad en cada lista (la baja por volumen se explica en la tarjeta): "Con varilla: $1.000 c/u · Sin varilla: $800 c/u"
+    const filas = Object.entries(prod.escalasPrecio.listas).map(([k, l]) => `${k}: ${formatoCLP(l[0][1])} c/u`);
+    return filas.join(" · ");
   }
   return prod.precioBase > 0 ? formatoCLP(prod.precioBase) : "";
 }
@@ -952,7 +1015,59 @@ function actualizarOpcionesDependientes(prod, contenedor, opcionCambiada, valorC
   });
 }
 
+// Cantidad escrita en la tarjeta (1 si está vacía o mal escrita).
+function leerCantidadDeCard(card) {
+  const el = card.querySelector("[data-cantidad-de]");
+  return el ? normalizarCantidad(el.value) : 1;
+}
+
+// Precio que se ve en la tarjeta: el de las opciones elegidas y, si el producto pide cantidad, el total de esas unidades.
+function actualizarPrecioDeCard(prod, card) {
+  const id = prod.id;
+  const seleccion = leerSeleccionDeCard(card);
+  const escalasEl = card.querySelector(`[data-escalas-de="${id}"]`);
+  if (escalasEl) escalasEl.innerHTML = textoEscalas(prod, seleccion);
+  if (prod.sinPrecio) return;
+  const cantidad = leerCantidadDeCard(card);
+  const unitario = precioProducto(prod, seleccion, cantidad);
+  card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(prod.cantidadLibre ? unitario * cantidad : unitario);
+  const unidadEl = card.querySelector(`[data-unidad-de="${id}"]`);
+  if (unidadEl) {
+    const html = prod.cantidadLibre
+      ? (cantidad > 1 ? `${formatoCLP(unitario)} <abbr title="por unidad">c/u</abbr>` : "")
+      : precioPorUnidadHtml(prod, seleccion);
+    unidadEl.innerHTML = html;
+    unidadEl.hidden = !html;
+  }
+}
+
+// Mientras se escribe la cantidad se actualiza el precio; al salir del campo se corrige lo que quedó mal escrito.
+document.addEventListener("input", e => {
+  if (!e.target.matches("[data-cantidad-de]")) return;
+  const prod = productos.find(p => p.id === e.target.dataset.cantidadDe);
+  const card = e.target.closest(".card");
+  if (prod && card) actualizarPrecioDeCard(prod, card);
+});
+document.addEventListener("click", e => {
+  const boton = e.target.closest("[data-cantidad-menos], [data-cantidad-mas]");
+  if (!boton) return;
+  const card = boton.closest(".card");
+  const campo = card && card.querySelector("[data-cantidad-de]");
+  const prod = campo && productos.find(p => p.id === campo.dataset.cantidadDe);
+  if (!prod) return;
+  campo.value = normalizarCantidad(normalizarCantidad(campo.value) + (boton.hasAttribute("data-cantidad-mas") ? 1 : -1));
+  actualizarPrecioDeCard(prod, card);
+});
+
 document.addEventListener("change", e => {
+  if (e.target.matches("[data-cantidad-de]")) {
+    e.target.value = normalizarCantidad(e.target.value);
+    const prod = productos.find(p => p.id === e.target.dataset.cantidadDe);
+    const card = e.target.closest(".card");
+    if (prod && card) actualizarPrecioDeCard(prod, card);
+    return;
+  }
+  if (e.target.matches("[data-cart-cantidad]")) { fijarCantidad(Number(e.target.dataset.cartCantidad), e.target.value); return; }
   if (e.target.matches("select[data-edit]")) { alCambiarOpcionEnEditor(e.target); return; }
   if (!e.target.matches("select[data-prod]")) return;
   const id = e.target.dataset.prod;
@@ -962,11 +1077,7 @@ document.addEventListener("change", e => {
   actualizarOpcionesDependientes(prod, card, e.target.dataset.opcion, e.target.value, `data-prod="${id}"`);
 
   const seleccion = leerSeleccionDeCard(card);
-  if (!prod.sinPrecio) {
-    card.querySelector(`[data-precio-de="${id}"]`).textContent = formatoCLP(precioProducto(prod, seleccion));
-    const unidadEl = card.querySelector(`[data-unidad-de="${id}"]`);
-    if (unidadEl) { const html = precioPorUnidadHtml(prod, seleccion); unidadEl.innerHTML = html; unidadEl.hidden = !html; }
-  }
+  actualizarPrecioDeCard(prod, card);
 
   const mediaEl = card.querySelector(`[data-media-de="${id}"]`);
   if (mediaEl) {
@@ -1053,7 +1164,8 @@ function agregarAlCarrito(id) {
     return;
   }
   const seleccion = leerSeleccionDeCard(card);
-  const precio = precioProducto(prod, seleccion);
+  const cantidad = prod.cantidadLibre ? leerCantidadDeCard(card) : 1;
+  const precio = precioProducto(prod, seleccion, cantidad);
   // Foto que el cliente está viendo en la tarjeta (la de la variante elegida).
   const imgCard = card.querySelector(".card-media img");
   const imagen = (imgCard && imgCard.getAttribute("src")) || imagenRespaldo(prod);
@@ -1061,7 +1173,7 @@ function agregarAlCarrito(id) {
 
   carrito.push({
     lineaId,
-    id, nombre: prod.nombre, seleccion, precio, cantidad: 1, imagen
+    id, nombre: prod.nombre, seleccion, precio, cantidad, imagen
   });
   guardarYRenderizarCarrito();
   abrirCarrito();
@@ -1128,7 +1240,7 @@ function guardarEdicion() {
     if (!mismaSeleccion(nueva, l.seleccion)) {
       l.imagen = fotoDeLinea(prod, l, nueva);
       l.seleccion = nueva;
-      l.precio = precioProducto(prod, nueva);
+      l.precio = precioProducto(prod, nueva, l.cantidad);
     }
   }
   edicion = null;
@@ -1148,7 +1260,7 @@ function alCambiarOpcionEnEditor(select) {
 
   const seleccion = leerSeleccionDeCard(editor);
   edicion.seleccion = seleccion;
-  editor.querySelector("[data-editor-precio]").textContent = formatoCLP(precioProducto(prod, seleccion));
+  editor.querySelector("[data-editor-precio]").textContent = formatoCLP(precioProducto(prod, seleccion, l.cantidad));
   const foto = editor.closest(".cart-line").querySelector(".cart-line-thumb");
   if (foto) foto.src = fotoDeLinea(prod, l, seleccion);
 }
@@ -1156,9 +1268,25 @@ function alCambiarOpcionEnEditor(select) {
 function cambiarCantidad(lineaId, delta) {
   const linea = carrito.find(l => l.lineaId === lineaId);
   if (!linea) return;
-  linea.cantidad += delta;
+  linea.cantidad = Math.min(linea.cantidad + delta, CANTIDAD_MAXIMA);
   if (linea.cantidad <= 0) carrito = carrito.filter(l => l.lineaId !== lineaId);
   guardarYRenderizarCarrito();
+}
+
+// Cantidad escrita a mano en una línea del carrito (solo en productos con cantidadLibre). Vacío o 0 la deja en 1: para quitarla está «Quitar».
+function fijarCantidad(lineaId, valor) {
+  const linea = carrito.find(l => l.lineaId === lineaId);
+  if (!linea) return;
+  linea.cantidad = normalizarCantidad(valor);
+  guardarYRenderizarCarrito();
+}
+
+// Productos con escalas: el precio por unidad sigue a la cantidad de la línea y al catálogo.
+function repreciarCarrito() {
+  carrito.forEach(l => {
+    const prod = productos.find(p => p.id === l.id);
+    if (prod && prod.escalasPrecio) l.precio = precioProducto(prod, l.seleccion, l.cantidad);
+  });
 }
 
 function eliminarLinea(lineaId) {
@@ -1190,6 +1318,7 @@ function aplicarRequisitosDelCarrito() {
 
 function guardarYRenderizarCarrito() {
   aplicarRequisitosDelCarrito();
+  repreciarCarrito();
   guardarCarrito();
   renderizarCarrito();
 }
@@ -1258,7 +1387,7 @@ function htmlLineaCarrito(l) {
         </div>
         <div class="cart-line-editor" data-editor="${l.lineaId}">
           ${opcionesHtmlDe(prod, edicion.seleccion, `data-edit="${l.lineaId}"`)}
-          <div class="editor-precio"><span>Precio de cada producto</span><b data-editor-precio>${formatoCLP(precioProducto(prod, edicion.seleccion))}</b></div>
+          <div class="editor-precio"><span>Precio de cada producto</span><b data-editor-precio>${formatoCLP(precioProducto(prod, edicion.seleccion, l.cantidad))}</b></div>
           <div class="editor-acciones">
             <button type="button" class="btn-guardar" onclick="guardarEdicion()">Guardar cambios</button>
             <button type="button" class="btn-cancelar" onclick="cancelarEdicion()">Cancelar</button>
@@ -1286,7 +1415,9 @@ function htmlLineaCarrito(l) {
           <div class="cart-line-bottom">
             <div class="qty">
               <button onclick="cambiarCantidad(${l.lineaId}, -1)" aria-label="Quitar una unidad">−</button>
-              <span>${l.cantidad}</span>
+              ${prod && prod.cantidadLibre
+                ? `<input type="number" class="qty-input" data-cart-cantidad="${l.lineaId}" value="${l.cantidad}" min="1" max="${CANTIDAD_MAXIMA}" step="1" inputmode="numeric" aria-label="Cantidad de ${l.nombre}">`
+                : `<span>${l.cantidad}</span>`}
               <button onclick="cambiarCantidad(${l.lineaId}, 1)" aria-label="Agregar una unidad">+</button>
             </div>
             <div class="cart-line-precio">
@@ -1294,6 +1425,7 @@ function htmlLineaCarrito(l) {
               ${l.cantidad > 1 ? `<small>${formatoCLP(l.precio)} c/u</small>` : ""}
             </div>
           </div>
+          ${prod && prod.escalasPrecio && avisoEscalaSiguiente(prod, l.seleccion, l.cantidad) ? `<p class="cart-line-escala">${avisoEscalaSiguiente(prod, l.seleccion, l.cantidad)}</p>` : ""}
         </div>
       </div>
     `;
@@ -1375,6 +1507,11 @@ function mensajePedidoParaWhatsapp() {
     `Nombre: ${document.getElementById("envioNombre").value.trim()}`,
     `RUT: ${document.getElementById("envioRut").value.trim()}`
   ];
+  // Teléfono y correo son opcionales: se escriben solo si son distintos a los de quien nos escribe.
+  const telefono = document.getElementById("envioTelefono").value.trim();
+  if (telefono) datosEnvio.push(`Teléfono de contacto: ${telefono}`);
+  const correo = document.getElementById("envioCorreo").value.trim();
+  if (correo) datosEnvio.push(`Correo de contacto: ${correo}`);
   if (!retiro) {
     datosEnvio.push(
       `Ciudad: ${document.getElementById("envioCiudad").value.trim()}`,
@@ -1419,6 +1556,21 @@ document.getElementById("checkoutBtn").addEventListener("click", () => {
       campo.focus();
       return;
     }
+  }
+
+  // Teléfono y correo: opcionales, pero si se escriben deben tener forma de teléfono y de correo.
+  const campoTelefono = document.getElementById("envioTelefono"), campoCorreo = document.getElementById("envioCorreo");
+  const telefono = campoTelefono.value.trim(), correo = campoCorreo.value.trim();
+  const digitos = telefono.replace(/\D/g, "");
+  if (telefono && (!/^[+\d\s().-]+$/.test(telefono) || digitos.length < 8 || digitos.length > 15)) {
+    alert("Revisa el teléfono: escríbelo con números (por ejemplo +56 9 1234 5678) o déjalo en blanco si es el mismo desde el que nos escribes.");
+    campoTelefono.focus();
+    return;
+  }
+  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    alert("Revisa el correo: debe verse como nombre@ejemplo.cl, o déjalo en blanco si es el mismo con el que nos escribes.");
+    campoCorreo.focus();
+    return;
   }
 
   const urlWhatsapp = `https://wa.me/56920635715?text=${mensajePedidoParaWhatsapp()}`;
@@ -1535,4 +1687,5 @@ if (new URLSearchParams(location.search).has("ocultos")) {
 actualizarSeccionEnvio();
 aplicarRequisitosDelCarrito();
 guardarCarrito();
+repreciarCarrito();
 renderizarCarrito();
