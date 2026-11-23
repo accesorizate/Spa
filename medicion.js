@@ -2,7 +2,9 @@
    - Nada de Google Analytics se descarga ni se guarda en el navegador hasta que la persona pulsa «Aceptar».
    - Su elección queda en el almacenamiento local del navegador (clave "medicionVisitas": "si" o "no") y puede cambiarla
      en la política de privacidad (elementos con data-medicion-eleccion y data-medicion-estado).
-   - Solo se mide la visita a cada página (page_view). No se envía nada del carrito ni de los datos del pedido.
+   - Se mide la visita a cada página (page_view) y tres acciones, sin datos personales (ver window.medirEvento más abajo):
+     agregar un producto al carrito (producto y valor), pulsar «cotizar/avísame» por WhatsApp (producto) y abrir WhatsApp con el pedido (sin datos).
+     Nunca se envían el nombre, el RUT, la dirección, el teléfono, el correo ni lo que la persona escribe en el pedido.
    - Sin funciones de publicidad: señales de Google y personalización de anuncios desactivadas.
    El ID de la propiedad llega en el atributo data-ga de la etiqueta <script> que carga este archivo (lo escribe construir.js). */
 (function () {
@@ -12,6 +14,12 @@
   if (!ID || !/^G-[A-Z0-9]{6,12}$/.test(ID)) return;
   var CLAVE = "medicionVisitas";
   var cargado = false;
+
+  // Para que tienda.js pueda registrar eventos (solo si la persona aceptó la medición).
+  window.medirEvento = function (nombre, datos) {
+    if (!cargado || window["ga-disable-" + ID]) return;
+    (function () { window.dataLayer.push(arguments); })("event", nombre, datos || {});
+  };
 
   function leer() {
     try { var v = localStorage.getItem(CLAVE); return v === "si" || v === "no" ? v : null; } catch (e) { return null; }
@@ -63,7 +71,7 @@
     aviso.className = "medicion-aviso";
     aviso.setAttribute("role", "region");
     aviso.setAttribute("aria-label", "Medición de visitas");
-    aviso.innerHTML = '<p>Usamos Google Analytics para saber cuántas personas visitan el sitio y qué páginas ven. Solo se activa si lo aceptas. <a href="/politica-de-privacidad/#medicion">Más información</a></p>' +
+    aviso.innerHTML = '<p>Usamos Google Analytics para saber cuántas personas visitan el sitio, qué páginas ven y si agregan productos al carrito. Solo se activa si lo aceptas. <a href="/politica-de-privacidad/#medicion">Más información</a></p>' +
       '<div class="medicion-botones"><button type="button" data-medicion-eleccion="no">Rechazar</button><button type="button" data-medicion-eleccion="si">Aceptar</button></div>';
     document.body.appendChild(aviso);
   }

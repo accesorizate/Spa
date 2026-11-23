@@ -1119,6 +1119,7 @@ function cotizarPorWhatsapp(id) {
   if (detalle) mensaje += `\n\nDetalle: ${detalle}`;
 
   window.open(`https://wa.me/56920635715?text=${encodeURIComponent(mensaje)}`, "_blank");
+  if (window.medirEvento) medirEvento("cotizar_whatsapp", { item_id: id });
 }
 
 // -- Carrito --
@@ -1178,6 +1179,8 @@ function agregarAlCarrito(id) {
   guardarYRenderizarCarrito();
   abrirCarrito();
   resaltarLinea(lineaId);
+  // Medición (solo si la persona aceptó): qué producto y cuánto vale. Nunca datos personales.
+  if (window.medirEvento) medirEvento("add_to_cart", { currency: "CLP", value: precio * cantidad, items: [{ item_id: id, item_name: prod.nombre, price: precio, quantity: cantidad }] });
 }
 
 // Marca la línea recién agregada y, si queda fuera de vista, la trae a la pantalla.
@@ -1575,6 +1578,7 @@ document.getElementById("checkoutBtn").addEventListener("click", () => {
 
   const urlWhatsapp = `https://wa.me/56920635715?text=${mensajePedidoParaWhatsapp()}`;
   window.open(urlWhatsapp, "_blank");
+  if (window.medirEvento) medirEvento("pedido_whatsapp");
 });
 
 // -- Buscador: filtra las tarjetas del catálogo por nombre o descripción --
